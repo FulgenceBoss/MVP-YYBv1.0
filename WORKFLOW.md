@@ -58,34 +58,21 @@ Avant d'entamer la boucle de développement en 6 étapes, chaque nouvelle phase 
 - **Action :** Écriture du code (backend ou frontend) nécessaire pour réaliser la tâche.
 - **Objectif :** Produire un code propre, commenté lorsque nécessaire, et respectant l'architecture et les conventions établies.
 
-### Étape 4 : Test et Validation
+### Étape 4 : Test et Validation Rigoureux
 
 - **Action :** Effectuer des tests pour valider que l'implémentation fonctionne comme attendu.
+- **Principe fondamental :** "Aucun code n'est considéré comme terminé sans preuve de son bon fonctionnement." Cette validation peut être un appel d'API réussi, une capture d'écran de l'interface utilisateur, ou une confirmation du comportement attendu.
 - **Objectif :** S'assurer que la nouvelle fonctionnalité ne casse rien et remplit son rôle. Les tests peuvent inclure :
   - **Tests Backend :** Appels d'API via `curl` ou un client API (Postman).
   - **Tests Frontend :** Vérification du rendu visuel et des interactions sur un simulateur/appareil.
   - **Tests d'Intégration :** S'assurer que le frontend et le backend communiquent correctement.
-- **Débogage de Connectivité :** En cas d'échec de communication (erreurs réseau, CORS, etc.), vérifier les adresses IP, les ports, les configurations de pare-feu et utiliser des outils comme le tunnel d'Expo si nécessaire.
 
-### Étape 5 : Mise à Jour du Suivi de Projet
+### Étape 5 : Finalisation et Sauvegarde
 
-- **Action :** Utiliser la commande `task-master set-status --id=<ID_TACHE> --status=done`.
-- **Objectif :** Mettre à jour officiellement le statut de la tâche terminée. Cela nous permet d'avoir une vision claire et en temps réel de l'avancement du projet.
-
-### Étape 6 : Sauvegarde et Synchronisation
-
-- **Principe fondamental :** "Toute tâche validée et terminée DOIT être sauvegardée."
-- **Action :** Créer un commit local pour encapsuler les changements, puis pousser ce commit sur le dépôt GitHub.
-- **Objectif :** Garantir qu'aucune progression ne soit perdue et que le travail de l'équipe soit synchronisé.
-- **Commandes Types :**
-  1.  `git add .`
-  2.  `git commit -m "feat(module): Ajout de la fonctionnalité X"`
-  3.  `git push origin master`
-
-### Étape 7 : Documentation de l'Avancement
-
-- **Action :** Mettre à jour le fichier `REF-YESSI-MVP.txt`.
-- **Objectif :** Consigner les progrès réalisés dans notre document de référence. Mettre à jour les sections "CODE PRÊT" et, si nécessaire, "PROBLÈMES IDENTIFIÉS".
+- **Principe fondamental :** "On ne sauvegarde que du code testé et validé."
+- **Action 1 (Suivi de projet) :** Une fois la validation réussie, mettre à jour le statut de la tâche avec `task-master set-status --id=<ID_TACHE> --status=done`.
+- **Action 2 (Sauvegarde Git) :** Créer un commit local clair encapsulant la fonctionnalité validée, puis pousser ce commit sur le dépôt GitHub.
+- **Action 3 (Documentation) :** Mettre à jour le fichier `REF-YESSI-MVP.txt` pour consigner les progrès réalisés.
 
 ---
 
