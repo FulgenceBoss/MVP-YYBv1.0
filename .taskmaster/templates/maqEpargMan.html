@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YESSI-YESSI BANK - Écran 7: Épargne Manuelle MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-orange: #fff3e0;
+        --moov-orange: #ff6b00;
+        --airtel-red: #e60012;
+      }
+
+      body {
+        font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .phone-mockup {
+        width: 375px;
+        height: 812px;
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 8px;
+        position: relative;
+        box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.1);
+      }
+
+      .phone-mockup::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        z-index: 10;
+      }
+
+      .phone-mockup::after {
+        content: "";
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--surface);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .status-bar {
+        height: 44px;
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 5;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .battery {
+        width: 24px;
+        height: 12px;
+        border: 1px solid var(--text-primary);
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 6px;
+        background: var(--text-primary);
+        border-radius: 0 1px 1px 0;
+      }
+
+      .battery-fill {
+        width: 80%;
+        height: 100%;
+        background: var(--success);
+        border-radius: 1px;
+      }
+
+      .epargne-screen {
+        width: 100%;
+        height: calc(100% - 44px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Header Navigation */
+      .nav-header {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px 16px;
+        position: relative;
+      }
+
+      .back-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 16px;
+      }
+
+      .back-button:hover {
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .back-button::before {
+        content: "←";
+        font-size: 20px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .nav-title {
+        flex: 1;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-align: center;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        padding: 0 24px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Amount Selection Section */
+      .amount-section {
+        margin-bottom: 32px;
+      }
+
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        text-align: center;
+      }
+
+      .section-subtitle {
+        font-size: 16px;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .amount-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .amount-card {
+        background: var(--surface);
+        border: 3px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+
+      .amount-card.selected {
+        border-color: var(--primary);
+        background: var(--light-green);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(46, 125, 50, 0.2);
+      }
+
+      .amount-card.featured {
+        border-color: var(--primary);
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.15);
+      }
+
+      .amount-value {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+
+      .amount-card.selected .amount-value {
+        color: var(--primary);
+      }
+
+      .amount-equivalent {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .amount-card.selected .amount-equivalent {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .popular-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .custom-amount {
+        grid-column: 1 / -1;
+        background: var(--light-blue);
+        border: 2px dashed var(--secondary);
+      }
+
+      .custom-amount.selected {
+        background: var(--light-green);
+        border-color: var(--primary);
+      }
+
+      .custom-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-align: center;
+        outline: none;
+        margin-top: 8px;
+      }
+
+      .custom-input::placeholder {
+        color: var(--text-secondary);
+        font-weight: 400;
+      }
+
+      /* Mobile Money Section */
+      .mobile-money-section {
+        margin-bottom: 32px;
+      }
+
+      .account-selector {
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .account-selector:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      .account-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .account-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 800;
+        color: white;
+        background: var(--moov-orange);
+      }
+
+      .account-info {
+        flex: 1;
+      }
+
+      .account-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .account-number {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .change-account {
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      .change-account:hover {
+        color: var(--success);
+      }
+
+      .balance-info {
+        background: var(--light-green);
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .balance-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+      }
+
+      .balance-amount {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      /* Summary Section */
+      .summary-section {
+        background: linear-gradient(135deg, var(--light-green), #f1f8e9);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 32px;
+        border: 1px solid rgba(46, 125, 50, 0.2);
+        text-align: center;
+      }
+
+      .summary-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+      }
+
+      .summary-amount {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 8px;
+      }
+
+      .summary-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+      }
+
+      .impact-preview {
+        background: var(--surface);
+        padding: 16px;
+        border-radius: 12px;
+      }
+
+      .impact-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .impact-row:last-child {
+        margin-bottom: 0;
+        font-weight: 600;
+      }
+
+      .impact-label {
+        color: var(--text-secondary);
+      }
+
+      .impact-value {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .impact-highlight {
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      /* CTA Section */
+      .cta-section {
+        margin-bottom: 24px;
+      }
+
+      .cta-primary {
+        width: 100%;
+        height: 56px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .cta-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+      }
+
+      .cta-primary:active {
+        transform: translateY(0);
+      }
+
+      .cta-primary:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      /* Processing Screen */
+      .processing-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+
+      .processing-overlay.active {
+        display: flex;
+      }
+
+      .processing-content {
+        text-align: center;
+        max-width: 280px;
+      }
+
+      .processing-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 24px;
+        border-radius: 50%;
+        background: var(--light-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: var(--primary);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .processing-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+
+      .processing-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 32px;
+      }
+
+      .processing-steps {
+        width: 100%;
+        margin-bottom: 32px;
+      }
+
+      .step-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        background: var(--surface);
+        border-radius: 12px;
+        border-left: 4px solid var(--border);
+        transition: all 0.5s ease;
+      }
+
+      .step-item.active {
+        border-left-color: var(--primary);
+        background: var(--light-green);
+      }
+
+      .step-item.completed {
+        border-left-color: var(--success);
+        background: var(--light-green);
+      }
+
+      .step-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+
+      .step-text {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .step-status {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .step-item.active .step-status {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .step-item.completed .step-status {
+        color: var(--success);
+        font-weight: 600;
+      }
+
+      /* Success Screen */
+      .success-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, var(--success), var(--primary));
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        color: white;
+        text-align: center;
+      }
+
+      .success-overlay.active {
+        display: flex;
+      }
+
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #ffd700;
+      }
+
+      .success-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        animation: bounceIn 1s ease-out;
+      }
+
+      .success-title {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 16px;
+      }
+
+      .success-amount {
+        font-size: 48px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: #ffd700;
+      }
+
+      .success-subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        margin-bottom: 32px;
+      }
+
+      .success-stats {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 32px;
+        backdrop-filter: blur(10px);
+      }
+
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .stat-row:last-child {
+        margin-bottom: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        padding-top: 12px;
+        font-weight: 700;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .stat-value {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .success-actions {
+        display: flex;
+        gap: 16px;
+        width: 100%;
+        max-width: 280px;
+      }
+
+      .success-btn {
+        flex: 1;
+        height: 48px;
+        border: 2px solid white;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-continue {
+        background: white;
+        color: var(--primary);
+      }
+
+      .btn-continue:hover {
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .btn-home {
+        background: transparent;
+        color: white;
+      }
+
+      .btn-home:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Animations */
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+
+      @keyframes bounceIn {
+        0% {
+          transform: scale(0);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(-100vh) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 375px) {
+        .main-content {
+          padding: 0 16px;
+        }
+        .nav-header {
+          padding: 16px 16px 12px;
+        }
+        .amount-grid {
+          gap: 12px;
+        }
+        .amount-card {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <div class="status-left">
+            <span>9:41</span>
+          </div>
+          <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <div class="battery">
+              <div class="battery-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <main class="epargne-screen">
+          <!-- Navigation Header -->
+          <section class="nav-header">
+            <button
+              class="back-button"
+              onclick="goBack()"
+              aria-label="Retour"
+            ></button>
+            <h1 class="nav-title">Épargner maintenant</h1>
+          </section>
+
+          <!-- Main Content -->
+          <div class="main-content">
+            <!-- Amount Selection -->
+            <section class="amount-section">
+              <h2 class="section-title">Combien épargner ?</h2>
+              <p class="section-subtitle">
+                Choisissez le montant qui vous convient
+              </p>
+
+              <div class="amount-grid">
+                <div
+                  class="amount-card"
+                  data-amount="500"
+                  onclick="selectAmount(500)"
+                >
+                  <div class="amount-value">500 FCFA</div>
+                  <div class="amount-equivalent">Transport extra</div>
+                </div>
+
+                <div
+                  class="amount-card featured"
+                  data-amount="1000"
+                  onclick="selectAmount(1000)"
+                >
+                  <div class="popular-badge">⭐</div>
+                  <div class="amount-value">1,000 FCFA</div>
+                  <div class="amount-equivalent">Épargne habituelle</div>
+                </div>
+
+                <div
+                  class="amount-card"
+                  data-amount="2000"
+                  onclick="selectAmount(2000)"
+                >
+                  <div class="amount-value">2,000 FCFA</div>
+                  <div class="amount-equivalent">Double effort !</div>
+                </div>
+
+                <div
+                  class="amount-card"
+                  data-amount="5000"
+                  onclick="selectAmount(5000)"
+                >
+                  <div class="amount-value">5,000 FCFA</div>
+                  <div class="amount-equivalent">Boost weekend</div>
+                </div>
+
+                <div
+                  class="amount-card custom-amount"
+                  onclick="selectCustomAmount()"
+                >
+                  <div class="amount-value">Autre montant</div>
+                  <input
+                    type="number"
+                    class="custom-input"
+                    id="custom-input"
+                    placeholder="Saisissez..."
+                    min="100"
+                    max="50000"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <!-- Mobile Money Section -->
+            <section class="mobile-money-section">
+              <div class="account-selector">
+                <div class="account-header">
+                  <div class="account-logo">M</div>
+                  <div class="account-info">
+                    <div class="account-name">Moov Money</div>
+                    <div class="account-number">+241 074 XX XX 56</div>
+                  </div>
+                  <button class="change-account" onclick="changeAccount()">
+                    Changer
+                  </button>
+                </div>
+                <div class="balance-info">
+                  <div class="balance-text">Solde disponible</div>
+                  <div class="balance-amount">25,780 FCFA</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Summary -->
+            <section class="summary-section">
+              <h3 class="summary-title">Récapitulatif</h3>
+              <div class="summary-amount" id="summary-amount">1,000</div>
+              <div class="summary-subtitle">FCFA à épargner</div>
+
+              <div class="impact-preview">
+                <div class="impact-row">
+                  <span class="impact-label">Total actuel :</span>
+                  <span class="impact-value">127,500 FCFA</span>
+                </div>
+                <div class="impact-row">
+                  <span class="impact-label">Après épargne :</span>
+                  <span class="impact-value impact-highlight" id="new-total"
+                    >128,500 FCFA</span
+                  >
+                </div>
+                <div class="impact-row">
+                  <span class="impact-label">Progression :</span>
+                  <span class="impact-value impact-highlight" id="new-progress"
+                    >36%</span
+                  >
+                </div>
+              </div>
+            </section>
+
+            <!-- CTA -->
+            <section class="cta-section">
+              <button
+                class="cta-primary"
+                id="confirm-btn"
+                onclick="confirmEpargne()"
+              >
+                <span>💰</span>
+                Confirmer l'épargne
+              </button>
+            </section>
+          </div>
+
+          <!-- Processing Overlay -->
+          <div class="processing-overlay" id="processing-overlay">
+            <div class="processing-content">
+              <div class="processing-icon" id="processing-icon">🔒</div>
+              <h2 class="processing-title" id="processing-title">
+                Épargne en cours
+              </h2>
+              <p class="processing-subtitle" id="processing-subtitle">
+                Traitement sécurisé de votre transaction
+              </p>
+
+              <div class="processing-steps">
+                <div class="step-item" id="step-1">
+                  <div class="step-icon">🔒</div>
+                  <div class="step-text">Connexion sécurisée</div>
+                  <div class="step-status">En cours...</div>
+                </div>
+                <div class="step-item" id="step-2">
+                  <div class="step-icon">🔍</div>
+                  <div class="step-text">Vérification du compte</div>
+                  <div class="step-status">En attente</div>
+                </div>
+                <div class="step-item" id="step-3">
+                  <div class="step-icon">💰</div>
+                  <div class="step-text">Transfert en cours</div>
+                  <div class="step-status">En attente</div>
+                </div>
+                <div class="step-item" id="step-4">
+                  <div class="step-icon">✅</div>
+                  <div class="step-text">Épargne enregistrée</div>
+                  <div class="step-status">En attente</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Success Overlay -->
+          <div class="success-overlay" id="success-overlay">
+            <div class="success-icon">🎉</div>
+            <h2 class="success-title">Félicitations !</h2>
+            <div class="success-amount" id="success-amount">+1,000</div>
+            <p class="success-subtitle">FCFA ajoutés à votre épargne</p>
+
+            <div class="success-stats">
+              <div class="stat-row">
+                <span class="stat-label">Montant épargné :</span>
+                <span class="stat-value" id="final-amount">1,000 FCFA</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Via :</span>
+                <span class="stat-value">Moov Money</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Nouveau total :</span>
+                <span class="stat-value" id="final-total">128,500 FCFA</span>
+              </div>
+            </div>
+
+            <div class="success-actions">
+              <button class="success-btn btn-continue" onclick="saveAgain()">
+                Épargner encore
+              </button>
+              <button class="success-btn btn-home" onclick="goHome()">
+                Retour accueil
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let selectedAmount = 1000;
+      let currentTotal = 127500;
+      let goalTarget = 200000;
+
+      // Amount selection
+      function selectAmount(amount) {
+        selectedAmount = amount;
+
+        // Update visual selection
+        document.querySelectorAll(".amount-card").forEach(function (card) {
+          card.classList.remove("selected");
+        });
+        document
+          .querySelector('[data-amount="' + amount + '"]')
+          .classList.add("selected");
+
+        // Clear custom input
+        document.getElementById("custom-input").value = "";
+        document.querySelector(".custom-amount").classList.remove("selected");
+
+        updateSummary();
+      }
+
+      function selectCustomAmount() {
+        document.querySelectorAll(".amount-card").forEach(function (card) {
+          card.classList.remove("selected");
+        });
+        document.querySelector(".custom-amount").classList.add("selected");
+
+        // Focus on input
+        const customInput = document.getElementById("custom-input");
+        customInput.focus();
+
+        customInput.addEventListener("input", function () {
+          const value = parseInt(this.value) || 0;
+          if (value >= 100) {
+            selectedAmount = value;
+            updateSummary();
+          }
+        });
+      }
+
+      // Update summary section
+      function updateSummary() {
+        const summaryAmount = document.getElementById("summary-amount");
+        const newTotal = document.getElementById("new-total");
+        const newProgress = document.getElementById("new-progress");
+
+        summaryAmount.textContent = selectedAmount.toLocaleString("fr-FR");
+        newTotal.textContent =
+          (currentTotal + selectedAmount).toLocaleString("fr-FR") + " FCFA";
+
+        const progressPercentage = Math.min(
+          ((currentTotal + selectedAmount) / goalTarget) * 100,
+          100
+        );
+        newProgress.textContent = Math.round(progressPercentage) + "%";
+      }
+
+      // Change account
+      function changeAccount() {
+        alert(
+          "🔄 Changement de compte\n\n📱 Comptes disponibles :\n• Moov Money : +241 074 XX XX 56\n• Airtel Money : +241 066 XX XX 34\n\n✅ Sélection maintenue : Moov Money"
+        );
+      }
+
+      // Confirm savings
+      function confirmEpargne() {
+        if (selectedAmount < 100) {
+          alert("❌ Montant minimum : 100 FCFA");
+          return;
+        }
+
+        // Show processing overlay
+        const processingOverlay = document.getElementById("processing-overlay");
+        processingOverlay.classList.add("active");
+
+        // Animate processing steps
+        animateProcessingSteps();
+      }
+
+      // Animate processing steps
+      function animateProcessingSteps() {
+        const steps = [
+          {
+            id: "step-1",
+            duration: 2000,
+            icon: "🔒",
+            title: "Connexion sécurisée",
+            subtitle: "Chiffrement de vos données",
+          },
+          {
+            id: "step-2",
+            duration: 1500,
+            icon: "🔍",
+            title: "Vérification du compte",
+            subtitle: "Validation de votre solde",
+          },
+          {
+            id: "step-3",
+            duration: 2000,
+            icon: "💰",
+            title: "Transfert en cours",
+            subtitle: "Traitement de l'épargne",
+          },
+          {
+            id: "step-4",
+            duration: 1000,
+            icon: "✅",
+            title: "Épargne enregistrée",
+            subtitle: "Transaction terminée",
+          },
+        ];
+
+        let currentStep = 0;
+
+        function processStep() {
+          if (currentStep < steps.length) {
+            const step = steps[currentStep];
+            const stepElement = document.getElementById(step.id);
+            const processingIcon = document.getElementById("processing-icon");
+            const processingTitle = document.getElementById("processing-title");
+            const processingSubtitle = document.getElementById(
+              "processing-subtitle"
+            );
+
+            // Update current step
+            stepElement.classList.add("active");
+            stepElement.querySelector(".step-status").textContent =
+              "En cours...";
+
+            // Update main display
+            processingIcon.textContent = step.icon;
+            processingTitle.textContent = step.title;
+            processingSubtitle.textContent = step.subtitle;
+
+            setTimeout(function () {
+              // Complete current step
+              stepElement.classList.remove("active");
+              stepElement.classList.add("completed");
+              stepElement.querySelector(".step-status").textContent =
+                "Terminé ✓";
+
+              currentStep++;
+              if (currentStep < steps.length) {
+                processStep();
+              } else {
+                // All steps completed, show success
+                setTimeout(showSuccess, 500);
+              }
+            }, step.duration);
+          }
+        }
+
+        processStep();
+      }
+
+      // Show success screen
+      function showSuccess() {
+        const processingOverlay = document.getElementById("processing-overlay");
+        const successOverlay = document.getElementById("success-overlay");
+
+        processingOverlay.classList.remove("active");
+        successOverlay.classList.add("active");
+
+        // Update success details
+        document.getElementById("success-amount").textContent =
+          "+" + selectedAmount.toLocaleString("fr-FR");
+        document.getElementById("final-amount").textContent =
+          selectedAmount.toLocaleString("fr-FR") + " FCFA";
+        document.getElementById("final-total").textContent =
+          (currentTotal + selectedAmount).toLocaleString("fr-FR") + " FCFA";
+
+        // Update global state
+        currentTotal += selectedAmount;
+
+        // Create confetti animation
+        createConfetti();
+      }
+
+      // Create confetti animation
+      function createConfetti() {
+        const colors = [
+          "#FFD700",
+          "#FF6B6B",
+          "#4ECDC4",
+          "#45B7D1",
+          "#96CEB4",
+          "#FFEAA7",
+        ];
+
+        for (let i = 0; i < 50; i++) {
+          setTimeout(function () {
+            const confetti = document.createElement("div");
+            confetti.className = "confetti";
+            confetti.style.left = Math.random() * 100 + "%";
+            confetti.style.backgroundColor =
+              colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animation =
+              "confettiFall " + (Math.random() * 3 + 2) + "s linear forwards";
+
+            document.getElementById("success-overlay").appendChild(confetti);
+
+            setTimeout(function () {
+              if (confetti.parentNode) {
+                confetti.parentNode.removeChild(confetti);
+              }
+            }, 5000);
+          }, i * 100);
+        }
+      }
+
+      // Save again action
+      function saveAgain() {
+        // Reset overlays
+        document.getElementById("success-overlay").classList.remove("active");
+
+        // Reset form
+        document.querySelectorAll(".amount-card").forEach(function (card) {
+          card.classList.remove("selected");
+        });
+        document
+          .querySelector('[data-amount="1000"]')
+          .classList.add("selected");
+        selectedAmount = 1000;
+        updateSummary();
+
+        // Show notification
+        showNotification("💡 Prêt pour une nouvelle épargne !", "info");
+      }
+
+      // Go home action
+      function goHome() {
+        showNotification("🏠 Retour au dashboard...", "success");
+        setTimeout(function () {
+          alert(
+            "📊 Mise à jour dashboard\n\n💰 Nouveau total : " +
+              currentTotal.toLocaleString("fr-FR") +
+              ' FCFA\n📈 Progression objectif mise à jour\n🏆 Badge débloqué : "Épargnant actif"\n\n🔄 Redirection vers l\'accueil...'
+          );
+        }, 1000);
+      }
+
+      // Go back
+      function goBack() {
+        const button = document.querySelector(".back-button");
+        button.style.transform = "scale(0.9)";
+        setTimeout(function () {
+          button.style.transform = "scale(1)";
+          if (
+            confirm("Abandonner l'épargne ?\nVous pourrez revenir plus tard.")
+          ) {
+            alert("🔙 Retour au dashboard...");
+          }
+        }, 150);
+      }
+
+      // Show notification
+      function showNotification(message, type) {
+        const notification = document.createElement("div");
+        const colors = {
+          success: "#4CAF50",
+          warning: "#FF9800",
+          info: "#2196F3",
+          error: "#F44336",
+        };
+
+        notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${colors[type] || colors.info};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 1000;
+        animation: slideDown 0.3s ease-out;
+    `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(function () {
+          notification.style.animation = "slideUp 0.3s ease-out";
+          setTimeout(function () {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }, 3000);
+      }
+
+      // Add notification animations
+      const style = document.createElement("style");
+      style.textContent = `
+    @keyframes slideDown {
+        from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+    @keyframes slideUp {
+        from { transform: translateX(-50%) translateY(0); opacity: 1; }
+        to { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    }
+`;
+      document.head.appendChild(style);
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set default selection
+        selectAmount(1000);
+
+        // Animate sections
+        const sections = document.querySelectorAll(
+          ".amount-section, .mobile-money-section, .summary-section"
+        );
+        sections.forEach(function (section, index) {
+          section.style.opacity = "0";
+          section.style.transform = "translateY(20px)";
+          setTimeout(function () {
+            section.style.transition = "all 0.6s ease-out";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+          }, index * 200);
+        });
+
+        // Add input formatting for custom amount
+        const customInput = document.getElementById("custom-input");
+        customInput.addEventListener("input", function () {
+          let value = this.value.replace(/\D/g, "");
+          if (value) {
+            this.value = parseInt(value).toLocaleString("fr-FR");
+          }
+        });
+
+        customInput.addEventListener("blur", function () {
+          const value = parseInt(this.value.replace(/\D/g, "")) || 0;
+          if (value >= 100) {
+            selectedAmount = value;
+            updateSummary();
+          } else if (value > 0) {
+            alert("❌ Montant minimum : 100 FCFA");
+            this.value = "";
+          }
+        });
+      });
+
+      console.log("💰 YESSI-YESSI Manual Savings Screen loaded!");
+      console.log("🎯 Target: 40%+ monthly usage");
+      console.log("🎉 Instant gratification optimized");
+    </script>
+  </body>
+</html>

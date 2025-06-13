@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YESSI-YESSI BANK - Écran 2: Inscription/Connexion MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-red: #ffebee;
+      }
+
+      body {
+        font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .phone-mockup {
+        width: 375px;
+        height: 812px;
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 8px;
+        position: relative;
+        box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.1);
+      }
+
+      .phone-mockup::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        z-index: 10;
+      }
+
+      .phone-mockup::after {
+        content: "";
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--surface);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .status-bar {
+        height: 44px;
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 5;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .battery {
+        width: 24px;
+        height: 12px;
+        border: 1px solid var(--text-primary);
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 6px;
+        background: var(--text-primary);
+        border-radius: 0 1px 1px 0;
+      }
+
+      .battery-fill {
+        width: 80%;
+        height: 100%;
+        background: var(--success);
+        border-radius: 1px;
+      }
+
+      .inscription-screen {
+        width: 100%;
+        height: calc(100% - 44px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Header Navigation */
+      .nav-header {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px 16px;
+        position: relative;
+      }
+
+      .back-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 16px;
+      }
+
+      .back-button:hover {
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .back-button::before {
+        content: "←";
+        font-size: 20px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .progress-indicator {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .progress-bar {
+        flex: 1;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        width: 33%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        border-radius: 2px;
+        transition: width 0.5s ease;
+      }
+
+      .progress-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        padding: 0 24px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Social Proof Header */
+      .hero-section {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .main-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        line-height: 1.3;
+      }
+
+      .main-title .highlight {
+        color: var(--primary);
+        position: relative;
+      }
+
+      .main-title .highlight::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary), var(--success));
+        border-radius: 1px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 24px;
+      }
+
+      /* Live Counter */
+      .live-counter {
+        background: linear-gradient(
+          135deg,
+          var(--light-green) 0%,
+          #f1f8e9 100%
+        );
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(46, 125, 50, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .counter-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .counter-text {
+        font-size: 14px;
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .counter-number {
+        color: var(--primary);
+        font-weight: 800;
+        font-size: 16px;
+      }
+
+      /* Testimonial */
+      .testimonial {
+        background: var(--surface);
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 32px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border-left: 4px solid var(--primary);
+      }
+
+      .testimonial-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .testimonial-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary), var(--success));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .testimonial-text {
+        flex: 1;
+      }
+
+      .testimonial-quote {
+        font-size: 14px;
+        color: var(--text-primary);
+        font-weight: 500;
+        margin-bottom: 4px;
+        font-style: italic;
+      }
+
+      .testimonial-author {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+
+      /* Phone Input Section */
+      .input-section {
+        margin-bottom: 24px;
+      }
+
+      .input-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .phone-input-container {
+        position: relative;
+      }
+
+      .phone-input-group {
+        display: flex;
+        align-items: center;
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .phone-input-group:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      .phone-input-group.valid {
+        border-color: var(--success);
+        background: var(--light-green);
+      }
+
+      .phone-input-group.invalid {
+        border-color: var(--error);
+        background: var(--light-red);
+      }
+
+      .country-prefix {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-right: 12px;
+        padding-right: 12px;
+        border-right: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .flag-icon {
+        font-size: 16px;
+      }
+
+      .phone-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        outline: none;
+      }
+
+      .phone-input::placeholder {
+        color: var(--text-secondary);
+        font-weight: 400;
+      }
+
+      .validation-icon {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      .validation-icon.show {
+        opacity: 1;
+      }
+
+      .validation-message {
+        margin-top: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      .validation-message.show {
+        opacity: 1;
+      }
+
+      .validation-message.valid {
+        color: var(--success);
+      }
+
+      .validation-message.invalid {
+        color: var(--error);
+      }
+
+      /* Security Section */
+      .security-badges {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .security-badge {
+        flex: 1;
+        background: var(--surface);
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+      }
+
+      .security-badge:hover {
+        border-color: var(--primary);
+        background: var(--light-green);
+      }
+
+      .security-icon {
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .security-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+
+      /* CTA Section */
+      .cta-section {
+        margin-bottom: 24px;
+      }
+
+      .cta-primary {
+        width: 100%;
+        height: 56px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+        margin-bottom: 16px;
+      }
+
+      .cta-primary:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .cta-primary:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+      }
+
+      .cta-primary:not(:disabled):active {
+        transform: translateY(0);
+      }
+
+      /* Legal Section */
+      .legal-section {
+        margin-bottom: 20px;
+      }
+
+      .legal-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      .legal-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .legal-link:hover {
+        text-decoration: underline;
+      }
+
+      /* Login Link */
+      .login-section {
+        text-align: center;
+        padding-bottom: 20px;
+      }
+
+      .login-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .login-link:hover {
+        color: var(--primary);
+      }
+
+      .login-link::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: var(--primary);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+      }
+
+      .login-link:hover::after {
+        width: 100%;
+      }
+
+      /* Animations */
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+
+      .shake {
+        animation: shake 0.5s ease-in-out;
+      }
+
+      /* Print Styles */
+      @media print {
+        body {
+          background: white;
+          padding: 0;
+        }
+
+        .phone-mockup {
+          width: 300px;
+          height: 650px;
+          margin: 50px auto;
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          box-shadow: none;
+          padding: 4px;
+        }
+
+        .phone-mockup::before,
+        .phone-mockup::after {
+          display: none;
+        }
+
+        .phone-screen {
+          border-radius: 6px;
+          border: 1px solid #eee;
+        }
+
+        .status-bar {
+          display: none;
+        }
+
+        .inscription-screen {
+          height: 100%;
+          background: white;
+        }
+
+        .cta-primary {
+          background: var(--primary) !important;
+          color: white !important;
+          -webkit-print-color-adjust: exact;
+          color-adjust: exact;
+        }
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 375px) {
+        .main-content {
+          padding: 0 16px;
+        }
+
+        .nav-header {
+          padding: 16px 16px 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <div class="status-left">
+            <span>9:41</span>
+          </div>
+          <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <div class="battery">
+              <div class="battery-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <main class="inscription-screen">
+          <!-- Navigation Header -->
+          <section class="nav-header">
+            <button
+              class="back-button"
+              onclick="goBack()"
+              aria-label="Retour"
+            ></button>
+            <div class="progress-indicator">
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-text">Étape 1/3</span>
+            </div>
+          </section>
+
+          <!-- Main Content -->
+          <div class="main-content">
+            <!-- Hero Section -->
+            <section class="hero-section">
+              <h1 class="main-title">
+                Rejoignez <span class="highlight">10 000+</span><br />
+                épargnants gabonais
+              </h1>
+              <p class="subtitle">
+                Commencez votre parcours vers l'indépendance financière
+              </p>
+
+              <!-- Live Counter -->
+              <div class="live-counter">
+                <div class="counter-icon">🇬🇦</div>
+                <div class="counter-text">
+                  <span class="counter-number" id="live-counter">10 247</span>
+                  Gabonais épargnent déjà avec nous
+                </div>
+              </div>
+
+              <!-- Testimonial -->
+              <div class="testimonial">
+                <div class="testimonial-content">
+                  <div class="testimonial-avatar">M</div>
+                  <div class="testimonial-text">
+                    <div class="testimonial-quote">
+                      "J'ai déjà épargné 50 000 FCFA en 3 mois !"
+                    </div>
+                    <div class="testimonial-author">
+                      Marie Ondongo, 28 ans, Libreville
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Phone Input Section -->
+            <section class="input-section">
+              <label class="input-label" for="phone-input">
+                📱 Votre numéro de téléphone
+              </label>
+
+              <div class="phone-input-container">
+                <div class="phone-input-group" id="phone-group">
+                  <div class="country-prefix">
+                    <span class="flag-icon">🇬🇦</span>
+                    <span>+241</span>
+                  </div>
+                  <input
+                    type="tel"
+                    id="phone-input"
+                    class="phone-input"
+                    placeholder="01 23 45 67 89"
+                    maxlength="14"
+                    autocomplete="tel"
+                  />
+                  <div class="validation-icon" id="validation-icon"></div>
+                </div>
+                <div class="validation-message" id="validation-message"></div>
+              </div>
+            </section>
+
+            <!-- Security Badges -->
+            <section class="security-badges">
+              <div class="security-badge">
+                <div class="security-icon">🔒</div>
+                <div class="security-text">Données<br />protégées</div>
+              </div>
+              <div class="security-badge">
+                <div class="security-icon">🚫</div>
+                <div class="security-text">Aucun<br />spam</div>
+              </div>
+              <div class="security-badge">
+                <div class="security-icon">⚡</div>
+                <div class="security-text">Déconnexion<br />facile</div>
+              </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section">
+              <button
+                class="cta-primary"
+                id="cta-button"
+                onclick="receiveCode()"
+                disabled
+              >
+                📨 Recevoir mon code
+              </button>
+            </section>
+
+            <!-- Legal Section -->
+            <section class="legal-section">
+              <p class="legal-text">
+                En continuant, vous acceptez nos
+                <a href="#" class="legal-link">Conditions d'utilisation</a>
+                et notre
+                <a href="#" class="legal-link">Politique de confidentialité</a>
+              </p>
+            </section>
+
+            <!-- Login Section -->
+            <section class="login-section">
+              <a href="#" class="login-link">Déjà membre ? Se connecter</a>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Phone validation logic
+      const phoneInput = document.getElementById("phone-input");
+      const phoneGroup = document.getElementById("phone-group");
+      const validationIcon = document.getElementById("validation-icon");
+      const validationMessage = document.getElementById("validation-message");
+      const ctaButton = document.getElementById("cta-button");
+
+      // Gabon phone number format validation
+      function validateGabonPhone(phone) {
+        // Remove spaces and format
+        const cleanPhone = phone.replace(/\s/g, "");
+
+        // Gabon mobile numbers: 01, 02, 05, 06, 07 followed by 6 digits
+        const gabonPattern = /^0[125670]\d{6}$/;
+
+        return gabonPattern.test(cleanPhone);
+      }
+
+      // Format phone number with spaces
+      function formatPhoneNumber(value) {
+        const numbers = value.replace(/\D/g, "");
+        const match = numbers.match(
+          /^(\d{0,2})(\d{0,2})(\d{0,2})(\d{0,2})(\d{0,1})$/
+        );
+
+        if (!match) return value;
+
+        return [match[1], match[2], match[3], match[4], match[5]]
+          .filter((group) => group)
+          .join(" ");
+      }
+
+      // Real-time validation
+      phoneInput.addEventListener("input", (e) => {
+        const formatted = formatPhoneNumber(e.target.value);
+        e.target.value = formatted;
+
+        const isValid = validateGabonPhone(formatted);
+        const hasContent = formatted.length > 0;
+
+        // Update visual states
+        phoneGroup.classList.remove("valid", "invalid");
+        validationIcon.classList.remove("show");
+        validationMessage.classList.remove("show", "valid", "invalid");
+
+        if (hasContent) {
+          if (isValid) {
+            phoneGroup.classList.add("valid");
+            validationIcon.innerHTML = "✅";
+            validationIcon.classList.add("show");
+            validationMessage.textContent = "Numéro valide pour le Gabon";
+            validationMessage.classList.add("show", "valid");
+            ctaButton.disabled = false;
+          } else if (formatted.length >= 8) {
+            phoneGroup.classList.add("invalid");
+            validationIcon.innerHTML = "❌";
+            validationIcon.classList.add("show");
+            validationMessage.textContent = "Format invalide pour le Gabon";
+            validationMessage.classList.add("show", "invalid");
+            ctaButton.disabled = true;
+          } else {
+            ctaButton.disabled = true;
+          }
+        } else {
+          ctaButton.disabled = true;
+        }
+      });
+
+      // CTA Button action
+      function receiveCode() {
+        const phoneValue = phoneInput.value;
+        const isValid = validateGabonPhone(phoneValue);
+
+        if (!isValid) {
+          phoneGroup.classList.add("shake");
+          setTimeout(() => {
+            phoneGroup.classList.remove("shake");
+          }, 500);
+          return;
+        }
+
+        // Visual feedback
+        ctaButton.innerHTML = "📤 Envoi en cours...";
+        ctaButton.disabled = true;
+
+        setTimeout(() => {
+          ctaButton.innerHTML = "✅ Code envoyé !";
+          setTimeout(() => {
+            alert(
+              `📱 Code de vérification envoyé au +241 ${phoneValue}\n\nRedirection vers la vérification...`
+            );
+            ctaButton.innerHTML = "📨 Recevoir mon code";
+            ctaButton.disabled = false;
+          }, 1000);
+        }, 1500);
+      }
+
+      // Back button
+      function goBack() {
+        const button = document.querySelector(".back-button");
+        button.style.transform = "scale(0.9)";
+        setTimeout(() => {
+          button.style.transform = "scale(1)";
+          alert("Retour à l'écran d'accueil...");
+        }, 150);
+      }
+
+      // Live counter animation
+      function animateCounter() {
+        const counter = document.getElementById("live-counter");
+        let currentCount = 10247;
+
+        setInterval(() => {
+          // Simulate real-time growth
+          if (Math.random() > 0.7) {
+            currentCount += Math.floor(Math.random() * 3) + 1;
+            counter.textContent = currentCount.toLocaleString("fr-FR");
+
+            // Flash effect
+            counter.style.color = "var(--success)";
+            setTimeout(() => {
+              counter.style.color = "var(--primary)";
+            }, 500);
+          }
+        }, 3000);
+      }
+
+      // Security badge interactions
+      document.querySelectorAll(".security-badge").forEach((badge) => {
+        badge.addEventListener("click", () => {
+          const icon = badge.querySelector(".security-icon");
+          icon.style.transform = "scale(1.2)";
+          setTimeout(() => {
+            icon.style.transform = "scale(1)";
+          }, 200);
+        });
+      });
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", () => {
+        // Animate progress bar
+        setTimeout(() => {
+          document.querySelector(".progress-fill").style.width = "33%";
+        }, 500);
+
+        // Start counter animation
+        animateCounter();
+
+        // Focus on phone input
+        setTimeout(() => {
+          phoneInput.focus();
+        }, 1000);
+      });
+
+      console.log("📞 YESSI-YESSI Inscription Screen loaded!");
+      console.log("🎯 Target: 70%+ conversion rate");
+      console.log("🔒 Friction reduced, trust maximized");
+    </script>
+  </body>
+</html>

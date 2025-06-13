@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YESSI-YESSI BANK - Écran 6: Dashboard Accueil MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-orange: #fff3e0;
+        --gradient-start: #43a047;
+        --gradient-end: #2e7d32;
+      }
+
+      body {
+        font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .phone-mockup {
+        width: 375px;
+        height: 812px;
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 8px;
+        position: relative;
+        box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.1);
+      }
+
+      .phone-mockup::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        z-index: 10;
+      }
+
+      .phone-mockup::after {
+        content: "";
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--surface);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .status-bar {
+        height: 44px;
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 5;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .battery {
+        width: 24px;
+        height: 12px;
+        border: 1px solid var(--text-primary);
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 6px;
+        background: var(--text-primary);
+        border-radius: 0 1px 1px 0;
+      }
+
+      .battery-fill {
+        width: 80%;
+        height: 100%;
+        background: var(--success);
+        border-radius: 1px;
+      }
+
+      .dashboard-screen {
+        width: 100%;
+        height: calc(100% - 44px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Header Section */
+      .header-section {
+        background: linear-gradient(135deg, var(--primary), var(--success));
+        padding: 24px 24px 32px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header-section::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+      }
+
+      .header-content {
+        position: relative;
+        z-index: 2;
+      }
+
+      .greeting {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .greeting-emoji {
+        font-size: 28px;
+        animation: wave 2s ease-in-out infinite;
+      }
+
+      .greeting-time {
+        font-size: 14px;
+        font-weight: 500;
+        opacity: 0.9;
+        margin-bottom: 16px;
+      }
+
+      .quick-stats {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .stat-item {
+        flex: 1;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 12px 8px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+      }
+
+      .stat-value {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      /* Main Savings Card */
+      .savings-card {
+        background: linear-gradient(135deg, var(--surface), #f8f9fa);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .savings-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--success));
+      }
+
+      .savings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .savings-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .settings-btn {
+        width: 36px;
+        height: 36px;
+        background: var(--light-green);
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--primary);
+        font-size: 16px;
+      }
+
+      .settings-btn:hover {
+        background: var(--primary);
+        color: white;
+        transform: rotate(90deg);
+      }
+
+      .savings-amount {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .amount-value {
+        font-size: 42px;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 8px;
+      }
+
+      .amount-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      /* Progress Section */
+      .progress-section {
+        margin-bottom: 24px;
+      }
+
+      .progress-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 16px;
+      }
+
+      .progress-circle {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+      }
+
+      .progress-track {
+        fill: none;
+        stroke: var(--border);
+        stroke-width: 8;
+      }
+
+      .progress-bar {
+        fill: none;
+        stroke: url(#gradient);
+        stroke-width: 8;
+        stroke-linecap: round;
+        stroke-dasharray: 314;
+        stroke-dashoffset: 157;
+        transition: stroke-dashoffset 1s ease-in-out;
+      }
+
+      .progress-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+
+      .progress-percentage {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .progress-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .progress-info {
+        text-align: center;
+      }
+
+      .progress-text {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+      }
+
+      .progress-target {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      /* Savings Details */
+      .savings-details {
+        background: var(--light-green);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+      }
+
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .detail-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .detail-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .detail-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .modify-btn {
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      .modify-btn:hover {
+        color: var(--success);
+      }
+
+      /* Auto Save Toggle */
+      .auto-save-section {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 16px;
+        border: 2px solid var(--border);
+        margin-bottom: 24px;
+      }
+
+      .toggle-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .toggle-info {
+        flex: 1;
+      }
+
+      .toggle-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .toggle-subtitle {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 60px;
+        height: 32px;
+        background: var(--border);
+        border-radius: 16px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .toggle-switch.active {
+        background: var(--primary);
+      }
+
+      .toggle-slider {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 28px;
+        height: 28px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle-switch.active .toggle-slider {
+        transform: translateX(28px);
+      }
+
+      /* Action Buttons */
+      .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .action-btn {
+        flex: 1;
+        height: 56px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--success));
+        color: white;
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+      }
+
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--primary);
+        border: 2px solid var(--primary);
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* Recent Activity */
+      .recent-activity {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid var(--border);
+      }
+
+      .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .activity-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .view-all-btn {
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .view-all-btn:hover {
+        text-decoration: underline;
+      }
+
+      .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .activity-item:last-child {
+        border-bottom: none;
+      }
+
+      .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 16px;
+        font-size: 18px;
+      }
+
+      .activity-icon.success {
+        background: var(--light-green);
+        color: var(--success);
+      }
+
+      .activity-icon.pending {
+        background: var(--light-orange);
+        color: var(--warning);
+      }
+
+      .activity-info {
+        flex: 1;
+      }
+
+      .activity-description {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+      }
+
+      .activity-time {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .activity-amount {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      /* Animations */
+      @keyframes wave {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+          transform: rotate(20deg);
+        }
+        20%,
+        40%,
+        60%,
+        80% {
+          transform: rotate(-10deg);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-fade-in {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .pulse-animation {
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 375px) {
+        .main-content {
+          padding: 16px;
+        }
+        .savings-card {
+          padding: 20px;
+        }
+        .action-buttons {
+          flex-direction: column;
+        }
+        .action-btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <div class="status-left">
+            <span>9:41</span>
+          </div>
+          <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <div class="battery">
+              <div class="battery-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <main class="dashboard-screen">
+          <!-- Header Section -->
+          <section class="header-section">
+            <div class="header-content">
+              <div class="greeting">
+                <span>Bonjour Marie</span>
+                <span class="greeting-emoji">👋</span>
+              </div>
+              <div class="greeting-time" id="greeting-time">Bonne soirée !</div>
+
+              <div class="quick-stats">
+                <div class="stat-item">
+                  <div class="stat-value" id="streak-days">15</div>
+                  <div class="stat-label">Jours</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="monthly-saved">30k</div>
+                  <div class="stat-label">Ce mois</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="goal-progress">34%</div>
+                  <div class="stat-label">Objectif</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Main Content -->
+          <div class="main-content">
+            <!-- Main Savings Card -->
+            <section class="savings-card animate-fade-in">
+              <div class="savings-header">
+                <h2 class="savings-title">
+                  <span>💰</span>
+                  MON ÉPARGNE
+                </h2>
+                <button class="settings-btn" onclick="openSettings()">
+                  ⚙️
+                </button>
+              </div>
+
+              <div class="savings-amount">
+                <div class="amount-value" id="total-savings">127,500</div>
+                <div class="amount-subtitle">FCFA épargnés</div>
+              </div>
+
+              <!-- Progress Circle -->
+              <div class="progress-section">
+                <div class="progress-container">
+                  <svg class="progress-circle" viewBox="0 0 120 120">
+                    <defs>
+                      <linearGradient
+                        id="gradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="0%"
+                      >
+                        <stop
+                          offset="0%"
+                          style="stop-color: #2e7d32; stop-opacity: 1"
+                        />
+                        <stop
+                          offset="100%"
+                          style="stop-color: #4caf50; stop-opacity: 1"
+                        />
+                      </linearGradient>
+                    </defs>
+                    <circle
+                      class="progress-track"
+                      cx="60"
+                      cy="60"
+                      r="50"
+                    ></circle>
+                    <circle
+                      class="progress-bar"
+                      cx="60"
+                      cy="60"
+                      r="50"
+                      id="progress-circle"
+                    ></circle>
+                  </svg>
+                  <div class="progress-center">
+                    <div class="progress-percentage" id="progress-percentage">
+                      34%
+                    </div>
+                    <div class="progress-label">vers objectif</div>
+                  </div>
+                </div>
+                <div class="progress-info">
+                  <div class="progress-text">Objectif : Nouveau téléphone</div>
+                  <div class="progress-target">200,000 FCFA</div>
+                </div>
+              </div>
+
+              <!-- Savings Details -->
+              <div class="savings-details">
+                <div class="detail-row">
+                  <span class="detail-label">
+                    <span>📅</span>
+                    Jours d'épargne
+                  </span>
+                  <span class="detail-value">15 jours</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">
+                    <span>💵</span>
+                    Épargne quotidienne
+                  </span>
+                  <span class="detail-value">
+                    1,000 FCFA
+                    <button class="modify-btn" onclick="modifyAmount()">
+                      Modifier
+                    </button>
+                  </span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">
+                    <span>🎯</span>
+                    Prochain palier
+                  </span>
+                  <span class="detail-value">150,000 FCFA</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- Auto Save Toggle -->
+            <section class="auto-save-section">
+              <div class="toggle-container">
+                <div class="toggle-info">
+                  <div class="toggle-title">Épargne automatique</div>
+                  <div class="toggle-subtitle">
+                    Prélèvement quotidien à 20:00
+                  </div>
+                </div>
+                <div
+                  class="toggle-switch active"
+                  id="auto-save-toggle"
+                  onclick="toggleAutoSave()"
+                >
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <section class="action-buttons">
+              <button class="action-btn btn-primary" onclick="saveNow()">
+                <span>💰</span>
+                Épargner maintenant
+              </button>
+              <button class="action-btn btn-secondary" onclick="viewHistory()">
+                <span>📊</span>
+                Voir historique
+              </button>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="recent-activity">
+              <div class="activity-header">
+                <h3 class="activity-title">Activité récente</h3>
+                <button class="view-all-btn" onclick="viewAllActivity()">
+                  Tout voir
+                </button>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon success">✅</div>
+                <div class="activity-info">
+                  <div class="activity-description">Épargne automatique</div>
+                  <div class="activity-time">Aujourd'hui à 20:00</div>
+                </div>
+                <div class="activity-amount">+1,000</div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon success">✅</div>
+                <div class="activity-info">
+                  <div class="activity-description">Épargne manuelle</div>
+                  <div class="activity-time">Hier à 14:30</div>
+                </div>
+                <div class="activity-amount">+2,500</div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon pending">⏳</div>
+                <div class="activity-info">
+                  <div class="activity-description">Épargne programmée</div>
+                  <div class="activity-time">Demain à 20:00</div>
+                </div>
+                <div class="activity-amount">1,000</div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let totalSavings = 127500;
+      let dailySavings = 1000;
+      let savingsDays = 15;
+      let goalTarget = 200000;
+      let autoSaveEnabled = true;
+
+      // Update greeting based on time
+      function updateGreeting() {
+        const now = new Date();
+        const hour = now.getHours();
+        const greetingTimeEl = document.getElementById("greeting-time");
+
+        if (hour < 12) {
+          greetingTimeEl.textContent = "Bonne matinée !";
+        } else if (hour < 17) {
+          greetingTimeEl.textContent = "Bon après-midi !";
+        } else {
+          greetingTimeEl.textContent = "Bonne soirée !";
+        }
+      }
+
+      // Update progress circle
+      function updateProgress() {
+        const percentage = Math.min((totalSavings / goalTarget) * 100, 100);
+        const progressCircle = document.getElementById("progress-circle");
+        const progressPercentage = document.getElementById(
+          "progress-percentage"
+        );
+
+        const circumference = 2 * Math.PI * 50;
+        const strokeDashoffset =
+          circumference - (percentage / 100) * circumference;
+
+        progressCircle.style.strokeDashoffset = strokeDashoffset;
+        progressPercentage.textContent = Math.round(percentage) + "%";
+
+        // Update quick stats
+        document.getElementById("goal-progress").textContent =
+          Math.round(percentage) + "%";
+      }
+
+      // Format number with FCFA
+      function formatAmount(amount) {
+        return amount.toLocaleString("fr-FR");
+      }
+
+      // Update displays
+      function updateDisplays() {
+        document.getElementById("total-savings").textContent =
+          formatAmount(totalSavings);
+        document.getElementById("streak-days").textContent = savingsDays;
+        document.getElementById("monthly-saved").textContent =
+          Math.round(totalSavings / 1000) + "k";
+        updateProgress();
+      }
+
+      // Save now action
+      function saveNow() {
+        const button = event.target;
+        const originalText = button.innerHTML;
+
+        // Visual feedback
+        button.innerHTML = "<span>⚡</span>Épargne en cours...";
+        button.disabled = true;
+
+        setTimeout(function () {
+          // Show amount selection
+          const amount = prompt(
+            "💰 Combien voulez-vous épargner ?\n\nMontants suggérés :\n• 500 FCFA\n• 1,000 FCFA (habituel)\n• 2,000 FCFA\n• 5,000 FCFA\n\nSaisissez le montant :",
+            "1000"
+          );
+
+          if (amount && !isNaN(amount) && parseInt(amount) > 0) {
+            const saveAmount = parseInt(amount);
+            totalSavings += saveAmount;
+            updateDisplays();
+
+            // Success feedback
+            button.innerHTML = "<span>✅</span>Épargné !";
+            setTimeout(function () {
+              alert(
+                "🎉 Félicitations !\n\n💰 +" +
+                  formatAmount(saveAmount) +
+                  " FCFA ajoutés\n📊 Total : " +
+                  formatAmount(totalSavings) +
+                  " FCFA\n🎯 Progression : " +
+                  Math.round((totalSavings / goalTarget) * 100) +
+                  "%"
+              );
+              button.innerHTML = originalText;
+              button.disabled = false;
+            }, 1000);
+          } else {
+            button.innerHTML = originalText;
+            button.disabled = false;
+          }
+        }, 1500);
+      }
+
+      // Toggle auto save
+      function toggleAutoSave() {
+        autoSaveEnabled = !autoSaveEnabled;
+        const toggle = document.getElementById("auto-save-toggle");
+
+        if (autoSaveEnabled) {
+          toggle.classList.add("active");
+          showNotification("✅ Épargne automatique activée", "success");
+        } else {
+          toggle.classList.remove("active");
+          showNotification("⏸️ Épargne automatique désactivée", "warning");
+        }
+      }
+
+      // Show notification
+      function showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement("div");
+        notification.style.cssText = `
+position: fixed;
+top: 20px;
+left: 50%;
+transform: translateX(-50%);
+background: ${type === "success" ? "#4CAF50" : "#FF9800"};
+color: white;
+padding: 12px 20px;
+border-radius: 8px;
+font-weight: 600;
+z-index: 1000;
+animation: slideDown 0.3s ease-out;
+`;
+        notification.textContent = message;
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Remove after 3 seconds
+        setTimeout(function () {
+          notification.style.animation = "slideUp 0.3s ease-out";
+          setTimeout(function () {
+            document.body.removeChild(notification);
+          }, 300);
+        }, 3000);
+      }
+
+      // Modify amount
+      function modifyAmount() {
+        const newAmount = prompt(
+          "💵 Modifier votre épargne quotidienne\n\nMontant actuel : " +
+            formatAmount(dailySavings) +
+            " FCFA\n\nNouveau montant :",
+          dailySavings
+        );
+
+        if (newAmount && !isNaN(newAmount) && parseInt(newAmount) >= 100) {
+          dailySavings = parseInt(newAmount);
+          showNotification(
+            "✅ Épargne quotidienne mise à jour : " +
+              formatAmount(dailySavings) +
+              " FCFA",
+            "success"
+          );
+        } else if (newAmount) {
+          alert("❌ Montant invalide\nMinimum : 100 FCFA");
+        }
+      }
+
+      // View history
+      function viewHistory() {
+        alert(
+          "📊 Historique des transactions\n\n✅ Aujourd'hui: +1,000 FCFA (Auto)\n✅ Hier: +2,500 FCFA (Manuel)\n✅ 28/05: +1,000 FCFA (Auto)\n✅ 27/05: +1,000 FCFA (Auto)\n✅ 26/05: +500 FCFA (Manuel)\n\n📈 Tendance: +6,000 FCFA cette semaine\n\n🔗 Redirection vers l'historique détaillé..."
+        );
+      }
+
+      // View all activity
+      function viewAllActivity() {
+        alert(
+          "📋 Toute l'activité\n\n• 15 jours d'épargne consécutifs\n• 12 épargnes automatiques\n• 3 épargnes manuelles\n• Moyenne: 8,500 FCFA/semaine\n• Objectif téléphone: 34% atteint\n\n🏆 Badges débloqués:\n⭐ Débutant motivé\n🔥 Streak 15 jours\n💪 Premier palier"
+        );
+      }
+
+      // Open settings
+      function openSettings() {
+        const button = event.target;
+        button.style.animation = "pulse 0.6s ease-in-out";
+        setTimeout(function () {
+          button.style.animation = "";
+          alert(
+            "⚙️ Paramètres\n\n• Modifier l'objectif\n• Changer l'heure de prélèvement\n• Gérer les notifications\n• Sécurité du compte\n• Support client\n\n🔗 Redirection vers les paramètres..."
+          );
+        }, 600);
+      }
+
+      // Add CSS animations
+      const style = document.createElement("style");
+      style.textContent = `
+@keyframes slideDown {
+from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+@keyframes slideUp {
+from { transform: translateX(-50%) translateY(0); opacity: 1; }
+to { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+}
+`;
+      document.head.appendChild(style);
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        updateGreeting();
+        updateDisplays();
+
+        // Animate elements on load
+        const animatedElements = document.querySelectorAll(
+          ".savings-card, .auto-save-section, .action-buttons, .recent-activity"
+        );
+        animatedElements.forEach(function (el, index) {
+          el.style.opacity = "0";
+          el.style.transform = "translateY(20px)";
+          setTimeout(function () {
+            el.style.transition = "all 0.6s ease-out";
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+          }, index * 200);
+        });
+
+        // Update progress circle with animation
+        setTimeout(function () {
+          updateProgress();
+        }, 800);
+
+        // Simulate real-time updates
+        setInterval(function () {
+          updateGreeting();
+        }, 60000); // Update every minute
+      });
+
+      console.log("🏠 YESSI-YESSI Dashboard loaded!");
+      console.log("🎯 Target: 60%+ daily active users");
+      console.log("💡");
+    </script>
+  </body>
+</html>

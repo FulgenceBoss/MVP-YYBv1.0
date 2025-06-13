@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YESSI-YESSI BANK - Écran 5: Config Horaire + Mobile Money MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-orange: #fff3e0;
+        --moov-orange: #ff6b00;
+        --airtel-red: #e60012;
+      }
+
+      body {
+        font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .phone-mockup {
+        width: 375px;
+        height: 812px;
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 8px;
+        position: relative;
+        box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.1);
+      }
+
+      .phone-mockup::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        z-index: 10;
+      }
+
+      .phone-mockup::after {
+        content: "";
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--surface);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .status-bar {
+        height: 44px;
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 5;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .battery {
+        width: 24px;
+        height: 12px;
+        border: 1px solid var(--text-primary);
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 6px;
+        background: var(--text-primary);
+        border-radius: 0 1px 1px 0;
+      }
+
+      .battery-fill {
+        width: 80%;
+        height: 100%;
+        background: var(--success);
+        border-radius: 1px;
+      }
+
+      .config-screen {
+        width: 100%;
+        height: calc(100% - 44px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Header Navigation */
+      .nav-header {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px 16px;
+        position: relative;
+      }
+
+      .back-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 16px;
+      }
+
+      .back-button:hover {
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .back-button::before {
+        content: "←";
+        font-size: 20px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .progress-indicator {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .progress-bar {
+        flex: 1;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        width: 90%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        border-radius: 2px;
+        transition: width 0.5s ease;
+      }
+
+      .progress-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        padding: 0 24px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Hero Section */
+      .hero-section {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .main-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        line-height: 1.3;
+      }
+
+      .main-subtitle {
+        font-size: 16px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      /* Time Section */
+      .time-section {
+        margin-bottom: 32px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+
+      .section-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+      }
+
+      .time-selector {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 24px;
+        border: 2px solid var(--border);
+        transition: all 0.3s ease;
+      }
+
+      .time-selector:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      .time-display {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .time-value {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 8px;
+      }
+
+      .time-context {
+        font-size: 14px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .time-slider {
+        position: relative;
+        width: 100%;
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        margin-bottom: 16px;
+        cursor: pointer;
+      }
+
+      .time-track {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--success));
+        border-radius: 4px;
+        width: 67%;
+        transition: width 0.3s ease;
+      }
+
+      .time-thumb {
+        position: absolute;
+        top: -8px;
+        right: 33%;
+        width: 24px;
+        height: 24px;
+        background: var(--primary);
+        border: 3px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .time-thumb:hover {
+        transform: scale(1.1);
+      }
+
+      .time-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .popular-time {
+        background: var(--light-green);
+        padding: 8px 12px;
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 12px;
+        border: 1px solid rgba(46, 125, 50, 0.2);
+      }
+
+      .popular-text {
+        font-size: 12px;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      /* Mobile Money Section */
+      .mobile-money-section {
+        margin-bottom: 32px;
+      }
+
+      .operator-selection {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .operator-card {
+        flex: 1;
+        background: var(--surface);
+        border: 3px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .operator-card.selected {
+        border-color: var(--primary);
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .operator-card.moov.selected {
+        border-color: var(--moov-orange);
+        box-shadow: 0 4px 16px rgba(255, 107, 0, 0.2);
+      }
+
+      .operator-card.airtel.selected {
+        border-color: var(--airtel-red);
+        box-shadow: 0 4px 16px rgba(230, 0, 18, 0.2);
+      }
+
+      .operator-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 800;
+        color: white;
+      }
+
+      .operator-logo.moov {
+        background: var(--moov-orange);
+      }
+
+      .operator-logo.airtel {
+        background: var(--airtel-red);
+      }
+
+      .operator-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .operator-subtitle {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .selected-badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 24px;
+        height: 24px;
+        background: var(--success);
+        border: 2px solid white;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+      }
+
+      .operator-card.selected .selected-badge {
+        display: flex;
+      }
+
+      /* Phone Number Input */
+      .phone-input-section {
+        margin-bottom: 24px;
+      }
+
+      .phone-input-group {
+        display: flex;
+        align-items: center;
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .phone-input-group:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      .phone-input-group.valid {
+        border-color: var(--success);
+        background: var(--light-green);
+      }
+
+      .phone-input-group.invalid {
+        border-color: var(--error);
+        background: rgba(244, 67, 54, 0.1);
+      }
+
+      .operator-prefix {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-right: 12px;
+        padding-right: 12px;
+        border-right: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .prefix-logo {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 800;
+        color: white;
+      }
+
+      .phone-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        outline: none;
+      }
+
+      .phone-input::placeholder {
+        color: var(--text-secondary);
+        font-weight: 400;
+      }
+
+      .validation-icon {
+        font-size: 20px;
+        margin-left: 12px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .validation-icon.show {
+        opacity: 1;
+      }
+
+      .validation-message {
+        margin-top: 8px;
+        font-size: 14px;
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      .validation-message.show {
+        opacity: 1;
+      }
+
+      .validation-message.valid {
+        color: var(--success);
+      }
+
+      .validation-message.invalid {
+        color: var(--error);
+      }
+
+      /* Security Info */
+      .security-info {
+        background: var(--light-blue);
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        border-left: 4px solid var(--secondary);
+      }
+
+      .security-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .security-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--secondary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+      }
+
+      .security-text {
+        flex: 1;
+      }
+
+      .security-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+      }
+
+      .security-subtitle {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.3;
+      }
+
+      /* Summary Section */
+      .summary-section {
+        background: linear-gradient(135deg, var(--light-green), #f1f8e9);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(46, 125, 50, 0.2);
+      }
+
+      .summary-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        text-align: center;
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 14px;
+      }
+
+      .summary-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .summary-value {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .summary-highlight {
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      /* CTA Section */
+      .cta-section {
+        margin-bottom: 24px;
+      }
+
+      .cta-primary {
+        width: 100%;
+        height: 56px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+      }
+
+      .cta-primary:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .cta-primary:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+      }
+
+      .cta-primary:not(:disabled):active {
+        transform: translateY(0);
+      }
+
+      /* Help Section */
+      .help-section {
+        text-align: center;
+        padding-bottom: 20px;
+      }
+
+      .help-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+        margin-bottom: 8px;
+      }
+
+      .help-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .help-link:hover {
+        text-decoration: underline;
+      }
+
+      /* Animations */
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .animate-slide {
+        animation: slideIn 0.5s ease-out;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 375px) {
+        .main-content {
+          padding: 0 16px;
+        }
+        .nav-header {
+          padding: 16px 16px 12px;
+        }
+        .operator-selection {
+          gap: 12px;
+        }
+        .operator-card {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <div class="status-left">
+            <span>9:41</span>
+          </div>
+          <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <div class="battery">
+              <div class="battery-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <main class="config-screen">
+          <!-- Navigation Header -->
+          <section class="nav-header">
+            <button
+              class="back-button"
+              onclick="goBack()"
+              aria-label="Retour"
+            ></button>
+            <div class="progress-indicator">
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-text">Étape 4/4</span>
+            </div>
+          </section>
+
+          <!-- Main Content -->
+          <div class="main-content">
+            <!-- Hero Section -->
+            <section class="hero-section">
+              <h1 class="main-title">Finalisons votre épargne automatique</h1>
+              <p class="main-subtitle">
+                Plus que quelques détails et c'est parti !
+              </p>
+            </section>
+
+            <!-- Time Section -->
+            <section class="time-section">
+              <h2 class="section-title">Prélèvement quotidien à :</h2>
+              <p class="section-subtitle">
+                Choisissez l'heure qui vous convient
+              </p>
+
+              <div class="time-selector">
+                <div class="time-display">
+                  <div class="time-value" id="time-display">20:00</div>
+                  <div class="time-context" id="time-context">
+                    Après votre journée de travail
+                  </div>
+                </div>
+
+                <div class="time-slider" onclick="handleSliderClick(event)">
+                  <div class="time-track" id="time-track"></div>
+                  <div class="time-thumb" id="time-thumb"></div>
+                </div>
+
+                <div class="time-labels">
+                  <span>6h</span>
+                  <span>12h</span>
+                  <span>18h</span>
+                  <span>23h</span>
+                </div>
+
+                <div class="popular-time">
+                  <div class="popular-text">⭐ Horaire populaire : 20h00</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Mobile Money Section -->
+            <section class="mobile-money-section">
+              <h2 class="section-title">Choisissez votre mobile money</h2>
+              <p class="section-subtitle">Sélectionnez votre opérateur</p>
+
+              <div class="operator-selection">
+                <div
+                  class="operator-card moov"
+                  onclick="selectOperator('moov')"
+                >
+                  <div class="selected-badge">✓</div>
+                  <div class="operator-logo moov">M</div>
+                  <div class="operator-name">Moov</div>
+                  <div class="operator-subtitle">Partenaire officiel</div>
+                </div>
+
+                <div
+                  class="operator-card airtel"
+                  onclick="selectOperator('airtel')"
+                >
+                  <div class="selected-badge">✓</div>
+                  <div class="operator-logo airtel">A</div>
+                  <div class="operator-name">Airtel</div>
+                  <div class="operator-subtitle">Partenaire officiel</div>
+                </div>
+              </div>
+
+              <div class="phone-input-section">
+                <div class="phone-input-group" id="phone-group">
+                  <div class="operator-prefix" id="operator-prefix">
+                    <div class="prefix-logo moov" id="prefix-logo">M</div>
+                    <span id="prefix-text">+241</span>
+                  </div>
+                  <input
+                    type="tel"
+                    id="phone-input"
+                    class="phone-input"
+                    placeholder="XX XX XX XX"
+                    maxlength="11"
+                    autocomplete="tel"
+                  />
+                  <div class="validation-icon" id="validation-icon"></div>
+                </div>
+                <div class="validation-message" id="validation-message"></div>
+              </div>
+            </section>
+
+            <!-- Security Info -->
+            <section class="security-info">
+              <div class="security-content">
+                <div class="security-icon">🔒</div>
+                <div class="security-text">
+                  <div class="security-title">Connexion sécurisée</div>
+                  <div class="security-subtitle">
+                    Aucun prélèvement sans votre autorisation • Résiliable à
+                    tout moment
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Summary Section -->
+            <section class="summary-section">
+              <h3 class="summary-title">Récapitulatif de votre épargne</h3>
+              <div class="summary-item">
+                <span class="summary-label">Montant quotidien :</span>
+                <span class="summary-value">1,000 FCFA</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Heure de prélèvement :</span>
+                <span class="summary-value" id="summary-time">20:00</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Opérateur :</span>
+                <span class="summary-value" id="summary-operator">Moov</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Objectif annuel :</span>
+                <span class="summary-value summary-highlight"
+                  >365,000 FCFA</span
+                >
+              </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section">
+              <button
+                class="cta-primary"
+                id="cta-button"
+                onclick="activateEpargne()"
+                disabled
+              >
+                🚀 Activer mon épargne auto
+              </button>
+            </section>
+
+            <!-- Help Section -->
+            <section class="help-section">
+              <p class="help-text">
+                Besoin d'aide ? Notre support est disponible 24/7
+              </p>
+              <a href="#" class="help-link" onclick="showHelp()"
+                >📞 Contacter le support</a
+              >
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let selectedTime = 20;
+      let selectedOperator = "moov";
+      let phoneNumber = "";
+      let isFormValid = false;
+
+      // Operator configurations
+      const operators = {
+        moov: {
+          name: "Moov",
+          logo: "M",
+          color: "#FF6B00",
+          prefixes: ["074", "075", "076", "077"],
+          pattern: /^07[4-7]\d{6}$/,
+        },
+        airtel: {
+          name: "Airtel",
+          logo: "A",
+          color: "#E60012",
+          prefixes: ["062", "065", "066", "067"],
+          pattern: /^06[2567]\d{6}$/,
+        },
+      };
+
+      // Time contexts
+      const timeContexts = {
+        6: "Tôt le matin",
+        7: "Début de matinée",
+        8: "Avant le travail",
+        9: "Matinée",
+        10: "Matinée",
+        11: "Fin de matinée",
+        12: "Midi",
+        13: "Début d'après-midi",
+        14: "Après-midi",
+        15: "Après-midi",
+        16: "Fin d'après-midi",
+        17: "Fin de journée",
+        18: "Après le travail",
+        19: "Début de soirée",
+        20: "Après votre journée de travail",
+        21: "Soirée",
+        22: "Soirée",
+        23: "Fin de soirée",
+      };
+
+      // DOM Elements
+      const timeDisplay = document.getElementById("time-display");
+      const timeContext = document.getElementById("time-context");
+      const timeTrack = document.getElementById("time-track");
+      const timeThumb = document.getElementById("time-thumb");
+      const phoneInput = document.getElementById("phone-input");
+      const phoneGroup = document.getElementById("phone-group");
+      const validationIcon = document.getElementById("validation-icon");
+      const validationMessage = document.getElementById("validation-message");
+      const operatorPrefix = document.getElementById("operator-prefix");
+      const prefixLogo = document.getElementById("prefix-logo");
+      const prefixText = document.getElementById("prefix-text");
+      const summaryTime = document.getElementById("summary-time");
+      const summaryOperator = document.getElementById("summary-operator");
+      const ctaButton = document.getElementById("cta-button");
+
+      // Time Slider Logic
+      function handleSliderClick(event) {
+        const slider = event.currentTarget;
+        const rect = slider.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const percentage = (x / rect.width) * 100;
+        const hour = Math.round(6 + (percentage / 100) * 17);
+        const clampedHour = Math.max(6, Math.min(23, hour));
+        updateTimeDisplay(clampedHour);
+      }
+
+      function updateTimeDisplay(hour) {
+        selectedTime = hour;
+        timeDisplay.textContent = hour.toString().padStart(2, "0") + ":00";
+        timeContext.textContent = timeContexts[hour] || "Horaire personnalisé";
+        summaryTime.textContent = hour.toString().padStart(2, "0") + ":00";
+
+        // Update slider position
+        const percentage = ((hour - 6) / 17) * 100;
+        timeTrack.style.width = percentage + "%";
+        timeThumb.style.right = 100 - percentage + "%";
+
+        validateForm();
+      }
+
+      // Operator Selection
+      function selectOperator(operator) {
+        selectedOperator = operator;
+        const config = operators[operator];
+
+        // Update visual selection
+        document.querySelectorAll(".operator-card").forEach(function (card) {
+          card.classList.remove("selected");
+        });
+        document
+          .querySelector(".operator-card." + operator)
+          .classList.add("selected");
+
+        // Update prefix display
+        prefixLogo.className = "prefix-logo " + operator;
+        prefixLogo.textContent = config.logo;
+        prefixText.textContent = "+241";
+        summaryOperator.textContent = config.name;
+
+        // Clear and validate phone input
+        phoneInput.value = "";
+        validatePhone();
+        validateForm();
+      }
+
+      // Phone Validation
+      function validatePhone() {
+        const value = phoneInput.value.replace(/\s/g, "");
+        const config = operators[selectedOperator];
+        const isValidFormat = config.pattern.test(value);
+        const hasContent = value.length > 0;
+
+        // Update visual states
+        phoneGroup.classList.remove("valid", "invalid");
+        validationIcon.classList.remove("show");
+        validationMessage.classList.remove("show", "valid", "invalid");
+
+        if (hasContent) {
+          if (isValidFormat) {
+            phoneGroup.classList.add("valid");
+            validationIcon.innerHTML = "✅";
+            validationIcon.classList.add("show");
+            validationMessage.textContent = "Numéro " + config.name + " valide";
+            validationMessage.classList.add("show", "valid");
+            isFormValid = true;
+          } else if (value.length >= 8) {
+            phoneGroup.classList.add("invalid");
+            validationIcon.innerHTML = "❌";
+            validationIcon.classList.add("show");
+            validationMessage.textContent =
+              "Format invalide pour " + config.name;
+            validationMessage.classList.add("show", "invalid");
+            isFormValid = false;
+          } else {
+            isFormValid = false;
+          }
+        } else {
+          isFormValid = false;
+        }
+
+        phoneNumber = value;
+        validateForm();
+      }
+
+      // Format phone number with spaces
+      function formatPhoneNumber(value) {
+        const numbers = value.replace(/\D/g, "");
+        const match = numbers.match(/^(\d{0,3})(\d{0,2})(\d{0,2})(\d{0,2})$/);
+        if (!match) return value;
+        return [match[1], match[2], match[3], match[4]]
+          .filter(function (group) {
+            return group;
+          })
+          .join(" ");
+      }
+
+      // Phone input event listeners
+      phoneInput.addEventListener("input", function (e) {
+        const formatted = formatPhoneNumber(e.target.value);
+        e.target.value = formatted;
+        validatePhone();
+      });
+
+      // Form Validation
+      function validateForm() {
+        ctaButton.disabled = !isFormValid;
+      }
+
+      // CTA Action
+      function activateEpargne() {
+        if (!isFormValid) return;
+
+        // Visual feedback
+        ctaButton.innerHTML = "⚡ Activation en cours...";
+        ctaButton.disabled = true;
+
+        setTimeout(function () {
+          ctaButton.innerHTML = "🎉 Épargne activée !";
+          setTimeout(function () {
+            const config = operators[selectedOperator];
+            alert(
+              "🎉 Félicitations !\n\nVotre épargne automatique est activée !\n\n📋 Récapitulatif :\n• Montant : 1,000 FCFA/jour\n• Heure : " +
+                selectedTime.toString().padStart(2, "0") +
+                ":00\n• Opérateur : " +
+                config.name +
+                "\n• Numéro : +241 " +
+                phoneNumber +
+                "\n• Objectif : 365,000 FCFA/an\n\n🚀 Bienvenue dans votre parcours d'épargne !"
+            );
+            ctaButton.innerHTML = "🚀 Activer mon épargne auto";
+            ctaButton.disabled = false;
+          }, 1000);
+        }, 2000);
+      }
+
+      // Navigation
+      function goBack() {
+        const button = document.querySelector(".back-button");
+        button.style.transform = "scale(0.9)";
+        setTimeout(function () {
+          button.style.transform = "scale(1)";
+          if (
+            confirm(
+              "Retourner à l'étape précédente ?\nVos paramètres seront sauvegardés."
+            )
+          ) {
+            alert("Retour à la sélection du montant...");
+          }
+        }, 150);
+      }
+
+      function showHelp() {
+        alert(
+          "📞 Support YESSI-YESSI\n\n🕐 Disponible 24/7\n📱 WhatsApp : +241 XX XX XX XX\n📧 Email : support@yessi-yessi.ga\n\n❓ Questions fréquentes :\n• Modification des paramètres\n• Pause temporaire\n• Historique des transactions\n• Sécurité des données"
+        );
+      }
+
+      // Touch and drag functionality for slider
+      let isDragging = false;
+
+      function startDrag(e) {
+        isDragging = true;
+        e.preventDefault();
+      }
+
+      function handleDrag(e) {
+        if (!isDragging) return;
+        const slider = document.querySelector(".time-slider");
+        const rect = slider.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const x = clientX - rect.left;
+        const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const hour = Math.round(6 + (percentage / 100) * 17);
+        const clampedHour = Math.max(6, Math.min(23, hour));
+        updateTimeDisplay(clampedHour);
+      }
+
+      function endDrag() {
+        isDragging = false;
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        // Animate progress bar
+        setTimeout(function () {
+          document.querySelector(".progress-fill").style.width = "90%";
+        }, 500);
+
+        // Set default time
+        updateTimeDisplay(20);
+
+        // Set default operator
+        selectOperator("moov");
+
+        // Setup slider click events
+        const timeSlider = document.getElementById("time-slider");
+        timeSlider.addEventListener("click", function (event) {
+          const rect = timeSlider.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const percentage = (x / rect.width) * 100;
+          const hour = Math.round(6 + (percentage / 100) * 17);
+          const clampedHour = Math.max(6, Math.min(23, hour));
+          updateTimeDisplay(clampedHour);
+        });
+
+        // Setup drag events
+        timeThumb.addEventListener("mousedown", startDrag);
+        document.addEventListener("mousemove", handleDrag);
+        document.addEventListener("mouseup", endDrag);
+        timeThumb.addEventListener("touchstart", startDrag);
+        document.addEventListener("touchmove", handleDrag);
+        document.addEventListener("touchend", endDrag);
+
+        // Animate sections entrance
+        const sections = document.querySelectorAll(
+          ".time-section, .mobile-money-section, .summary-section"
+        );
+        sections.forEach(function (section, index) {
+          section.style.opacity = "0";
+          section.style.transform = "translateY(20px)";
+          setTimeout(function () {
+            section.style.transition = "all 0.5s ease";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+          }, 200 * index);
+        });
+
+        // Focus phone input after animation
+        setTimeout(function () {
+          phoneInput.focus();
+        }, 1500);
+
+        // Demo auto-fill for testing (remove in production)
+        setTimeout(function () {
+          if (confirm("🎯 DEMO: Remplir automatiquement le numéro Moov ?")) {
+            phoneInput.value = "074 12 34 56";
+            validatePhone();
+          }
+        }, 3000);
+      });
+
+      console.log("⚙️ YESSI-YESSI Config Screen loaded!");
+      console.log("🎯 Target: 80%+ activation rate");
+      console.log("🔒 Security maximized, friction minimized");
+    </script>
+  </body>
+</html>

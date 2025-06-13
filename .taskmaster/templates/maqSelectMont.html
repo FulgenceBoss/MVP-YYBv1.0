@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YESSI-YESSI BANK - Écran 4: Sélection Montant Quotidien MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-orange: #fff3e0;
+        --gradient-start: #43a047;
+        --gradient-end: #2e7d32;
+      }
+
+      body {
+        font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .phone-mockup {
+        width: 375px;
+        height: 812px;
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 8px;
+        position: relative;
+        box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.1);
+      }
+
+      .phone-mockup::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        z-index: 10;
+      }
+
+      .phone-mockup::after {
+        content: "";
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--surface);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .status-bar {
+        height: 44px;
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 5;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .battery {
+        width: 24px;
+        height: 12px;
+        border: 1px solid var(--text-primary);
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 6px;
+        background: var(--text-primary);
+        border-radius: 0 1px 1px 0;
+      }
+
+      .battery-fill {
+        width: 80%;
+        height: 100%;
+        background: var(--success);
+        border-radius: 1px;
+      }
+
+      .selection-screen {
+        width: 100%;
+        height: calc(100% - 44px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Header Navigation */
+      .nav-header {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px 16px;
+        position: relative;
+      }
+
+      .back-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 16px;
+      }
+
+      .back-button:hover {
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .back-button::before {
+        content: "←";
+        font-size: 20px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .progress-indicator {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .progress-bar {
+        flex: 1;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        width: 75%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        border-radius: 2px;
+        transition: width 0.5s ease;
+      }
+
+      .progress-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        padding: 0 24px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Hero Section */
+      .hero-section {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .main-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        line-height: 1.2;
+      }
+
+      .main-subtitle {
+        font-size: 16px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 24px;
+      }
+
+      /* Amount Cards Section */
+      .amount-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .amount-card {
+        background: var(--surface);
+        border: 3px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .amount-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          var(--gradient-start),
+          var(--gradient-end)
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+      }
+
+      .amount-card.selected::before {
+        opacity: 0.1;
+      }
+
+      .amount-card.selected {
+        border-color: var(--primary);
+        box-shadow: 0 8px 24px rgba(46, 125, 50, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .amount-card.featured {
+        transform: scale(1.02);
+        border-color: var(--primary);
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.15);
+      }
+
+      .amount-card.featured .popular-badge {
+        display: block;
+      }
+
+      .card-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .amount-info {
+        flex: 1;
+      }
+
+      .amount-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .amount-card.selected .amount-value {
+        color: var(--primary);
+      }
+
+      .amount-equivalent {
+        font-size: 14px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .amount-card.selected .amount-equivalent {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .amount-projection {
+        text-align: right;
+      }
+
+      .projection-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+
+      .projection-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--success);
+      }
+
+      .popular-badge {
+        display: none;
+        position: absolute;
+        top: -1px;
+        right: 16px;
+        background: linear-gradient(135deg, var(--primary), var(--success));
+        color: white;
+        padding: 6px 12px;
+        border-radius: 0 12px 12px 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      /* Projection Section */
+      .projection-section {
+        background: linear-gradient(135deg, var(--light-green), #f1f8e9);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(46, 125, 50, 0.2);
+        text-align: center;
+      }
+
+      .projection-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+      }
+
+      .projection-display {
+        margin-bottom: 20px;
+      }
+
+      .projection-main {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 8px;
+      }
+
+      .projection-period {
+        font-size: 16px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      /* Goals Progress */
+      .goals-section {
+        margin-bottom: 32px;
+      }
+
+      .goals-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        text-align: center;
+      }
+
+      .goals-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .goal-item {
+        display: flex;
+        align-items: center;
+        background: var(--surface);
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+
+      .goal-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-right: 16px;
+        background: var(--light-blue);
+      }
+
+      .goal-info {
+        flex: 1;
+      }
+
+      .goal-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .goal-target {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+      }
+
+      .goal-progress {
+        width: 100%;
+        height: 6px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+
+      .goal-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--success));
+        border-radius: 3px;
+        transition: width 0.8s ease;
+      }
+
+      .goal-time {
+        font-size: 12px;
+        color: var(--success);
+        font-weight: 600;
+        margin-left: 16px;
+      }
+
+      /* CTA Section */
+      .cta-section {
+        margin-bottom: 24px;
+      }
+
+      .cta-primary {
+        width: 100%;
+        height: 56px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+      }
+
+      .cta-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+      }
+
+      .cta-primary:active {
+        transform: translateY(0);
+      }
+
+      /* Info Section */
+      .info-section {
+        text-align: center;
+        padding-bottom: 20px;
+      }
+
+      .info-text {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+      }
+
+      .info-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .info-link:hover {
+        text-decoration: underline;
+      }
+
+      /* Animations */
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes countUp {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideInUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .animate-count {
+        animation: countUp 0.6s ease-out;
+      }
+
+      .animate-slide {
+        animation: slideInUp 0.5s ease-out forwards;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 375px) {
+        .main-content {
+          padding: 0 16px;
+        }
+        .nav-header {
+          padding: 16px 16px 12px;
+        }
+        .amount-card {
+          padding: 16px;
+        }
+        .projection-section {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <div class="status-left">
+            <span>9:41</span>
+          </div>
+          <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <div class="battery">
+              <div class="battery-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <main class="selection-screen">
+          <!-- Navigation Header -->
+          <section class="nav-header">
+            <button
+              class="back-button"
+              onclick="goBack()"
+              aria-label="Retour"
+            ></button>
+            <div class="progress-indicator">
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-text">Étape 3/4</span>
+            </div>
+          </section>
+
+          <!-- Main Content -->
+          <div class="main-content">
+            <!-- Hero Section -->
+            <section class="hero-section">
+              <h1 class="main-title">Combien épargner<br />chaque jour ?</h1>
+              <p class="main-subtitle">
+                Choisissez un montant qui vous convient
+              </p>
+            </section>
+
+            <!-- Amount Cards -->
+            <section class="amount-cards" id="amount-cards">
+              <div
+                class="amount-card"
+                data-amount="100"
+                onclick="selectAmount(100)"
+              >
+                <div class="card-content">
+                  <div class="amount-info">
+                    <div class="amount-value">100 FCFA</div>
+                    <div class="amount-equivalent">
+                      = Transport urbain court
+                    </div>
+                  </div>
+                  <div class="amount-projection">
+                    <div class="projection-label">par an</div>
+                    <div class="projection-value">36,500</div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="amount-card"
+                data-amount="500"
+                onclick="selectAmount(500)"
+              >
+                <div class="card-content">
+                  <div class="amount-info">
+                    <div class="amount-value">500 FCFA</div>
+                    <div class="amount-equivalent">
+                      = Café + pain au chocolat
+                    </div>
+                  </div>
+                  <div class="amount-projection">
+                    <div class="projection-label">par an</div>
+                    <div class="projection-value">182,500</div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="amount-card featured"
+                data-amount="1000"
+                onclick="selectAmount(1000)"
+              >
+                <div class="popular-badge">⭐ Populaire</div>
+                <div class="card-content">
+                  <div class="amount-info">
+                    <div class="amount-value">1,000 FCFA</div>
+                    <div class="amount-equivalent">
+                      = Bière Castel + brochettes
+                    </div>
+                  </div>
+                  <div class="amount-projection">
+                    <div class="projection-label">par an</div>
+                    <div class="projection-value">365,000</div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="amount-card"
+                data-amount="2000"
+                onclick="selectAmount(2000)"
+              >
+                <div class="card-content">
+                  <div class="amount-info">
+                    <div class="amount-value">2,000 FCFA</div>
+                    <div class="amount-equivalent">
+                      = Repas restaurant local
+                    </div>
+                  </div>
+                  <div class="amount-projection">
+                    <div class="projection-label">par an</div>
+                    <div class="projection-value">730,000</div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="amount-card"
+                data-amount="5000"
+                onclick="selectAmount(5000)"
+              >
+                <div class="card-content">
+                  <div class="amount-info">
+                    <div class="amount-value">5,000 FCFA</div>
+                    <div class="amount-equivalent">= Plein essence scooter</div>
+                  </div>
+                  <div class="amount-projection">
+                    <div class="projection-label">par an</div>
+                    <div class="projection-value">1,825,000</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Projection Display -->
+            <section class="projection-section">
+              <h2 class="projection-title">Votre épargne projetée</h2>
+              <div class="projection-display">
+                <div class="projection-main" id="main-projection">
+                  365,000 FCFA
+                </div>
+                <div class="projection-period">en 1 an</div>
+              </div>
+            </section>
+
+            <!-- Goals Progress -->
+            <section class="goals-section">
+              <h3 class="goals-title">Vos objectifs à portée de main</h3>
+              <div class="goals-list" id="goals-list">
+                <div class="goal-item">
+                  <div class="goal-icon">📱</div>
+                  <div class="goal-info">
+                    <div class="goal-name">Nouveau téléphone</div>
+                    <div class="goal-target">200,000 FCFA</div>
+                    <div class="goal-progress">
+                      <div class="goal-progress-fill" id="phone-progress"></div>
+                    </div>
+                  </div>
+                  <div class="goal-time" id="phone-time">6 mois</div>
+                </div>
+
+                <div class="goal-item">
+                  <div class="goal-icon">🛵</div>
+                  <div class="goal-info">
+                    <div class="goal-name">Scooter/Moto</div>
+                    <div class="goal-target">800,000 FCFA</div>
+                    <div class="goal-progress">
+                      <div class="goal-progress-fill" id="moto-progress"></div>
+                    </div>
+                  </div>
+                  <div class="goal-time" id="moto-time">26 mois</div>
+                </div>
+
+                <div class="goal-item">
+                  <div class="goal-icon">🏠</div>
+                  <div class="goal-info">
+                    <div class="goal-name">Acompte logement</div>
+                    <div class="goal-target">2,000,000 FCFA</div>
+                    <div class="goal-progress">
+                      <div class="goal-progress-fill" id="house-progress"></div>
+                    </div>
+                  </div>
+                  <div class="goal-time" id="house-time">5.5 ans</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section">
+              <button
+                class="cta-primary"
+                id="cta-button"
+                onclick="configureEpargne()"
+              >
+                💰 Configurer mon épargne
+              </button>
+            </section>
+
+            <!-- Info Section -->
+            <section class="info-section">
+              <p class="info-text">
+                Vous pourrez
+                <a href="#" class="info-link">modifier ce montant</a> à tout
+                moment
+              </p>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let selectedAmount = 1000; // Default selection
+
+      // Amount configurations
+      const amountConfigs = {
+        100: {
+          equivalent: "Transport urbain court",
+          yearlyTotal: 36500,
+          goals: {
+            phone: { months: 55, progress: 18 },
+            moto: { months: 220, progress: 5 },
+            house: { months: 548, progress: 2 },
+          },
+        },
+        500: {
+          equivalent: "Café + pain au chocolat",
+          yearlyTotal: 182500,
+          goals: {
+            phone: { months: 11, progress: 91 },
+            moto: { months: 44, progress: 23 },
+            house: { months: 110, progress: 9 },
+          },
+        },
+        1000: {
+          equivalent: "Bière Castel + brochettes",
+          yearlyTotal: 365000,
+          goals: {
+            phone: { months: 6, progress: 100 },
+            moto: { months: 22, progress: 46 },
+            house: { months: 55, progress: 18 },
+          },
+        },
+        2000: {
+          equivalent: "Repas restaurant local",
+          yearlyTotal: 730000,
+          goals: {
+            phone: { months: 3, progress: 100 },
+            moto: { months: 11, progress: 91 },
+            house: { months: 27, progress: 37 },
+          },
+        },
+        5000: {
+          equivalent: "Plein essence scooter",
+          yearlyTotal: 1825000,
+          goals: {
+            phone: { months: 1, progress: 100 },
+            moto: { months: 4, progress: 100 },
+            house: { months: 11, progress: 91 },
+          },
+        },
+      };
+
+      // DOM Elements
+      const mainProjection = document.getElementById("main-projection");
+      const phoneProgress = document.getElementById("phone-progress");
+      const motoProgress = document.getElementById("moto-progress");
+      const houseProgress = document.getElementById("house-progress");
+      const phoneTime = document.getElementById("phone-time");
+      const motoTime = document.getElementById("moto-time");
+      const houseTime = document.getElementById("house-time");
+
+      // Amount selection
+      function selectAmount(amount) {
+        selectedAmount = amount;
+
+        // Update card selection
+        document.querySelectorAll(".amount-card").forEach((card) => {
+          card.classList.remove("selected");
+        });
+        document
+          .querySelector(`[data-amount="${amount}"]`)
+          .classList.add("selected");
+
+        // Update projections with animation
+        updateProjections(amount);
+
+        // Animate selection
+        const selectedCard = document.querySelector(
+          `[data-amount="${amount}"]`
+        );
+        selectedCard.style.animation = "pulse 0.6s ease-in-out";
+        setTimeout(() => {
+          selectedCard.style.animation = "";
+        }, 600);
+      }
+
+      // Update projections and goals
+      function updateProjections(amount) {
+        const config = amountConfigs[amount];
+
+        // Update main projection with animation
+        mainProjection.classList.add("animate-count");
+        setTimeout(() => {
+          mainProjection.textContent = `${config.yearlyTotal.toLocaleString(
+            "fr-FR"
+          )} FCFA`;
+          mainProjection.classList.remove("animate-count");
+        }, 100);
+
+        // Update goals progress
+        updateGoalProgress("phone", config.goals.phone);
+        updateGoalProgress("moto", config.goals.moto);
+        updateGoalProgress("house", config.goals.house);
+      }
+
+      function updateGoalProgress(goalType, goalData) {
+        const progressElement = document.getElementById(`${goalType}-progress`);
+        const timeElement = document.getElementById(`${goalType}-time`);
+
+        // Animate progress bar
+        setTimeout(() => {
+          progressElement.style.width = `${Math.min(goalData.progress, 100)}%`;
+        }, 200);
+
+        // Update time text
+        const timeText =
+          goalData.months === 1
+            ? "1 mois"
+            : goalData.months < 12
+            ? `${goalData.months} mois`
+            : goalData.months === 12
+            ? "1 an"
+            : `${(goalData.months / 12).toFixed(1)} ans`;
+
+        timeElement.textContent = timeText;
+
+        // Color coding for achievable goals
+        if (goalData.months <= 12) {
+          timeElement.style.color = "var(--success)";
+        } else if (goalData.months <= 24) {
+          timeElement.style.color = "var(--warning)";
+        } else {
+          timeElement.style.color = "var(--text-secondary)";
+        }
+      }
+
+      // CTA Action
+      function configureEpargne() {
+        const button = document.getElementById("cta-button");
+
+        // Visual feedback
+        button.innerHTML = "⚡ Configuration...";
+        button.disabled = true;
+
+        setTimeout(() => {
+          button.innerHTML = "✅ Épargne configurée !";
+          setTimeout(() => {
+            alert(
+              `🎉 Parfait !\n\nVotre épargne quotidienne : ${selectedAmount.toLocaleString(
+                "fr-FR"
+              )} FCFA\nObjectif annuel : ${amountConfigs[
+                selectedAmount
+              ].yearlyTotal.toLocaleString(
+                "fr-FR"
+              )} FCFA\n\nRedirection vers la configuration des horaires...`
+            );
+            button.innerHTML = "💰 Configurer mon épargne";
+            button.disabled = false;
+          }, 1000);
+        }, 1500);
+      }
+
+      // Navigation
+      function goBack() {
+        const button = document.querySelector(".back-button");
+        button.style.transform = "scale(0.9)";
+        setTimeout(() => {
+          button.style.transform = "scale(1)";
+          if (
+            confirm(
+              "Retourner à l'étape précédente ?\nVotre progression sera sauvegardée."
+            )
+          ) {
+            alert("Retour à la vérification...");
+          }
+        }, 150);
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", () => {
+        // Animate progress bar
+        setTimeout(() => {
+          document.querySelector(".progress-fill").style.width = "75%";
+        }, 500);
+
+        // Set default selection (1000 FCFA)
+        setTimeout(() => {
+          selectAmount(1000);
+        }, 800);
+
+        // Animate cards entrance
+        const cards = document.querySelectorAll(".amount-card");
+        cards.forEach((card, index) => {
+          card.style.opacity = "0";
+          card.style.transform = "translateY(20px)";
+          setTimeout(() => {
+            card.style.transition = "all 0.5s ease";
+            card.style.opacity = "1";
+            card.style.transform = "translateY(0)";
+          }, 100 * index);
+        });
+
+        // Animate goals section
+        setTimeout(() => {
+          document
+            .querySelector(".goals-section")
+            .classList.add("animate-slide");
+        }, 1200);
+      });
+
+      console.log("💰 YESSI-YESSI Amount Selection Screen loaded!");
+      console.log("🎯 Target: 85%+ configuration rate");
+      console.log("🧠 Psychology optimized: anchoring + concrete equivalents");
+    </script>
+  </body>
+</html>

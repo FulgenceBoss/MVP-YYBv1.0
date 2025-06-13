@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      YESSI-YESSI BANK - Écran 3: Vérification OTP + Création PIN MVP
+    </title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-red: #ffebee;
+        --light-orange: #fff3e0;
+      }
+
+      body {
+        font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .phone-mockup {
+        width: 375px;
+        height: 812px;
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 8px;
+        position: relative;
+        box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.1);
+      }
+
+      .phone-mockup::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        z-index: 10;
+      }
+
+      .phone-mockup::after {
+        content: "";
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--surface);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .status-bar {
+        height: 44px;
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 5;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .battery {
+        width: 24px;
+        height: 12px;
+        border: 1px solid var(--text-primary);
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 6px;
+        background: var(--text-primary);
+        border-radius: 0 1px 1px 0;
+      }
+
+      .battery-fill {
+        width: 80%;
+        height: 100%;
+        background: var(--success);
+        border-radius: 1px;
+      }
+
+      .verification-screen {
+        width: 100%;
+        height: calc(100% - 44px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Header Navigation */
+      .nav-header {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px 16px;
+        position: relative;
+      }
+
+      .back-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 16px;
+      }
+
+      .back-button:hover {
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .back-button::before {
+        content: "←";
+        font-size: 20px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .progress-indicator {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .progress-bar {
+        flex: 1;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        width: 66%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        border-radius: 2px;
+        transition: width 0.5s ease;
+      }
+
+      .progress-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        padding: 0 24px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* OTP Section */
+      .otp-section {
+        margin-bottom: 32px;
+      }
+
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        text-align: center;
+      }
+
+      .phone-display {
+        font-size: 16px;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 24px;
+        font-weight: 500;
+      }
+
+      .phone-number {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .otp-container {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .otp-input {
+        width: 48px;
+        height: 56px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+        background: var(--surface);
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      .otp-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      .otp-input.valid {
+        border-color: var(--success);
+        background: var(--light-green);
+      }
+
+      .otp-input.invalid {
+        border-color: var(--error);
+        background: var(--light-red);
+        animation: shake 0.5s ease-in-out;
+      }
+
+      /* Timer Section */
+      .timer-section {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .timer-display {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+      }
+
+      .timer-count {
+        color: var(--primary);
+      }
+
+      .timer-count.warning {
+        color: var(--warning);
+      }
+
+      .timer-count.danger {
+        color: var(--error);
+      }
+
+      .resend-button {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .resend-button:hover:not(:disabled) {
+        background: var(--primary);
+        color: white;
+      }
+
+      .resend-button:disabled {
+        border-color: var(--text-secondary);
+        color: var(--text-secondary);
+        cursor: not-allowed;
+      }
+
+      /* PIN Section */
+      .pin-section {
+        margin-bottom: 32px;
+        opacity: 0.5;
+        pointer-events: none;
+        transition: all 0.5s ease;
+      }
+
+      .pin-section.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .pin-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        text-align: center;
+      }
+
+      .pin-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .pin-group {
+        margin-bottom: 20px;
+      }
+
+      .pin-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        display: block;
+      }
+
+      .pin-container {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 8px;
+      }
+
+      .pin-input {
+        width: 56px;
+        height: 56px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+        background: var(--surface);
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      .pin-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      .pin-input.valid {
+        border-color: var(--success);
+        background: var(--light-green);
+      }
+
+      .pin-input.invalid {
+        border-color: var(--error);
+        background: var(--light-red);
+      }
+
+      .pin-strength {
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+
+      .pin-strength-fill {
+        height: 100%;
+        width: 0%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+      }
+
+      .pin-strength-fill.weak {
+        width: 25%;
+        background: var(--error);
+      }
+
+      .pin-strength-fill.medium {
+        width: 50%;
+        background: var(--warning);
+      }
+
+      .pin-strength-fill.strong {
+        width: 100%;
+        background: var(--success);
+      }
+
+      .pin-message {
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-align: center;
+      }
+
+      .pin-message.error {
+        color: var(--error);
+      }
+
+      .pin-message.success {
+        color: var(--success);
+      }
+
+      /* Security Info */
+      .security-info {
+        background: var(--light-blue);
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        border-left: 4px solid var(--secondary);
+      }
+
+      .security-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .security-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--secondary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+      }
+
+      .security-text {
+        flex: 1;
+      }
+
+      .security-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+      }
+
+      .security-subtitle {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      /* CTA Section */
+      .cta-section {
+        margin-bottom: 24px;
+      }
+
+      .cta-primary {
+        width: 100%;
+        height: 56px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+      }
+
+      .cta-primary:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .cta-primary:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+      }
+
+      .cta-primary:not(:disabled):active {
+        transform: translateY(0);
+      }
+
+      /* Help Section */
+      .help-section {
+        text-align: center;
+        padding-bottom: 20px;
+      }
+
+      .help-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .help-link:hover {
+        color: var(--primary);
+        text-decoration: underline;
+      }
+
+      /* Animations */
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes success-pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+          background: var(--success);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .success-animation {
+        animation: success-pulse 0.6s ease-in-out;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 375px) {
+        .main-content {
+          padding: 0 16px;
+        }
+        .nav-header {
+          padding: 16px 16px 12px;
+        }
+        .otp-container {
+          gap: 8px;
+        }
+        .otp-input {
+          width: 44px;
+          height: 52px;
+          font-size: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <div class="status-left">
+            <span>9:41</span>
+          </div>
+          <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <div class="battery">
+              <div class="battery-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <main class="verification-screen">
+          <!-- Navigation Header -->
+          <section class="nav-header">
+            <button
+              class="back-button"
+              onclick="goBack()"
+              aria-label="Retour"
+            ></button>
+            <div class="progress-indicator">
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-text">Étape 2/3</span>
+            </div>
+          </section>
+
+          <!-- Main Content -->
+          <div class="main-content">
+            <!-- OTP Section -->
+            <section class="otp-section" id="otp-section">
+              <h1 class="section-title">Vérifiez votre téléphone</h1>
+              <p class="phone-display">
+                Code envoyé au
+                <span class="phone-number" id="phone-display"
+                  >+241 XX XX XX 89</span
+                >
+              </p>
+
+              <div class="otp-container" id="otp-container">
+                <input
+                  type="text"
+                  class="otp-input"
+                  maxlength="1"
+                  autocomplete="off"
+                />
+                <input
+                  type="text"
+                  class="otp-input"
+                  maxlength="1"
+                  autocomplete="off"
+                />
+                <input
+                  type="text"
+                  class="otp-input"
+                  maxlength="1"
+                  autocomplete="off"
+                />
+                <input
+                  type="text"
+                  class="otp-input"
+                  maxlength="1"
+                  autocomplete="off"
+                />
+                <input
+                  type="text"
+                  class="otp-input"
+                  maxlength="1"
+                  autocomplete="off"
+                />
+                <input
+                  type="text"
+                  class="otp-input"
+                  maxlength="1"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="timer-section">
+                <div class="timer-display">
+                  Renvoyer le code dans
+                  <span class="timer-count" id="timer-count">60</span>s
+                </div>
+                <button
+                  class="resend-button"
+                  id="resend-button"
+                  onclick="resendCode()"
+                  disabled
+                >
+                  📨 Renvoyer le code
+                </button>
+              </div>
+            </section>
+
+            <!-- PIN Section -->
+            <section class="pin-section" id="pin-section">
+              <h2 class="pin-title">Créez votre PIN sécurisé</h2>
+              <p class="pin-subtitle">Votre PIN protège votre épargne</p>
+
+              <div class="pin-group">
+                <label class="pin-label">Nouveau PIN (4 chiffres)</label>
+                <div class="pin-container" id="pin-container">
+                  <input
+                    type="password"
+                    class="pin-input"
+                    maxlength="1"
+                    autocomplete="off"
+                  />
+                  <input
+                    type="password"
+                    class="pin-input"
+                    maxlength="1"
+                    autocomplete="off"
+                  />
+                  <input
+                    type="password"
+                    class="pin-input"
+                    maxlength="1"
+                    autocomplete="off"
+                  />
+                  <input
+                    type="password"
+                    class="pin-input"
+                    maxlength="1"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="pin-strength" id="pin-strength">
+                  <div class="pin-strength-fill" id="pin-strength-fill"></div>
+                </div>
+                <div class="pin-message" id="pin-message">
+                  Évitez les séquences comme 1234 ou 0000
+                </div>
+              </div>
+
+              <div class="pin-group">
+                <label class="pin-label">Confirmez votre PIN</label>
+                <div class="pin-container" id="pin-confirm-container">
+                  <input
+                    type="password"
+                    class="pin-input"
+                    maxlength="1"
+                    autocomplete="off"
+                  />
+                  <input
+                    type="password"
+                    class="pin-input"
+                    maxlength="1"
+                    autocomplete="off"
+                  />
+                  <input
+                    type="password"
+                    class="pin-input"
+                    maxlength="1"
+                    autocomplete="off"
+                  />
+                  <input
+                    type="password"
+                    class="pin-input"
+                    maxlength="1"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="pin-message" id="pin-confirm-message"></div>
+              </div>
+            </section>
+
+            <!-- Security Info -->
+            <section class="security-info">
+              <div class="security-content">
+                <div class="security-icon">🔒</div>
+                <div class="security-text">
+                  <div class="security-title">Vos données sont chiffrées</div>
+                  <div class="security-subtitle">
+                    PIN stocké de manière sécurisée
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section">
+              <button
+                class="cta-primary"
+                id="cta-button"
+                onclick="secureAccount()"
+                disabled
+              >
+                🔐 Sécuriser mon compte
+              </button>
+            </section>
+
+            <!-- Help Section -->
+            <section class="help-section">
+              <a href="#" class="help-link" onclick="showHelp()"
+                >Code non reçu ? Besoin d'aide ?</a
+              >
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let otpValid = false;
+      let pinValid = false;
+      let pinConfirmed = false;
+      let timerInterval;
+      let timeLeft = 60;
+
+      // DOM Elements
+      const otpInputs = document.querySelectorAll("#otp-container .otp-input");
+      const pinInputs = document.querySelectorAll("#pin-container .pin-input");
+      const pinConfirmInputs = document.querySelectorAll(
+        "#pin-confirm-container .pin-input"
+      );
+      const pinSection = document.getElementById("pin-section");
+      const ctaButton = document.getElementById("cta-button");
+      const timerCount = document.getElementById("timer-count");
+      const resendButton = document.getElementById("resend-button");
+
+      // OTP Logic
+      function setupOTPInputs() {
+        otpInputs.forEach((input, index) => {
+          input.addEventListener("input", (e) => {
+            const value = e.target.value.replace(/\D/g, "");
+            e.target.value = value;
+
+            if (value && index < otpInputs.length - 1) {
+              otpInputs[index + 1].focus();
+            }
+
+            validateOTP();
+          });
+
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !e.target.value && index > 0) {
+              otpInputs[index - 1].focus();
+            }
+          });
+
+          input.addEventListener("paste", (e) => {
+            e.preventDefault();
+            const paste = e.clipboardData.getData("text").replace(/\D/g, "");
+
+            const digits = paste.slice(0, 6).split("");
+
+            otpInputs.forEach((input, i) => {
+              if (digits[i]) {
+                input.value = digits[i];
+              }
+            });
+
+            validateOTP();
+          });
+        });
+      }
+
+      function validateOTP() {
+        const otpValue = Array.from(otpInputs)
+          .map((input) => input.value)
+          .join("");
+        const isComplete = otpValue.length === 6;
+        const isValid = /^\d{6}$/.test(otpValue);
+
+        otpInputs.forEach((input) => {
+          input.classList.remove("valid", "invalid");
+        });
+
+        if (isComplete) {
+          if (isValid) {
+            otpInputs.forEach((input) => input.classList.add("valid"));
+            otpValid = true;
+            setTimeout(() => {
+              activatePINSection();
+            }, 500);
+          } else {
+            otpInputs.forEach((input) => input.classList.add("invalid"));
+            otpValid = false;
+          }
+        } else {
+          otpValid = false;
+        }
+
+        updateCTAButton();
+      }
+
+      function activatePINSection() {
+        pinSection.classList.add("active");
+        pinInputs[0].focus();
+
+        // Success feedback
+        otpInputs.forEach((input) => {
+          input.classList.add("success-animation");
+        });
+      }
+
+      // PIN Logic
+      function setupPINInputs() {
+        // Main PIN inputs
+        pinInputs.forEach((input, index) => {
+          input.addEventListener("input", (e) => {
+            const value = e.target.value.replace(/\D/g, "");
+            e.target.value = value;
+
+            if (value && index < pinInputs.length - 1) {
+              pinInputs[index + 1].focus();
+            }
+
+            validatePIN();
+          });
+
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !e.target.value && index > 0) {
+              pinInputs[index - 1].focus();
+            }
+          });
+        });
+
+        // Confirm PIN inputs
+        pinConfirmInputs.forEach((input, index) => {
+          input.addEventListener("input", (e) => {
+            const value = e.target.value.replace(/\D/g, "");
+            e.target.value = value;
+
+            if (value && index < pinConfirmInputs.length - 1) {
+              pinConfirmInputs[index + 1].focus();
+            }
+
+            validatePINConfirmation();
+          });
+
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !e.target.value && index > 0) {
+              pinConfirmInputs[index - 1].focus();
+            }
+          });
+        });
+      }
+
+      function validatePIN() {
+        const pinValue = Array.from(pinInputs)
+          .map((input) => input.value)
+          .join("");
+        const pinMessage = document.getElementById("pin-message");
+        const pinStrengthFill = document.getElementById("pin-strength-fill");
+
+        pinInputs.forEach((input) => {
+          input.classList.remove("valid", "invalid");
+        });
+
+        if (pinValue.length === 4) {
+          // Check for weak patterns
+          const weakPatterns = [
+            "0000",
+            "1111",
+            "2222",
+            "3333",
+            "4444",
+            "5555",
+            "6666",
+            "7777",
+            "8888",
+            "9999",
+            "1234",
+            "4321",
+            "0123",
+            "9876",
+          ];
+
+          if (weakPatterns.includes(pinValue)) {
+            pinInputs.forEach((input) => input.classList.add("invalid"));
+            pinMessage.textContent =
+              "PIN trop faible. Évitez les séquences simples.";
+            pinMessage.className = "pin-message error";
+            pinStrengthFill.className = "pin-strength-fill weak";
+            pinValid = false;
+          } else {
+            pinInputs.forEach((input) => input.classList.add("valid"));
+            pinMessage.textContent = "PIN sécurisé ✓";
+            pinMessage.className = "pin-message success";
+            pinStrengthFill.className = "pin-strength-fill strong";
+            pinValid = true;
+          }
+        } else if (pinValue.length > 0) {
+          pinMessage.textContent = "Saisissez 4 chiffres";
+          pinMessage.className = "pin-message";
+          pinStrengthFill.className = "pin-strength-fill medium";
+          pinValid = false;
+        } else {
+          pinMessage.textContent = "Évitez les séquences comme 1234 ou 0000";
+          pinMessage.className = "pin-message";
+          pinStrengthFill.className = "pin-strength-fill";
+          pinValid = false;
+        }
+
+        validatePINConfirmation();
+        updateCTAButton();
+      }
+
+      function validatePINConfirmation() {
+        const pinValue = Array.from(pinInputs)
+          .map((input) => input.value)
+          .join("");
+        const confirmValue = Array.from(pinConfirmInputs)
+          .map((input) => input.value)
+          .join("");
+        const confirmMessage = document.getElementById("pin-confirm-message");
+
+        pinConfirmInputs.forEach((input) => {
+          input.classList.remove("valid", "invalid");
+        });
+
+        if (confirmValue.length === 4) {
+          if (confirmValue === pinValue && pinValid) {
+            pinConfirmInputs.forEach((input) => input.classList.add("valid"));
+            confirmMessage.textContent = "PIN confirmé ✓";
+            confirmMessage.className = "pin-message success";
+            pinConfirmed = true;
+          } else {
+            pinConfirmInputs.forEach((input) => input.classList.add("invalid"));
+            confirmMessage.textContent = "Les PIN ne correspondent pas";
+            confirmMessage.className = "pin-message error";
+            pinConfirmed = false;
+          }
+        } else if (confirmValue.length > 0) {
+          confirmMessage.textContent = "Confirmez votre PIN";
+          confirmMessage.className = "pin-message";
+          pinConfirmed = false;
+        } else {
+          confirmMessage.textContent = "";
+          confirmMessage.className = "pin-message";
+          pinConfirmed = false;
+        }
+
+        updateCTAButton();
+      }
+
+      // Timer Logic
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          timerCount.textContent = timeLeft;
+
+          if (timeLeft <= 10) {
+            timerCount.className = "timer-count danger";
+          } else if (timeLeft <= 30) {
+            timerCount.className = "timer-count warning";
+          } else {
+            timerCount.className = "timer-count";
+          }
+
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            resendButton.disabled = false;
+            timerCount.textContent = "0";
+          }
+        }, 1000);
+      }
+
+      function resendCode() {
+        timeLeft = 60;
+        resendButton.disabled = true;
+        timerCount.textContent = timeLeft;
+        timerCount.className = "timer-count";
+
+        // Clear OTP inputs
+        otpInputs.forEach((input) => {
+          input.value = "";
+          input.classList.remove("valid", "invalid");
+        });
+        otpInputs[0].focus();
+        otpValid = false;
+        updateCTAButton();
+
+        // Visual feedback
+        resendButton.innerHTML = "📤 Envoi...";
+        setTimeout(() => {
+          resendButton.innerHTML = "📨 Renvoyer le code";
+          alert("📱 Nouveau code envoyé !");
+          startTimer();
+        }, 1500);
+      }
+
+      // CTA Logic
+      function updateCTAButton() {
+        ctaButton.disabled = !(otpValid && pinValid && pinConfirmed);
+      }
+
+      function secureAccount() {
+        if (!otpValid || !pinValid || !pinConfirmed) {
+          return;
+        }
+
+        // Visual feedback
+        ctaButton.innerHTML = "🔐 Sécurisation...";
+        ctaButton.disabled = true;
+
+        setTimeout(() => {
+          ctaButton.innerHTML = "✅ Compte sécurisé !";
+          setTimeout(() => {
+            alert(
+              "🎉 Félicitations !\n\nVotre compte est maintenant sécurisé.\nRedirection vers la configuration de votre épargne..."
+            );
+            ctaButton.innerHTML = "🔐 Sécuriser mon compte";
+            ctaButton.disabled = false;
+          }, 1000);
+        }, 2000);
+      }
+
+      // Navigation
+      function goBack() {
+        const button = document.querySelector(".back-button");
+        button.style.transform = "scale(0.9)";
+        setTimeout(() => {
+          button.style.transform = "scale(1)";
+          if (
+            confirm(
+              "Abandonner la vérification ?\nVous devrez recommencer l'inscription."
+            )
+          ) {
+            alert("Retour à l'écran d'inscription...");
+          }
+        }, 150);
+      }
+
+      function showHelp() {
+        alert(
+          "💡 Aide\n\n• Vérifiez vos SMS\n• Le code expire dans 10 minutes\n• Contactez le support: +241 XX XX XX XX\n• Email: support@yessi-yessi.ga"
+        );
+      }
+
+      // Phone number masking
+      function maskPhoneNumber() {
+        const phoneDisplay = document.getElementById("phone-display");
+        // Simulate getting phone from previous screen
+        const lastDigits = "89"; // Would come from previous screen
+        phoneDisplay.textContent = `+241 XX XX XX ${lastDigits}`;
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", () => {
+        // Setup inputs
+        setupOTPInputs();
+        setupPINInputs();
+
+        // Animate progress bar
+        setTimeout(() => {
+          document.querySelector(".progress-fill").style.width = "66%";
+        }, 500);
+
+        // Start timer
+        startTimer();
+
+        // Mask phone number
+        maskPhoneNumber();
+
+        // Focus first OTP input
+        setTimeout(() => {
+          otpInputs[0].focus();
+        }, 1000);
+
+        // Simulate auto-fill OTP for demo (remove in production)
+        setTimeout(() => {
+          if (confirm("🎯 DEMO: Remplir automatiquement l'OTP 123456 ?")) {
+            const demoOTP = "123456";
+            otpInputs.forEach((input, i) => {
+              input.value = demoOTP[i];
+            });
+            validateOTP();
+          }
+        }, 2000);
+      });
+
+      console.log("📱 YESSI-YESSI Verification Screen loaded!");
+      console.log("🎯 Target: 90%+ OTP validation rate");
+      console.log("🔒 Security optimized, friction minimized");
+    </script>
+  </body>
+</html>

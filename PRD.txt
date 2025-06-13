@@ -1,0 +1,151 @@
+# DOCUMENT DES EXIGENCES PRODUIT (PRD) - MVP YESSI-YESSI BANK
+# Version: 1.0
+# Date: 12/06/2025
+# Auteur: Yessi-Yessi Team & AI Assistant
+
+---
+
+## 1. INTRODUCTION ET VISION GÉNÉRALE
+
+Yessi-Yessi Bank est une application mobile d'épargne automatisée conçue spécifiquement pour les populations africaines. La vision est de transformer les micro-dépenses quotidiennes en un capital significatif sur le long terme en s'appuyant sur l'écosystème du mobile money, et en rendant l'épargne aussi simple et accessible que possible.
+
+---
+
+## 2. PROBLÈME RÉSOLU
+
+En Afrique, de nombreuses personnes dépensent de petites sommes quotidiennes sans réaliser l'impact cumulatif. L'épargne traditionnelle est soit perçue comme inaccessible (banques), soit informelle et risquée (à domicile). Yessi-Yessi résout ce problème en offrant une solution d'épargne automatisée, sécurisée et intégrée aux habitudes financières existantes (mobile money), levant ainsi les barrières psychologiques et financières à l'épargne.
+
+---
+
+## 3. MARCHÉ CIBLE (MVP)
+
+*   **Cible Primaire:** Jeunes adultes gabonais (18-35 ans) à Libreville, disposant de revenus modestes mais réguliers, et utilisateurs actifs de services mobile money (MTN/Airtel à confirmer, Moov/Airtel dans les maquettes).
+*   **Caractéristiques:** Non-bancarisés ou sous-bancarisés, cherchant un moyen simple et fiable de mettre de l'argent de côté sans contraintes administratives lourdes.
+*   **Phase Pilote:** 100 utilisateurs pilotes à Libreville.
+
+---
+
+## 4. OBJECTIFS STRATÉGIQUES DU MVP
+
+L'objectif principal du MVP est de **valider la proposition de valeur fondamentale : la capacité de l'application à créer une discipline d'épargne automatique et sans friction, et à générer la confiance des utilisateurs.**
+
+*   **Mantra Absolu:** "Simplicité et Fiabilité avant la Sophistication."
+*   **Objectif Chiffré:** Atteindre un taux de configuration de l'épargne de 85%+ parmi les nouveaux inscrits et un taux de rétention de 40%+ après le premier mois.
+*   **Objectif Fonctionnel:** Permettre à un utilisateur gabonais de configurer une épargne quotidienne automatique (de 100 à 5,000 FCFA) et de voir son solde grandir de manière fiable au sein de l'application.
+
+---
+
+## 5. FONCTIONNALITÉS CORE (USER STORIES)
+
+Le développement sera décomposé en phases logiques, inspirées des maquettes fournies.
+
+### 5.1. Phase 1: Parcours d'Inscription et d'Authentification
+
+*   **Épopée:** En tant que nouvel utilisateur, je veux créer un compte et me connecter de manière simple et sécurisée pour accéder à l'application.
+*   **User Stories:**
+    *   Je peux m'inscrire en utilisant uniquement mon numéro de téléphone gabonais.
+    *   Je reçois un code de vérification unique (OTP) par SMS pour valider mon numéro.
+    *   Je peux créer un code PIN à 4 chiffres pour sécuriser mon compte.
+    *   Je peux me connecter à l'application en utilisant uniquement mon PIN.
+    *   Mon jeton de session (JWT) est stocké de manière sécurisée sur mon appareil.
+    *   Je peux récupérer l'accès à mon compte via un processus de vérification par SMS si j'oublie mon PIN.
+
+### 5.2. Phase 2: Configuration de l'Épargne (Le Cercle Vertueux)
+
+*   **Épopée:** En tant qu'utilisateur connecté, je veux configurer mon plan d'épargne automatique en quelques secondes pour commencer à mettre de l'argent de côté sans effort.
+*   **User Stories:**
+    *   Je vois un écran clair (`maqSelectMont.html`) me proposant de choisir un montant d'épargne quotidien prédéfini (100, 500, 1000, 2000, 5000 FCFA).
+    *   Je peux sélectionner un montant en un seul clic sur des cartes visuelles.
+    *   Je peux voir une projection de mon épargne annuelle et un équivalent concret pour m'aider à choisir.
+    *   Je vois comment mon épargne m'aidera à atteindre des objectifs de vie concrets (téléphone, scooter).
+    *   Sur l'écran suivant (`maqConfig.html`), je peux ajuster l'heure du prélèvement (valeur par défaut intelligente : 20h00).
+    *   Je peux lier mon portefeuille Mobile Money (Moov ou Airtel) en saisissant mon numéro de téléphone, qui est validé.
+    *   Je peux voir un récapitulatif clair de ma configuration avant de confirmer et d'activer mon épargne automatique.
+
+### 5.3. Phase 3: Le Tableau de Bord et le Suivi
+
+*   **Épopée:** En tant qu'épargnant, je veux voir mes progrès de manière claire et motivante pour rester engagé sur le long terme.
+*   **User Stories:**
+    *   J'ai un écran principal (dashboard) qui affiche en grand mon solde d'épargne total.
+    *   Je peux voir un compteur de "jours d'épargne d'affilée" pour me motiver.
+    *   Je peux consulter un historique simple de mes transactions (succès et échecs).
+    *   Je peux mettre mon épargne en pause temporairement (max 7 jours) et la réactiver.
+
+### 5.4. Phase 4: La Mécanique d'Épargne Manuelle
+
+*   **Épopée:** En tant qu'utilisateur, si je reçois une rentrée d'argent inattendue, je veux pouvoir faire une épargne ponctuelle pour booster ma cagnotte.
+*   **User Stories:**
+    *   Je peux accéder à un écran "Épargner maintenant" (`maqEpargMan.html`).
+    *   Je peux choisir un montant prédéfini ou saisir un montant personnalisé.
+    *   Je peux voir un récapitulatif de l'opération avant de confirmer.
+    *   Je vois une animation de traitement rassurante qui me montre les étapes de la transaction.
+    *   Je reçois une confirmation de succès festive et gratifiante lorsque l'épargne est réussie.
+
+### 5.5. Phase 5: Notifications
+
+*   **Épopée:** En tant qu'utilisateur, je veux être tenu informé des activités de mon compte pour me sentir en confiance et motivé.
+*   **User Stories:**
+    *   Je reçois une notification de rappel avant le prélèvement quotidien.
+    *   Je reçois une notification de confirmation après chaque prélèvement réussi.
+    *   Je reçois une notification d'alerte claire et non anxiogène en cas d'échec de prélèvement.
+    *   Je reçois des notifications d'encouragement lorsque j'atteins des paliers d'épargne ou des séries de jours.
+
+---
+
+## 6. EXIGENCES TECHNIQUES ET ARCHITECTURE
+
+### 6.1. Stack Technique
+
+*   **Frontend:** React Native (Expo SDK 51+), Redux Toolkit, React Navigation, Axios, Expo SecureStore.
+*   **Backend:** Node.js, Express.js, Mongoose ODM.
+*   **Base de Données:** MongoDB (via MongoDB Atlas).
+*   **Middlewares Backend:** `cors`, `helmet`, `morgan`, `express-rate-limit`, `bcryptjs`, `dotenv`.
+*   **Tâches Automatisées:** Un CRON Job (ex: via node-cron) pour le processeur d'épargne quotidien.
+
+### 6.2. Stratégie de Contournement pour l'API Mobile Money (Risque n°1)
+
+*   **Problème:** L'accès aux API officielles de MTN/Orange/Airtel peut être long à obtenir et bloquer le développement.
+*   **Solution:** **Simuler l'intégration pour le MVP.**
+*   **Implémentation:**
+    1.  **Créer une Couche d'Abstraction:** Dans `backend/services`, créer une interface de paiement générique (`initiateDebit`, `getTransactionStatus`).
+    2.  **Implémenter un Service "Mock":** Créer `mockPaymentService.js` qui implémente cette interface. Ce service ne fera pas d'appels externes.
+    3.  **Logique du Mock:** `initiateDebit` créera une transaction en base de données avec le statut `pending`, puis décidera de manière aléatoire (ex: 90% de succès) de passer le statut à `completed` ou `failed` après un court délai. En cas de succès, le solde de l'utilisateur DANS NOTRE DB sera mis à jour.
+*   **Avantage:** Permet de développer 100% du parcours utilisateur et de la logique métier sans dépendance externe. L'intégration future consistera à créer un nouveau service (ex: `mtnPaymentService.js`) respectant la même interface.
+
+### 6.3. Exigences de Sécurité (Défense en Profondeur)
+
+*   **Côté Client:**
+    *   **Stockage JWT:** Utilisation exclusive de `Expo SecureStore`.
+    *   **PIN:** Jamais stocké sur l'appareil. Transmis via HTTPS pour obtenir le JWT.
+*   **En Transit:**
+    *   **HTTPS/TLS:** Obligatoire pour toute communication entre le client et le serveur.
+*   **Côté Serveur:**
+    *   **Hachage PIN:** Utilisation de `bcryptjs` avec un "salt". Jamais de stockage en clair.
+    *   **Validation des Entrées:** Utiliser un validateur (ex: `express-validator`) pour assainir toutes les données reçues du client.
+    *   **Rate Limiting:** Limiter les tentatives de connexion pour prévenir les attaques par force brute.
+    *   **Gestion des Secrets:** Clés d'API, secrets JWT, et connexion DB via des variables d'environnement (`.env`), exclues de Git.
+*   **Base de Données:**
+    *   **Isolation des Données:** Chaque requête doit être cloisonnée à l'utilisateur authentifié (`userId`).
+    *   **Chiffrement au Repos:** Assuré par l'utilisation de MongoDB Atlas.
+
+---
+
+## 7. HORS PÉRIMÈTRE (CE QUE NOUS NE CONSTRUISONS PAS POUR LE MVP)
+
+*   Gestion de plusieurs devises.
+*   Prélèvements hebdomadaires ou mensuels (uniquement quotidien).
+*   Objectifs d'épargne personnalisés par l'utilisateur (objectifs fixes pour le MVP).
+*   Fonctionnalités sociales (tontines, défis).
+*   Modules d'éducation financière gamifiés.
+*   Interface web d'administration.
+*   Retrait de l'épargne (le focus est sur l'accumulation pour le MVP).
+
+---
+
+## 8. MÉTRIQUES DE SUCCÈS
+
+*   **Taux d'Activation:** Pourcentage d'utilisateurs inscrits qui configurent et activent leur épargne automatique. **Objectif: > 85%**
+*   **Taux de Succès des Prélèvements (Simulés):** Pourcentage de prélèvements quotidiens réussis. **Objectif: > 95% (pour valider la robustesse de la mécanique).**
+*   **Rétention J30:** Pourcentage d'utilisateurs actifs 30 jours après leur inscription. **Objectif: > 40%**
+*   **Engagement:** Fréquence d'utilisation de la fonctionnalité d'épargne manuelle.
+*   **Feedback Qualitatif:** Retours des 100 utilisateurs pilotes sur la simplicité, la confiance et la motivation. 

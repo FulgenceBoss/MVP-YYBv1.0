@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YESSI-YESSI BANK - Écran 8: Historique Transactions MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-orange: #fff3e0;
+        --light-red: #ffebee;
+      }
+
+      body {
+        font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .phone-mockup {
+        width: 375px;
+        height: 812px;
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 8px;
+        position: relative;
+        box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.1);
+      }
+
+      .phone-mockup::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        z-index: 10;
+      }
+
+      .phone-mockup::after {
+        content: "";
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--surface);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .status-bar {
+        height: 44px;
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 5;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .battery {
+        width: 24px;
+        height: 12px;
+        border: 1px solid var(--text-primary);
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 6px;
+        background: var(--text-primary);
+        border-radius: 0 1px 1px 0;
+      }
+
+      .battery-fill {
+        width: 80%;
+        height: 100%;
+        background: var(--success);
+        border-radius: 1px;
+      }
+
+      .history-screen {
+        width: 100%;
+        height: calc(100% - 44px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Header Navigation */
+      .nav-header {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px 16px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .back-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 16px;
+      }
+
+      .back-button:hover {
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .back-button::before {
+        content: "←";
+        font-size: 20px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .nav-title {
+        flex: 1;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .download-btn {
+        background: var(--light-green);
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .download-btn:hover {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* Filter Section */
+      .filter-section {
+        padding: 16px 24px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .filter-tabs {
+        display: flex;
+        background: var(--bg);
+        border-radius: 12px;
+        padding: 4px;
+        gap: 4px;
+      }
+
+      .filter-tab {
+        flex: 1;
+        padding: 12px 16px;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+      }
+
+      .filter-tab.active {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+      }
+
+      /* Summary Section */
+      .summary-section {
+        background: linear-gradient(135deg, var(--light-green), #f1f8e9);
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .summary-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .summary-total {
+        flex: 1;
+      }
+
+      .total-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+      }
+
+      .total-amount {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--primary);
+      }
+
+      .summary-stats {
+        flex: 1;
+        text-align: right;
+      }
+
+      .stat-item {
+        margin-bottom: 8px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .stat-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .summary-insights {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .insight-badge {
+        flex: 1;
+        background: var(--surface);
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .insight-icon {
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .insight-text {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .insight-subtext {
+        font-size: 10px;
+        color: var(--text-secondary);
+      }
+
+      /* Transactions List */
+      .transactions-section {
+        flex: 1;
+        padding: 0 24px;
+      }
+
+      .transactions-list {
+        padding: 16px 0;
+      }
+
+      .date-group {
+        margin-bottom: 24px;
+      }
+
+      .date-header {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .transaction-item {
+        display: flex;
+        align-items: center;
+        background: var(--surface);
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .transaction-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+      }
+
+      .transaction-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 16px;
+        font-size: 20px;
+      }
+
+      .transaction-icon.success {
+        background: var(--light-green);
+        color: var(--success);
+      }
+
+      .transaction-icon.error {
+        background: var(--light-red);
+        color: var(--error);
+      }
+
+      .transaction-icon.paused {
+        background: var(--light-orange);
+        color: var(--warning);
+      }
+
+      .transaction-info {
+        flex: 1;
+      }
+
+      .transaction-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .transaction-details {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 2px;
+      }
+
+      .transaction-time {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .transaction-operator {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .operator-logo {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+        font-weight: 800;
+        color: white;
+        background: #ff6b00;
+        margin-left: 4px;
+      }
+
+      .transaction-amount {
+        text-align: right;
+      }
+
+      .amount-value {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .amount-value.positive {
+        color: var(--success);
+      }
+
+      .amount-value.negative {
+        color: var(--error);
+      }
+
+      .amount-value.neutral {
+        color: var(--text-secondary);
+      }
+
+      .transaction-status {
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 4px;
+      }
+
+      .status-success {
+        color: var(--success);
+      }
+
+      .status-error {
+        color: var(--error);
+      }
+
+      .status-paused {
+        color: var(--warning);
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+      }
+
+      .empty-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+        color: var(--text-secondary);
+      }
+
+      .empty-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+
+      .empty-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+      }
+
+      /* Loading State */
+      .loading-state {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+      }
+
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border);
+        border-top: 3px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      /* Download Modal */
+      .download-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .download-modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 24px;
+        margin: 20px;
+        max-width: 320px;
+        width: 100%;
+      }
+
+      .modal-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        text-align: center;
+      }
+
+      .format-options {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .format-option {
+        flex: 1;
+        padding: 16px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .format-option:hover {
+        border-color: var(--primary);
+        background: var(--light-green);
+      }
+
+      .format-option.selected {
+        border-color: var(--primary);
+        background: var(--light-green);
+      }
+
+      .format-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      .format-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .format-desc {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 12px;
+      }
+
+      .modal-btn {
+        flex: 1;
+        height: 48px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-cancel {
+        background: var(--border);
+        color: var(--text-primary);
+      }
+
+      .btn-cancel:hover {
+        background: var(--text-secondary);
+        color: white;
+      }
+
+      .btn-download {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-download:hover {
+        background: var(--success);
+      }
+
+      /* Animations */
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-fade-in {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 375px) {
+        .transactions-section {
+          padding: 0 16px;
+        }
+        .nav-header {
+          padding: 16px 16px 12px;
+        }
+        .filter-section {
+          padding: 12px 16px;
+        }
+        .summary-section {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <div class="status-left">
+            <span>9:41</span>
+          </div>
+          <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <div class="battery">
+              <div class="battery-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <main class="history-screen">
+          <!-- Navigation Header -->
+          <section class="nav-header">
+            <button
+              class="back-button"
+              onclick="goBack()"
+              aria-label="Retour"
+            ></button>
+            <h1 class="nav-title">Mon Historique</h1>
+            <button class="download-btn" onclick="showDownloadModal()">
+              📄 Relevé
+            </button>
+          </section>
+
+          <!-- Filter Section -->
+          <section class="filter-section">
+            <div class="filter-tabs">
+              <button class="filter-tab" data-filter="7" onclick="setFilter(7)">
+                7 jours
+              </button>
+              <button
+                class="filter-tab active"
+                data-filter="30"
+                onclick="setFilter(30)"
+              >
+                30 jours
+              </button>
+              <button
+                class="filter-tab"
+                data-filter="all"
+                onclick="setFilter('all')"
+              >
+                Tout
+              </button>
+            </div>
+          </section>
+
+          <!-- Summary Section -->
+          <section class="summary-section">
+            <div class="summary-main">
+              <div class="summary-total">
+                <div class="total-label">Total épargné</div>
+                <div class="total-amount" id="total-amount">15,000 FCFA</div>
+              </div>
+              <div class="summary-stats">
+                <div class="stat-item">
+                  <div class="stat-label">Transactions</div>
+                  <div class="stat-value" id="transaction-count">15</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Moyenne/jour</div>
+                  <div class="stat-value" id="daily-average">1,071 FCFA</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-insights">
+              <div class="insight-badge">
+                <div class="insight-icon">🔥</div>
+                <div class="insight-text">Streak 12 jours</div>
+                <div class="insight-subtext">Record personnel</div>
+              </div>
+              <div class="insight-badge">
+                <div class="insight-icon">📈</div>
+                <div class="insight-text">+15% vs dernier</div>
+                <div class="insight-subtext">Excellente progression</div>
+              </div>
+              <div class="insight-badge">
+                <div class="insight-icon">⭐</div>
+                <div class="insight-text">Top 10%</div>
+                <div class="insight-subtext">Épargnants actifs</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Transactions List -->
+          <section class="transactions-section">
+            <div class="transactions-list" id="transactions-list">
+              <div class="date-group">
+                <div class="date-header">Aujourd'hui</div>
+
+                <div
+                  class="transaction-item"
+                  onclick="showTransactionDetail('tx001')"
+                >
+                  <div class="transaction-icon success">✅</div>
+                  <div class="transaction-info">
+                    <div class="transaction-title">Épargne automatique</div>
+                    <div class="transaction-details">
+                      <span class="transaction-time">20:00</span>
+                      <span class="transaction-operator"
+                        >via Moov<span class="operator-logo">M</span></span
+                      >
+                    </div>
+                  </div>
+                  <div class="transaction-amount">
+                    <div class="amount-value positive">+1,000</div>
+                    <div class="transaction-status status-success">Réussie</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="date-group">
+                <div class="date-header">Hier</div>
+
+                <div
+                  class="transaction-item"
+                  onclick="showTransactionDetail('tx002')"
+                >
+                  <div class="transaction-icon success">✅</div>
+                  <div class="transaction-info">
+                    <div class="transaction-title">Épargne manuelle</div>
+                    <div class="transaction-details">
+                      <span class="transaction-time">14:30</span>
+                      <span class="transaction-operator"
+                        >via Moov<span class="operator-logo">M</span></span
+                      >
+                    </div>
+                  </div>
+                  <div class="transaction-amount">
+                    <div class="amount-value positive">+2,500</div>
+                    <div class="transaction-status status-success">Réussie</div>
+                  </div>
+                </div>
+
+                <div
+                  class="transaction-item"
+                  onclick="showTransactionDetail('tx003')"
+                >
+                  <div class="transaction-icon success">✅</div>
+                  <div class="transaction-info">
+                    <div class="transaction-title">Épargne automatique</div>
+                    <div class="transaction-details">
+                      <span class="transaction-time">20:00</span>
+                      <span class="transaction-operator"
+                        >via Moov<span class="operator-logo">M</span></span
+                      >
+                    </div>
+                  </div>
+                  <div class="transaction-amount">
+                    <div class="amount-value positive">+1,000</div>
+                    <div class="transaction-status status-success">Réussie</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="date-group">
+                <div class="date-header">28 Mai 2025</div>
+
+                <div
+                  class="transaction-item"
+                  onclick="showTransactionDetail('tx004')"
+                >
+                  <div class="transaction-icon success">✅</div>
+                  <div class="transaction-info">
+                    <div class="transaction-title">Épargne automatique</div>
+                    <div class="transaction-details">
+                      <span class="transaction-time">20:00</span>
+                      <span class="transaction-operator"
+                        >via Moov<span class="operator-logo">M</span></span
+                      >
+                    </div>
+                  </div>
+                  <div class="transaction-amount">
+                    <div class="amount-value positive">+1,000</div>
+                    <div class="transaction-status status-success">Réussie</div>
+                  </div>
+                </div>
+
+                <div
+                  class="transaction-item"
+                  onclick="showTransactionDetail('tx005')"
+                >
+                  <div class="transaction-icon paused">⏸️</div>
+                  <div class="transaction-info">
+                    <div class="transaction-title">Épargne automatique</div>
+                    <div class="transaction-details">
+                      <span class="transaction-time">Pause temporaire</span>
+                      <span class="transaction-operator">Utilisateur</span>
+                    </div>
+                  </div>
+                  <div class="transaction-amount">
+                    <div class="amount-value neutral">Pause</div>
+                    <div class="transaction-status status-paused">En pause</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="date-group">
+                <div class="date-header">27 Mai 2025</div>
+
+                <div
+                  class="transaction-item"
+                  onclick="showTransactionDetail('tx006')"
+                >
+                  <div class="transaction-icon success">✅</div>
+                  <div class="transaction-info">
+                    <div class="transaction-title">Épargne automatique</div>
+                    <div class="transaction-details">
+                      <span class="transaction-time">20:00</span>
+                      <span class="transaction-operator"
+                        >via Moov<span class="operator-logo">M</span></span
+                      >
+                    </div>
+                  </div>
+                  <div class="transaction-amount">
+                    <div class="amount-value positive">+1,000</div>
+                    <div class="transaction-status status-success">Réussie</div>
+                  </div>
+                </div>
+
+                <div
+                  class="transaction-item"
+                  onclick="showTransactionDetail('tx007')"
+                >
+                  <div class="transaction-icon error">❌</div>
+                  <div class="transaction-info">
+                    <div class="transaction-title">Épargne automatique</div>
+                    <div class="transaction-details">
+                      <span class="transaction-time">20:00</span>
+                      <span class="transaction-operator"
+                        >via Moov<span class="operator-logo">M</span></span
+                      >
+                    </div>
+                  </div>
+                  <div class="transaction-amount">
+                    <div class="amount-value negative">Échec</div>
+                    <div class="transaction-status status-error">
+                      Solde insuffisant
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <!-- Download Modal -->
+        <div class="download-modal" id="download-modal">
+          <div class="modal-content">
+            <h2 class="modal-title">Télécharger le relevé</h2>
+            <div class="format-options">
+              <div class="format-option selected" data-format="pdf">
+                <div class="format-icon">📄</div>
+                <div class="format-name">PDF</div>
+                <div class="format-desc">Document officiel</div>
+              </div>
+              <div class="format-option" data-format="excel">
+                <div class="format-icon">📊</div>
+                <div class="format-name">Excel</div>
+                <div class="format-desc">Analyse détaillée</div>
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button
+                class="modal-btn btn-cancel"
+                onclick="hideDownloadModal()"
+              >
+                Annuler
+              </button>
+              <button class="modal-btn btn-download" onclick="downloadReport()">
+                Télécharger
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let currentFilter = 30;
+      let selectedFormat = "pdf";
+
+      // Sample transaction data
+      const transactionData = {
+        7: {
+          total: 7000,
+          count: 7,
+          average: 1000,
+          transactions: [
+            {
+              id: "tx001",
+              type: "auto",
+              amount: 1000,
+              status: "success",
+              date: "Aujourd'hui",
+              time: "20:00",
+            },
+            {
+              id: "tx002",
+              type: "manual",
+              amount: 2500,
+              status: "success",
+              date: "Hier",
+              time: "14:30",
+            },
+            {
+              id: "tx003",
+              type: "auto",
+              amount: 1000,
+              status: "success",
+              date: "Hier",
+              time: "20:00",
+            },
+            {
+              id: "tx004",
+              type: "auto",
+              amount: 1000,
+              status: "success",
+              date: "28 Mai 2025",
+              time: "20:00",
+            },
+            {
+              id: "tx005",
+              type: "auto",
+              amount: 0,
+              status: "paused",
+              date: "28 Mai 2025",
+              time: "Pause",
+            },
+            {
+              id: "tx006",
+              type: "auto",
+              amount: 1000,
+              status: "success",
+              date: "27 Mai 2025",
+              time: "20:00",
+            },
+            {
+              id: "tx007",
+              type: "auto",
+              amount: 0,
+              status: "error",
+              date: "27 Mai 2025",
+              time: "20:00",
+            },
+          ],
+        },
+        30: {
+          total: 15000,
+          count: 15,
+          average: 1071,
+          transactions: "current", // Use current HTML transactions
+        },
+        all: {
+          total: 127500,
+          count: 89,
+          average: 1432,
+          transactions: "extended",
+        },
+      };
+
+      // Set filter
+      function setFilter(period) {
+        currentFilter = period;
+
+        // Update active tab
+        document.querySelectorAll(".filter-tab").forEach(function (tab) {
+          tab.classList.remove("active");
+        });
+        document
+          .querySelector('[data-filter="' + period + '"]')
+          .classList.add("active");
+
+        // Update summary
+        updateSummary(period);
+
+        // Show loading and update transactions
+        showLoading();
+        setTimeout(function () {
+          updateTransactionsList(period);
+          hideLoading();
+        }, 800);
+      }
+
+      // Update summary section
+      function updateSummary(period) {
+        const data = transactionData[period];
+        document.getElementById("total-amount").textContent =
+          data.total.toLocaleString("fr-FR") + " FCFA";
+        document.getElementById("transaction-count").textContent = data.count;
+        document.getElementById("daily-average").textContent =
+          data.average.toLocaleString("fr-FR") + " FCFA";
+      }
+
+      // Update transactions list
+      function updateTransactionsList(period) {
+        const listElement = document.getElementById("transactions-list");
+
+        if (period === 7) {
+          // Show fewer transactions for 7 days
+          listElement.innerHTML = `
+<div class="date-group">
+<div class="date-header">Aujourd'hui</div>
+<div class="transaction-item">
+<div class="transaction-icon success">✅</div>
+<div class="transaction-info">
+<div class="transaction-title">Épargne automatique</div>
+<div class="transaction-details">
+<span class="transaction-time">20:00</span>
+<span class="transaction-operator">via Moov<span class="operator-logo">M</span></span>
+</div>
+</div>
+<div class="transaction-amount">
+<div class="amount-value positive">+1,000</div>
+<div class="transaction-status status-success">Réussie</div>
+</div>
+</div>
+</div>
+<div class="date-group">
+<div class="date-header">Hier</div>
+<div class="transaction-item">
+<div class="transaction-icon success">✅</div>
+<div class="transaction-info">
+<div class="transaction-title">Épargne manuelle</div>
+<div class="transaction-details">
+<span class="transaction-time">14:30</span>
+<span class="transaction-operator">via Moov<span class="operator-logo">M</span></span>
+</div>
+</div>
+<div class="transaction-amount">
+<div class="amount-value positive">+2,500</div>
+<div class="transaction-status status-success">Réussie</div>
+</div>
+</div>
+</div>
+`;
+        } else if (period === "all") {
+          // Show message for full history
+          listElement.innerHTML =
+            `
+<div class="date-group">
+<div class="date-header">Historique complet</div>
+<div class="insight-badge" style="margin: 20px 0; text-align: center;">
+<div class="insight-icon">📊</div>
+<div class="insight-text">89 transactions depuis le début</div>
+<div class="insight-subtext">Défilez pour voir l'historique complet</div>
+</div>
+</div>
+` + document.getElementById("transactions-list").innerHTML;
+        }
+        // For period 30, keep current transactions
+      }
+
+      // Show loading state
+      function showLoading() {
+        const listElement = document.getElementById("transactions-list");
+        listElement.innerHTML = `
+<div class="loading-state">
+<div class="loading-spinner"></div>
+</div>
+`;
+      }
+
+      // Hide loading state
+      function hideLoading() {
+        // Transactions will be updated by updateTransactionsList
+      }
+
+      // Show transaction detail
+      function showTransactionDetail(transactionId) {
+        alert(
+          "📋 Détails de la transaction\n\n🆔 ID: " +
+            transactionId +
+            "\n📅 Date: 29 Mai 2025\n⏰ Heure: 20:00\n💰 Montant: +1,000 FCFA\n🏦 Via: Moov Money\n📱 Numéro: +241 074 XX XX 56\n✅ Statut: Réussie\n🔗 Hash: 0x1a2b3c...\n\n📞 Support si problème"
+        );
+      }
+
+      // Show download modal
+      function showDownloadModal() {
+        document.getElementById("download-modal").classList.add("active");
+      }
+
+      // Hide download modal
+      function hideDownloadModal() {
+        document.getElementById("download-modal").classList.remove("active");
+      }
+
+      // Handle format selection
+      document.addEventListener("click", function (e) {
+        if (e.target.closest(".format-option")) {
+          const option = e.target.closest(".format-option");
+
+          // Remove selected class from all options
+          document.querySelectorAll(".format-option").forEach(function (opt) {
+            opt.classList.remove("selected");
+          });
+
+          // Add selected class to clicked option
+          option.classList.add("selected");
+          selectedFormat = option.dataset.format;
+        }
+      });
+
+      // Download report
+      function downloadReport() {
+        const periodText =
+          currentFilter === 7
+            ? "7 jours"
+            : currentFilter === 30
+            ? "30 jours"
+            : "historique complet";
+        const formatText = selectedFormat === "pdf" ? "PDF" : "Excel";
+
+        // Visual feedback
+        const downloadBtn = document.querySelector(".btn-download");
+        downloadBtn.innerHTML = "⏳ Génération...";
+        downloadBtn.disabled = true;
+
+        setTimeout(function () {
+          downloadBtn.innerHTML = "✅ Généré !";
+          setTimeout(function () {
+            hideDownloadModal();
+            alert(
+              "📄 Relevé téléchargé !\n\n📋 Période: " +
+                periodText +
+                "\n📊 Format: " +
+                formatText +
+                "\n💾 Fichier: yessi_releve_" +
+                getCurrentDate() +
+                "." +
+                selectedFormat +
+                "\n\n✅ Document prêt pour vos démarches administratives"
+            );
+            downloadBtn.innerHTML = "Télécharger";
+            downloadBtn.disabled = false;
+          }, 1000);
+        }, 2000);
+      }
+
+      // Get current date for filename
+      function getCurrentDate() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, "0");
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const year = now.getFullYear();
+        return day + month + year;
+      }
+
+      // Go back
+      function goBack() {
+        const button = document.querySelector(".back-button");
+        button.style.transform = "scale(0.9)";
+        setTimeout(function () {
+          button.style.transform = "scale(1)";
+          showNotification("🔙 Retour au dashboard...", "info");
+          setTimeout(function () {
+            alert("📊 Dashboard mis à jour avec vos dernières transactions");
+          }, 1000);
+        }, 150);
+      }
+
+      // Show notification
+      function showNotification(message, type) {
+        const notification = document.createElement("div");
+        const colors = {
+          success: "#4CAF50",
+          warning: "#FF9800",
+          info: "#2196F3",
+          error: "#F44336",
+        };
+
+        notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${colors[type] || colors.info};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 1000;
+        animation: slideDown 0.3s ease-out;
+    `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(function () {
+          notification.style.animation = "slideUp 0.3s ease-out";
+          setTimeout(function () {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }, 3000);
+      }
+
+      // Add notification animations
+      const style = document.createElement("style");
+      style.textContent = `
+    @keyframes slideDown {
+        from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+    @keyframes slideUp {
+        from { transform: translateX(-50%) translateY(0); opacity: 1; }
+        to { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    }
+`;
+      document.head.appendChild(style);
+
+      // Pull to refresh functionality
+      let startY = 0;
+      let pullDistance = 0;
+      const refreshThreshold = 80;
+
+      document.addEventListener(
+        "touchstart",
+        function (e) {
+          startY = e.touches[0].clientY;
+        },
+        { passive: true }
+      );
+
+      document.addEventListener(
+        "touchmove",
+        function (e) {
+          if (window.scrollY === 0) {
+            pullDistance = e.touches[0].clientY - startY;
+            if (pullDistance > 0 && pullDistance < refreshThreshold * 2) {
+              e.preventDefault();
+              // Visual feedback for pull to refresh
+              document.querySelector(
+                ".nav-header"
+              ).style.transform = `translateY(${Math.min(
+                pullDistance / 2,
+                40
+              )}px)`;
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      document.addEventListener(
+        "touchend",
+        function (e) {
+          if (pullDistance > refreshThreshold) {
+            showNotification("🔄 Actualisation des données...", "info");
+            // Reset position
+            document.querySelector(".nav-header").style.transform =
+              "translateY(0)";
+
+            // Simulate refresh
+            setTimeout(function () {
+              showNotification("✅ Historique mis à jour", "success");
+            }, 1500);
+          } else {
+            // Reset position
+            document.querySelector(".nav-header").style.transform =
+              "translateY(0)";
+          }
+          pullDistance = 0;
+        },
+        { passive: true }
+      );
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set default filter
+        setFilter(30);
+
+        // Animate sections on load
+        const sections = document.querySelectorAll(
+          ".summary-section, .transactions-section"
+        );
+        sections.forEach(function (section, index) {
+          section.style.opacity = "0";
+          section.style.transform = "translateY(20px)";
+          setTimeout(function () {
+            section.style.transition = "all 0.6s ease-out";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+          }, index * 200);
+        });
+
+        // Add click handlers for transaction items
+        document.querySelectorAll(".transaction-item").forEach(function (item) {
+          item.addEventListener("click", function () {
+            this.style.animation = "none";
+            setTimeout(function () {
+              item.style.animation = "fadeInUp 0.3s ease-out";
+            }, 10);
+          });
+        });
+
+        // Show welcome message
+        setTimeout(function () {
+          showNotification(
+            "📊 Historique chargé - " +
+              document.querySelectorAll(".transaction-item").length +
+              " transactions",
+            "success"
+          );
+        }, 1000);
+      });
+
+      console.log("📊 YESSI-YESSI History Screen loaded!");
+      console.log("🎯 Target: 100% transparency + trust");
+      console.log("📋 Complete transaction tracking active");
+    </script>
+  </body>
+</html>

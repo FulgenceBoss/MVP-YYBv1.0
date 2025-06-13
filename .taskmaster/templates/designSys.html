@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YESSI-YESSI BANK - Design System MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        /* === COULEURS PRIMAIRES === */
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+
+        /* === COULEURS NEUTRALES === */
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+
+        /* === COULEURS D'ACCENTUATION === */
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-red: #ffebee;
+        --light-orange: #fff3e0;
+        --light-purple: #f3e5f5;
+
+        /* === COULEURS OPÉRATEURS === */
+        --moov-orange: #ff6b00;
+        --airtel-red: #e60012;
+
+        /* === TYPOGRAPHY === */
+        --font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        --font-size-xs: 12px;
+        --font-size-sm: 14px;
+        --font-size-base: 16px;
+        --font-size-lg: 18px;
+        --font-size-xl: 20px;
+        --font-size-2xl: 24px;
+        --font-size-3xl: 28px;
+        --font-size-4xl: 32px;
+        --font-size-5xl: 36px;
+
+        /* === SPACING === */
+        --spacing-xs: 4px;
+        --spacing-sm: 8px;
+        --spacing-md: 12px;
+        --spacing-lg: 16px;
+        --spacing-xl: 20px;
+        --spacing-2xl: 24px;
+        --spacing-3xl: 32px;
+        --spacing-4xl: 40px;
+
+        /* === BORDER RADIUS === */
+        --radius-sm: 4px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+        --radius-2xl: 20px;
+        --radius-full: 50%;
+
+        /* === SHADOWS === */
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 4px 16px rgba(46, 125, 50, 0.3);
+        --shadow-xl: 0 6px 20px rgba(46, 125, 50, 0.4);
+
+        /* === TRANSITIONS === */
+        --transition-fast: 0.15s ease;
+        --transition-base: 0.3s ease;
+        --transition-slow: 0.5s ease;
+        --transition-cubic: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      body {
+        font-family: var(--font-family);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+        color: var(--text-primary);
+      }
+
+      .design-system {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: var(--surface);
+        border-radius: var(--radius-2xl);
+        padding: var(--spacing-4xl);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: var(--spacing-4xl);
+      }
+
+      .brand-title {
+        font-size: var(--font-size-4xl);
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .brand-subtitle {
+        font-size: var(--font-size-lg);
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .brand-mission {
+        background: var(--light-green);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(46, 125, 50, 0.2);
+        margin-bottom: var(--spacing-2xl);
+      }
+
+      .mission-text {
+        font-size: var(--font-size-base);
+        color: var(--text-primary);
+        font-weight: 500;
+        text-align: center;
+      }
+
+      .section {
+        margin-bottom: var(--spacing-4xl);
+      }
+
+      .section-title {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--primary);
+      }
+
+      .subsection {
+        margin-bottom: var(--spacing-2xl);
+      }
+
+      .subsection-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      /* === COULEURS === */
+      .color-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+      }
+
+      .color-card {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+      }
+
+      .color-display {
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: var(--font-size-sm);
+      }
+
+      .color-info {
+        padding: var(--spacing-lg);
+        background: var(--surface);
+      }
+
+      .color-name {
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .color-value {
+        font-family: monospace;
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      /* === TYPOGRAPHY === */
+      .typography-demo {
+        background: var(--surface);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+      }
+
+      .font-size-demo {
+        margin-bottom: var(--spacing-lg);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xl);
+      }
+
+      .font-label {
+        min-width: 120px;
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        font-family: monospace;
+      }
+
+      .font-example {
+        font-weight: 600;
+      }
+
+      /* === COMPOSANTS === */
+      .components-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-2xl);
+      }
+
+      .component-demo {
+        background: var(--surface);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+      }
+
+      .component-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin-bottom: var(--spacing-lg);
+        color: var(--text-primary);
+      }
+
+      /* === BOUTONS === */
+      .button {
+        height: 56px;
+        border-radius: var(--radius-lg);
+        font-size: var(--font-size-base);
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-cubic);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        margin: var(--spacing-sm);
+        min-width: 160px;
+      }
+
+      .button-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        color: white;
+        box-shadow: var(--shadow-lg);
+      }
+
+      .button-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .button-secondary {
+        background: var(--surface);
+        color: var(--primary);
+        border: 2px solid var(--primary);
+      }
+
+      .button-secondary:hover {
+        background: var(--light-green);
+      }
+
+      .button-danger {
+        background: var(--error);
+        color: white;
+      }
+
+      .button-danger:hover {
+        background: #d32f2f;
+      }
+
+      .button-disabled {
+        background: var(--text-secondary);
+        color: white;
+        cursor: not-allowed;
+      }
+
+      /* === INPUTS === */
+      .input-group {
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .input-label {
+        font-size: var(--font-size-base);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-md);
+        display: block;
+      }
+
+      .input {
+        width: 100%;
+        height: 56px;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+        background: var(--surface);
+        transition: var(--transition-base);
+      }
+
+      .input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      .input.valid {
+        border-color: var(--success);
+        background: var(--light-green);
+      }
+
+      .input.invalid {
+        border-color: var(--error);
+        background: var(--light-red);
+      }
+
+      /* === TOGGLES === */
+      .toggle-switch {
+        position: relative;
+        width: 52px;
+        height: 32px;
+        background: var(--border);
+        border-radius: 16px;
+        cursor: pointer;
+        transition: var(--transition-base);
+        margin: var(--spacing-sm);
+      }
+
+      .toggle-switch.active {
+        background: var(--primary);
+      }
+
+      .toggle-thumb {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 28px;
+        height: 28px;
+        background: white;
+        border-radius: 14px;
+        transition: var(--transition-cubic);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .toggle-switch.active .toggle-thumb {
+        transform: translateX(20px);
+      }
+
+      /* === CARDS === */
+      .card {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .card-header {
+        padding: var(--spacing-xl);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .card-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .card-content {
+        padding: var(--spacing-xl);
+      }
+
+      .card-gradient {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        color: white;
+      }
+
+      .card-hover {
+        transition: var(--transition-base);
+        cursor: pointer;
+      }
+
+      .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+
+      /* === PROGRESS BARS === */
+      .progress-container {
+        background: var(--border);
+        border-radius: var(--radius-md);
+        height: 8px;
+        overflow: hidden;
+        margin: var(--spacing-md) 0;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        border-radius: var(--radius-md);
+        transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* === BADGES === */
+      .badge {
+        display: inline-block;
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        margin: var(--spacing-xs);
+      }
+
+      .badge-success {
+        background: var(--light-green);
+        color: var(--success);
+      }
+
+      .badge-warning {
+        background: var(--light-orange);
+        color: var(--warning);
+      }
+
+      .badge-error {
+        background: var(--light-red);
+        color: var(--error);
+      }
+
+      .badge-info {
+        background: var(--light-blue);
+        color: var(--secondary);
+      }
+
+      /* === OPERATEUR LOGOS === */
+      .operator-logos {
+        display: flex;
+        gap: var(--spacing-lg);
+      }
+
+      .operator-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 800;
+        color: white;
+      }
+
+      .operator-logo.moov {
+        background: var(--moov-orange);
+      }
+
+      .operator-logo.airtel {
+        background: var(--airtel-red);
+      }
+
+      /* === ANIMATIONS === */
+      .animations-demo {
+        display: flex;
+        gap: var(--spacing-lg);
+        align-items: center;
+      }
+
+      .animation-box {
+        width: 60px;
+        height: 60px;
+        background: var(--primary);
+        border-radius: var(--radius-md);
+      }
+
+      .animate-slide {
+        animation: slideIn 0.5s ease-out;
+      }
+
+      .animate-pulse {
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .animate-bounce {
+        animation: bounce 1s ease-in-out infinite;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes bounce {
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+          transform: translateY(0);
+        }
+        40% {
+          transform: translateY(-10px);
+        }
+        60% {
+          transform: translateY(-5px);
+        }
+      }
+
+      /* === GUIDELINES === */
+      .guidelines {
+        background: var(--light-blue);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(25, 118, 210, 0.2);
+      }
+
+      .guideline-item {
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .guideline-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .guideline-text {
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      /* === RESPONSIVE === */
+      @media (max-width: 768px) {
+        .design-system {
+          padding: var(--spacing-2xl);
+          margin: var(--spacing-lg);
+        }
+
+        .color-grid,
+        .components-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .font-size-demo {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="design-system">
+      <!-- Header -->
+      <header class="header">
+        <h1 class="brand-title">🐘 YESSI-YESSI BANK</h1>
+        <p class="brand-subtitle">Design System MVP - Version 2.0</p>
+        <div class="brand-mission">
+          <p class="mission-text">
+            "Révolutionner l'épargne en Afrique en permettant aux Gabonais
+            d'épargner automatiquement de petites sommes quotidiennes,
+            transformant les micro-dépenses en capital significatif."
+          </p>
+        </div>
+      </header>
+
+      <!-- Couleurs -->
+      <section class="section">
+        <h2 class="section-title">🎨 Palette de Couleurs</h2>
+
+        <div class="subsection">
+          <h3 class="subsection-title">Couleurs Primaires</h3>
+          <div class="color-grid">
+            <div class="color-card">
+              <div class="color-display" style="background: var(--primary)">
+                PRIMARY
+              </div>
+              <div class="color-info">
+                <div class="color-name">Vert Principal</div>
+                <div class="color-value">#2E7D32</div>
+              </div>
+            </div>
+            <div class="color-card">
+              <div class="color-display" style="background: var(--secondary)">
+                SECONDARY
+              </div>
+              <div class="color-info">
+                <div class="color-name">Bleu Sécurité</div>
+                <div class="color-value">#1976D2</div>
+              </div>
+            </div>
+            <div class="color-card">
+              <div class="color-display" style="background: var(--success)">
+                SUCCESS
+              </div>
+              <div class="color-info">
+                <div class="color-name">Vert Succès</div>
+                <div class="color-value">#4CAF50</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3 class="subsection-title">Couleurs Statuts</h3>
+          <div class="color-grid">
+            <div class="color-card">
+              <div class="color-display" style="background: var(--error)">
+                ERROR
+              </div>
+              <div class="color-info">
+                <div class="color-name">Rouge Erreur</div>
+                <div class="color-value">#F44336</div>
+              </div>
+            </div>
+            <div class="color-card">
+              <div class="color-display" style="background: var(--warning)">
+                WARNING
+              </div>
+              <div class="color-info">
+                <div class="color-name">Orange Alerte</div>
+                <div class="color-value">#FF9800</div>
+              </div>
+            </div>
+            <div class="color-card">
+              <div class="color-display" style="background: var(--moov-orange)">
+                MOOV
+              </div>
+              <div class="color-info">
+                <div class="color-name">Orange Moov</div>
+                <div class="color-value">#FF6B00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Typography -->
+      <section class="section">
+        <h2 class="section-title">✍️ Typographie</h2>
+        <div class="typography-demo">
+          <div class="font-size-demo">
+            <span class="font-label">36px (5xl)</span>
+            <span class="font-example" style="font-size: var(--font-size-5xl)"
+              >Montant Principal</span
+            >
+          </div>
+          <div class="font-size-demo">
+            <span class="font-label">24px (2xl)</span>
+            <span class="font-example" style="font-size: var(--font-size-2xl)"
+              >Titres Sections</span
+            >
+          </div>
+          <div class="font-size-demo">
+            <span class="font-label">18px (lg)</span>
+            <span class="font-example" style="font-size: var(--font-size-lg)"
+              >Texte Important</span
+            >
+          </div>
+          <div class="font-size-demo">
+            <span class="font-label">16px (base)</span>
+            <span class="font-example" style="font-size: var(--font-size-base)"
+              >Texte Standard</span
+            >
+          </div>
+          <div class="font-size-demo">
+            <span class="font-label">14px (sm)</span>
+            <span class="font-example" style="font-size: var(--font-size-sm)"
+              >Texte Secondaire</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- Composants -->
+      <section class="section">
+        <h2 class="section-title">🧩 Composants</h2>
+
+        <div class="components-grid">
+          <!-- Boutons -->
+          <div class="component-demo">
+            <h3 class="component-title">Boutons</h3>
+            <button class="button button-primary">🚀 Bouton Principal</button>
+            <button class="button button-secondary">
+              ⚙️ Bouton Secondaire
+            </button>
+            <button class="button button-danger">🗑️ Bouton Danger</button>
+            <button class="button button-disabled">Désactivé</button>
+          </div>
+
+          <!-- Inputs -->
+          <div class="component-demo">
+            <h3 class="component-title">Champs de Saisie</h3>
+            <div class="input-group">
+              <label class="input-label">📱 Numéro de téléphone</label>
+              <input class="input" type="tel" placeholder="+241 XX XX XX XX" />
+            </div>
+            <div class="input-group">
+              <label class="input-label">💰 Montant (Valide)</label>
+              <input class="input valid" type="number" value="1,000" />
+            </div>
+            <div class="input-group">
+              <label class="input-label">🚫 Champ Erreur</label>
+              <input
+                class="input invalid"
+                type="text"
+                value="Format invalide"
+              />
+            </div>
+          </div>
+
+          <!-- Toggles -->
+          <div class="component-demo">
+            <h3 class="component-title">Interrupteurs</h3>
+            <div class="toggle-switch active">
+              <div class="toggle-thumb"></div>
+            </div>
+            <div class="toggle-switch">
+              <div class="toggle-thumb"></div>
+            </div>
+            <p
+              style="
+                margin-top: 12px;
+                color: var(--text-secondary);
+                font-size: 14px;
+              "
+            >
+              Épargne automatique : ON / OFF
+            </p>
+          </div>
+
+          <!-- Progress -->
+          <div class="component-demo">
+            <h3 class="component-title">Barres de Progression</h3>
+            <div class="progress-container">
+              <div class="progress-fill" style="width: 25%"></div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-fill" style="width: 65%"></div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-fill" style="width: 90%"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cards -->
+      <section class="section">
+        <h2 class="section-title">🃏 Cartes</h2>
+
+        <div class="components-grid">
+          <div class="card card-hover">
+            <div class="card-header">
+              <h3 class="card-title">💰 Épargne Quotidienne</h3>
+            </div>
+            <div class="card-content">
+              <p>Configurez votre montant d'épargne automatique quotidien.</p>
+            </div>
+          </div>
+
+          <div class="card card-gradient">
+            <div class="card-content">
+              <h3 style="color: white; margin-bottom: 8px">🏠 Mon Objectif</h3>
+              <p style="color: rgba(255, 255, 255, 0.9)">
+                Maison - 2,000,000 FCFA
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Badges -->
+      <section class="section">
+        <h2 class="section-title">🏷️ Badges & Statuts</h2>
+
+        <div class="subsection">
+          <span class="badge badge-success">✅ Actif</span>
+          <span class="badge badge-warning">⏸️ En pause</span>
+          <span class="badge badge-error">❌ Échoué</span>
+          <span class="badge badge-info">ℹ️ Information</span>
+        </div>
+
+        <div class="subsection">
+          <h3 class="subsection-title">Logos Opérateurs</h3>
+          <div class="operator-logos">
+            <div class="operator-logo moov">M</div>
+            <div class="operator-logo airtel">A</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Animations -->
+      <section class="section">
+        <h2 class="section-title">🎬 Animations</h2>
+
+        <div class="animations-demo">
+          <div class="animation-box animate-slide"></div>
+          <div class="animation-box animate-pulse"></div>
+          <div class="animation-box animate-bounce"></div>
+        </div>
+        <p
+          style="
+            margin-top: 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+          "
+        >
+          SlideIn • Pulse • Bounce
+        </p>
+      </section>
+
+      <!-- Guidelines -->
+      <section class="section">
+        <h2 class="section-title">📋 Guidelines d'Utilisation</h2>
+
+        <div class="guidelines">
+          <div class="guideline-item">
+            <h4 class="guideline-title">🎯 Accessibilité Gabonaise</h4>
+            <p class="guideline-text">
+              Touch targets minimum 56px • Contraste 4.5:1 minimum • Typography
+              18px minimum pour faible littératie
+            </p>
+          </div>
+
+          <div class="guideline-item">
+            <h4 class="guideline-title">🎨 Cohérence Visuelle</h4>
+            <p class="guideline-text">
+              Maximum 3 actions par écran • Feedback visuel immédiat •
+              Progression claire avec indicateurs
+            </p>
+          </div>
+
+          <div class="guideline-item">
+            <h4 class="guideline-title">💡 Optimisation Conversion</h4>
+            <p class="guideline-text">
+              Preuves sociales intégrées • Équivalents concrets gabonais •
+              Célébrations et gamification culturelle
+            </p>
+          </div>
+
+          <div class="guideline-item">
+            <h4 class="guideline-title">📱 Mobile First</h4>
+            <p class="guideline-text">
+              Design 375x812px • Portrait uniquement • Performance <3s •
+              Animations 60fps
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Variables CSS -->
+      <section class="section">
+        <h2 class="section-title">⚙️ Variables CSS</h2>
+
+        <div class="component-demo">
+          <h3 class="component-title">Implémentation</h3>
+          <pre
+            style="
+              background: #f5f5f5;
+              padding: 16px;
+              border-radius: 8px;
+              font-size: 12px;
+              overflow-x: auto;
+            "
+          >
+:root {
+  /* Couleurs */
+  --primary: #2e7d32;
+  --secondary: #1976d2;
+  --success: #4caf50;
+  --error: #f44336;
+  
+  /* Typography */
+  --font-family: "Roboto", sans-serif;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  
+  /* Spacing */
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  
+  /* Autres */
+  --radius-lg: 12px;
+  --transition-base: 0.3s ease;
+}
+</pre
+          >
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // Démonstration interactive
+      document.addEventListener("DOMContentLoaded", function () {
+        // Animation des progress bars
+        setTimeout(() => {
+          const progressBars = document.querySelectorAll(".progress-fill");
+          progressBars.forEach((bar, index) => {
+            const widths = ["25%", "65%", "90%"];
+            bar.style.width = widths[index];
+          });
+        }, 1000);
+
+        // Toggle interaction
+        document.querySelectorAll(".toggle-switch").forEach((toggle) => {
+          toggle.addEventListener("click", () => {
+            toggle.classList.toggle("active");
+          });
+        });
+
+        // Button hover effects
+        document.querySelectorAll(".button").forEach((button) => {
+          button.addEventListener("click", (e) => {
+            if (!button.classList.contains("button-disabled")) {
+              button.style.transform = "scale(0.95)";
+              setTimeout(() => {
+                button.style.transform = "";
+              }, 150);
+            }
+          });
+        });
+
+        console.log("🎨 YESSI-YESSI Design System loaded!");
+        console.log("🎯 Cohérence maximale pour MVP success");
+      });
+    </script>
+  </body>
+</html>
