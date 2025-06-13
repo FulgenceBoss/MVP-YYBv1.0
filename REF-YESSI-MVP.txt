@@ -69,6 +69,8 @@
   - Création d'un endpoint backend (`/api/savings/balance`) pour récupérer le solde.
   - Création d'un "slice" Redux (`dashboardSlice`) pour gérer les données du dashboard.
   - Le `DashboardScreen` affiche maintenant le solde de l'utilisateur.
+  - Le `DashboardScreen` a été refactorisé dans son propre fichier.
+  - Le composant `StreakCounter` (Tâche 7.2) a été créé et intégré avec une valeur statique.
 - **Navigation (Frontend) :**
   - La logique de navigation post-connexion a été rendue robuste via un `AppLoadingScreen`.
   - L'application redirige désormais intelligemment vers le `Dashboard` si une configuration d'épargne existe, ou vers le parcours de configuration sinon.
@@ -77,11 +79,13 @@
 
 ### ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de pause)
 
-- **Objectif Atteint :** La Tâche 10 (Sécurité de base) est terminée. La Tâche 7 (Dashboard) est bien entamée et le socle de navigation de l'application est maintenant très stable.
-- **Progrès :** L'application est plus sécurisée et offre une expérience de connexion et de redirection logique et fluide pour tous les cas d'usage (nouvel utilisateur, utilisateur avec config, utilisateur sans config).
+- **Objectif en cours :** Finaliser la sous-tâche 7.2 en validant l'affichage du composant `StreakCounter`.
+- **Progrès :** Le code pour la refactorisation du `DashboardScreen` et la création du `StreakCounter` a été écrit et poussé sur GitHub.
+- **Point de Blocage :** Des problèmes de connexion empêchent le lancement et le test de l'application sur l'appareil.
 - **Prochaine Action :**
-  1.  **Sauvegarder tout le travail sur GitHub.**
-  2.  Continuer le développement du tableau de bord en implémentant la sous-tâche 7.2 : "Implement Streak Counter Component".
+  1.  **Résoudre les problèmes de connexion.**
+  2.  **Valider visuellement** que le composant `StreakCounter` s'affiche correctement sur l'écran du tableau de bord.
+  3.  Une fois validé, passer à la tâche suivante (7.3 : "Create Transaction History View").
 
 ---
 
