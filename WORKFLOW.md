@@ -72,7 +72,17 @@ Avant d'entamer la boucle de développement en 6 étapes, chaque nouvelle phase 
 - **Action :** Utiliser la commande `task-master set-status --id=<ID_TACHE> --status=done`.
 - **Objectif :** Mettre à jour officiellement le statut de la tâche terminée. Cela nous permet d'avoir une vision claire et en temps réel de l'avancement du projet.
 
-### Étape 6 : Documentation de l'Avancement
+### Étape 6 : Sauvegarde et Synchronisation
+
+- **Principe fondamental :** "Toute tâche validée et terminée DOIT être sauvegardée."
+- **Action :** Créer un commit local pour encapsuler les changements, puis pousser ce commit sur le dépôt GitHub.
+- **Objectif :** Garantir qu'aucune progression ne soit perdue et que le travail de l'équipe soit synchronisé.
+- **Commandes Types :**
+  1.  `git add .`
+  2.  `git commit -m "feat(module): Ajout de la fonctionnalité X"`
+  3.  `git push origin master`
+
+### Étape 7 : Documentation de l'Avancement
 
 - **Action :** Mettre à jour le fichier `REF-YESSI-MVP.txt`.
 - **Objectif :** Consigner les progrès réalisés dans notre document de référence. Mettre à jour les sections "CODE PRÊT" et, si nécessaire, "PROBLÈMES IDENTIFIÉS".
