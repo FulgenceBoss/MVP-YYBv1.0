@@ -1,11 +1,7 @@
-import React, { useEffect } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../store/slices/authSlice";
-import { fetchDashboardData } from "../store/slices/dashboardSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSelector } from "react-redux";
 
 // Import screens
 import SignUpScreen from "../screens/auth/SignUpScreen";
@@ -19,12 +15,7 @@ import DashboardScreen from "../screens/DashboardScreen";
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  const {
-    isAuthenticated,
-    user,
-    token,
-    status: authStatus,
-  } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   return (
     <NavigationContainer>
