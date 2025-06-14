@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import { COLORS, FONTS, SIZES } from "../../constants/theme";
@@ -25,6 +26,7 @@ const OtpScreen = ({ route, navigation }) => {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [pin, setPin] = useState(new Array(4).fill(""));
   const [pinConfirm, setPinConfirm] = useState(new Array(4).fill(""));
+  const [isLoading, setIsLoading] = useState(false);
 
   const otpInputs = useRef([]);
   const pinInputs = useRef([]);
@@ -81,6 +83,7 @@ const OtpScreen = ({ route, navigation }) => {
       return;
     }
 
+    setIsLoading(true);
     dispatch(setLoading(true));
     try {
       const response = await api.post("/auth/verify", {
@@ -101,6 +104,9 @@ const OtpScreen = ({ route, navigation }) => {
       const message = err.response?.data?.message || "Une erreur est survenue.";
       dispatch(setError(message));
       Alert.alert("Erreur", message);
+    } finally {
+      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
 
@@ -156,8 +162,16 @@ const OtpScreen = ({ route, navigation }) => {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.ctaButton} onPress={handleSecureAccount}>
-        <Text style={styles.ctaText}>🔐 Sécuriser mon compte</Text>
+      <TouchableOpacity
+        style={[styles.ctaButton, isLoading && styles.disabledButton]}
+        onPress={handleSecureAccount}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator color={COLORS.surface} />
+        ) : (
+          <Text style={styles.ctaText}>🔐 Sécuriser mon compte</Text>
+        )}
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -213,6 +227,9 @@ const styles = StyleSheet.create({
   ctaText: {
     ...FONTS.h4,
     color: COLORS.surface,
+  },
+  disabledButton: {
+    backgroundColor: COLORS.primary_dark,
   },
 });
 
