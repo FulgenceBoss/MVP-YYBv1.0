@@ -20,6 +20,7 @@
 - **Tableau de bord (Placeholder) :**
   - Un écran `Dashboard` basique sert de destination finale après la configuration.
 
+
 ---
 
 ### CODE PRÊT :
@@ -80,16 +81,19 @@
 ### ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de pause)
 
 - **Objectif en cours :** Finaliser la sous-tâche 7.2 en validant l'affichage du composant `StreakCounter`.
-- **Progrès :** Le code pour la refactorisation du `DashboardScreen` et la création du `StreakCounter` a été écrit et poussé sur GitHub.
-- **Point de Blocage :** Des problèmes de connexion empêchent le lancement et le test de l'application sur l'appareil.
+- **Progrès :** Le code pour la refactorisation du `DashboardScreen` et la création du `StreakCounter` a été écrit et poussé sur GitHub. Le bug de redirection post-OTP a été identifié et corrigé.
+- **Point de Blocage :** ~~Des problèmes de connexion empêchent le lancement et le test de l'application sur l'appareil.~~ **RÉSOLU.**
 - **Prochaine Action :**
-  1.  **Résoudre les problèmes de connexion.**
-  2.  **Valider visuellement** que le composant `StreakCounter` s'affiche correctement sur l'écran du tableau de bord.
-  3.  Une fois validé, passer à la tâche suivante (7.3 : "Create Transaction History View").
+  1.  **~~Résoudre les problèmes de connexion.~~**
+  2.  **~~Valider visuellement** que le composant `StreakCounter` s'affiche correctement sur l'écran du tableau de bord.~~ **VALIDÉ.**
+  3.  Passer à la tâche suivante (7.3 : "Create Transaction History View").
 
 ---
 
 ### PROBLÈMES IDENTIFIÉS ET RÉSOLUS :
+- **Redirection Post-Vérification OTP :** L'application ne redirigeait pas l'utilisateur vers le tableau de bord après la vérification réussie de l'OTP.
+  - **Cause Racine :** L'état Redux (`authSlice`) ne contenait pas de booléen `isAuthenticated` pour signaler le changement d'état au navigateur (`AppNavigator`).
+  - **Solution :** Ajout de la variable `isAuthenticated` dans le `authSlice` et mise à jour de sa valeur lors de la connexion et de la déconnexion, ce qui a rendu la redirection fonctionnelle.
 - **Compatibilité du terminal (PowerShell) :** Des erreurs sont survenues lors de l'utilisation de commandes `mkdir` avec plusieurs arguments ou des commandes chaînées avec `&&`.
   - **Solution :** Utilisation de commandes séparées par des points-virgules (`;`) pour la création de dossiers multiples, ce qui a résolu le problème.
 - **Débogage initial d'Expo :** Plusieurs erreurs de configuration (`Cannot resolve entry file`, conflits de dépendances) ont été rencontrées lors du passage d'une structure Expo Router à une structure classique.
