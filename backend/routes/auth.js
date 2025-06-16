@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const rateLimit = require("express-rate-limit");
-const { register, verifyOTP, login } = require("../controllers/authController");
+const {
+  registerUser,
+  verifyOtp,
+  loginUser,
+} = require("../controllers/authController");
 const {
   validateRegister,
   validateVerify,
@@ -24,16 +28,16 @@ router.use(authLimiter);
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-router.post("/register", validateRegister, register);
+router.post("/register", validateRegister, registerUser);
 
 // @desc    Verify OTP and create user session
 // @route   POST /api/auth/verify
 // @access  Public
-router.post("/verify", validateVerify, verifyOTP);
+router.post("/verify", validateVerify, verifyOtp);
 
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-router.post("/login", validateLogin, login);
+router.post("/login", validateLogin, loginUser);
 
 module.exports = router;

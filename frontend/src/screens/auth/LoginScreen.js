@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,90 +7,135 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
+  StatusBar,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { COLORS, FONTS, SIZES } from "../../constants/theme";
 import api from "../../api/api";
 import {
   setUserToken,
   setLoading,
   setError,
+  loginUser,
 } from "../../store/slices/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
+  const { isLoading, error } = useSelector((state) => state.auth);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pin, setPin] = useState("");
 
-  const handleLogin = async () => {
+  useEffect(() => {
+    if (error) {
+      Alert.alert("Erreur de connexion", error, [
+        { text: "OK", onPress: () => dispatch(setError(null)) },
+      ]);
+    }
+  }, [error, dispatch]);
+
+  useEffect(() => {
+    // Pre-fill phone number if it's passed from the sign-up screen
+    if (route.params?.phoneNumber) {
+      setPhoneNumber(route.params.phoneNumber);
+    }
+  }, [route.params?.phoneNumber]);
+
+  const handleLogin = () => {
     if (!phoneNumber || !pin) {
       Alert.alert("Erreur", "Veuillez saisir votre numéro et votre PIN.");
       return;
     }
-
-    dispatch(setLoading(true));
-    try {
-      const response = await api.post("/auth/login", { phoneNumber, pin });
-
-      if (response.data.success) {
-        const { token } = response.data;
-        await AsyncStorage.setItem("userToken", token);
-        dispatch(setUserToken(token));
-      } else {
-        dispatch(setError(response.data.message));
-        Alert.alert("Erreur de connexion", response.data.message);
-      }
-    } catch (err) {
-      const message = err.response?.data?.message || "Une erreur est survenue.";
-      dispatch(setError(message));
-      Alert.alert("Erreur", message);
+    // Simple validation, can be improved
+    if (phoneNumber.length < 9 || pin.length < 4) {
+      Alert.alert("Erreur", "Le numéro ou le PIN est invalide.");
+      return;
     }
+    dispatch(loginUser({ phoneNumber, pin }));
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Content de vous revoir !</Text>
-      <Text style={styles.subtitle}>
-        Connectez-vous pour accéder à votre épargne
-      </Text>
+      <StatusBar barStyle="dark-content" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.mainContent}>
+            <View style={styles.header}>
+              <Text style={styles.title}>
+                Content de vous <Text style={styles.highlight}>revoir !</Text>
+              </Text>
+              <Text style={styles.subtitle}>
+                Connectez-vous pour accéder à votre épargne
+              </Text>
+            </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Votre numéro de téléphone</Text>
-        <View style={styles.phoneInputGroup}>
-          <Text style={styles.countryPrefix}>🇬🇦 +241</Text>
-          <TextInput
-            style={styles.phoneInput}
-            placeholder="06 12 34 56"
-            keyboardType="phone-pad"
-            onChangeText={setPhoneNumber}
-            value={phoneNumber}
-            maxLength={10}
-          />
-        </View>
-      </View>
+            <View style={styles.form}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Votre numéro de téléphone</Text>
+                <View style={styles.phoneInputGroup}>
+                  <Text style={styles.countryPrefix}>GA +241</Text>
+                  <TextInput
+                    style={styles.phoneInput}
+                    placeholder="07 72 12 12"
+                    keyboardType="phone-pad"
+                    onChangeText={setPhoneNumber}
+                    value={phoneNumber}
+                    maxLength={9}
+                  />
+                </View>
+              </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Votre PIN à 4 chiffres</Text>
-        <TextInput
-          style={styles.pinInput}
-          keyboardType="number-pad"
-          maxLength={4}
-          secureTextEntry
-          onChangeText={setPin}
-          value={pin}
-        />
-      </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Votre PIN à 4 chiffres</Text>
+                <TextInput
+                  style={styles.pinInput}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  secureTextEntry
+                  onChangeText={setPin}
+                  value={pin}
+                  placeholder="••••"
+                />
+              </View>
+            </View>
+          </View>
 
-      <TouchableOpacity style={styles.ctaButton} onPress={handleLogin}>
-        <Text style={styles.ctaText}>Se Connecter</Text>
-      </TouchableOpacity>
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={[styles.ctaButton, isLoading && styles.ctaDisabled]}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={COLORS.surface} />
+              ) : (
+                <Text style={styles.ctaText}>Se Connecter</Text>
+              )}
+            </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-        <Text style={styles.loginLink}>
-          Pas encore de compte ? S&apos;inscrire
-        </Text>
-      </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => (isLoading ? null : navigation.navigate("SignUp"))}
+              disabled={isLoading}
+            >
+              <Text style={styles.navLink}>
+                Pas encore de compte ? S&apos;inscrire
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -99,26 +144,46 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    justifyContent: "center",
-    padding: SIZES.padding,
+  },
+  content: {
+    flexGrow: 1,
+    justifyContent: "space-between", // Pushes header/form up and footer down
+    padding: SIZES.padding * 1.5,
+  },
+  mainContent: {
+    flex: 1, // Takes up available space
+    justifyContent: "center", // Center header and form vertically in their space
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: SIZES.padding * 3, // Increased space between header and form
   },
   title: {
-    ...FONTS.h1,
+    fontSize: 28, // Bigger title
+    fontWeight: "bold",
     textAlign: "center",
-    marginBottom: SIZES.sm,
+    color: COLORS.textPrimary,
+    marginBottom: SIZES.base,
+  },
+  highlight: {
+    color: COLORS.primary,
   },
   subtitle: {
-    ...FONTS.body1,
+    ...FONTS.body2,
     color: COLORS.textSecondary,
     textAlign: "center",
-    marginBottom: SIZES["3xl"],
+    maxWidth: "80%", // Avoid text stretching to edges
+  },
+  form: {
+    width: "100%",
   },
   inputContainer: {
-    marginBottom: SIZES.xl,
+    marginBottom: SIZES.xl, // Space between inputs
   },
   inputLabel: {
     ...FONTS.h4,
-    marginBottom: SIZES.base * 1.5,
+    color: COLORS.textPrimary,
+    marginBottom: SIZES.sm,
   },
   phoneInputGroup: {
     flexDirection: "row",
@@ -127,27 +192,35 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.border,
     borderRadius: SIZES.radius_lg,
-    paddingHorizontal: SIZES.padding / 2,
-    height: 56,
+    paddingHorizontal: SIZES.padding,
+    height: 56, // As per design system
   },
   countryPrefix: {
     ...FONTS.h4,
     color: COLORS.textPrimary,
     marginRight: SIZES.base,
+    fontWeight: "bold",
   },
   phoneInput: {
     flex: 1,
     ...FONTS.h4,
+    color: COLORS.textPrimary,
   },
   pinInput: {
-    ...FONTS.h1,
     backgroundColor: COLORS.surface,
     borderWidth: 2,
     borderColor: COLORS.border,
     borderRadius: SIZES.radius_lg,
-    height: 60,
+    height: 56, // As per design system
     textAlign: "center",
-    letterSpacing: 20,
+    color: COLORS.textPrimary,
+    fontSize: 24, // Bigger font for pin
+    letterSpacing: Platform.OS === "ios" ? 15 : 10, // Adjust spacing for better visuals
+  },
+  footer: {
+    width: "100%",
+    alignItems: "center",
+    paddingBottom: SIZES.padding, // Add some padding at the bottom
   },
   ctaButton: {
     backgroundColor: COLORS.primary,
@@ -155,17 +228,28 @@ const styles = StyleSheet.create({
     height: 56,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: SIZES.padding,
+    width: "100%", // Full width
+    marginBottom: SIZES.lg, // Space between button and link
+    elevation: 3,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  ctaDisabled: {
+    backgroundColor: "#D1D1D6",
+    elevation: 0,
   },
   ctaText: {
     ...FONTS.h4,
     color: COLORS.surface,
+    fontWeight: "bold",
   },
-  loginLink: {
-    ...FONTS.body1,
-    color: COLORS.textSecondary,
-    textAlign: "center",
-    textDecorationLine: "underline",
+  navLink: {
+    ...FONTS.body2,
+    color: COLORS.primary, // Make it stand out more
+    fontWeight: "600", // Bolder
+    padding: SIZES.base,
   },
 });
 

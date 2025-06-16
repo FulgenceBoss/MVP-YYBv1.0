@@ -93,3 +93,50 @@ Ce cycle recommence ensuite pour la tâche suivante. Le respect de ce processus 
       - La prochaine action prévue pour la reprise.
 
 **Objectif :** Garantir que chaque nouvelle session puisse démarrer instantanément avec une compréhension parfaite du contexte, sans perte d'information.
+
+---
+
+## Règle d'Or du Débogage : La Méthode des "Logs Numérotés"
+
+Face à un bug persistant ou un comportement inexpliqué (ex: une action qui ne se déclenche pas, un "gel" de l'application), la méthode de débogage suivante est **obligatoire** et doit être appliquée **systématiquement** avant de formuler des hypothèses complexes.
+
+**Principe Fondamental :** Transformer l'exécution du code en une histoire lisible pour identifier précisément la ligne qui échoue.
+
+### Processus en 3 Étapes
+
+1.  **Identifier la Fonction Suspecte :**
+
+    - Repérer la fonction qui est censée s'exécuter lorsque le bug se produit (ex: `handleLogin`, `onPressSave`, `verifyOtp`).
+
+2.  **Instrumenter le Code avec des Logs Numérotés :**
+
+    - Placer des `console.log()` numérotés et descriptifs au début de la fonction et avant/après chaque étape critique (appel `dispatch`, requête API, boucle, condition complexe).
+    - **Exemple Concret (`SignUpScreen.js`) :**
+
+      ```javascript
+      const handleReceiveCode = async () => {
+        console.log("[DEBUG] 1. Entrée dans la fonction.");
+        if (!isValid) return;
+
+        console.log("[DEBUG] 3. Avant dispatch.");
+        dispatch(setLoading(true));
+        console.log("[DEBUG] 4. Après dispatch.");
+
+        try {
+          console.log("[DEBUG] 5. Avant appel API.");
+          await api.post(...);
+          console.log("[DEBUG] 6. Après appel API.");
+        } catch (err) {
+          console.log("[DEBUG] 7. ERREUR CATCH:", err);
+        } finally {
+          console.log("[DEBUG] 8. Bloc FINALLY.");
+        }
+      };
+      ```
+
+3.  **Analyser la Séquence :**
+    - Lancer l'action dans l'application et observer le terminal.
+    - La **dernière ligne de log qui s'affiche** indique la section de code qui s'est exécutée avec succès. Le bug se trouve **immédiatement après**, sur la ligne qui aurait dû produire le log suivant.
+    - Cette information factuelle doit guider la correction, évitant les hypothèses hasardeuses.
+
+**Post-Débogage :** Une fois le bug résolu et validé, il est impératif de **retirer tous les logs de débogage** pour maintenir un code propre.

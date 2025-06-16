@@ -1,11 +1,9 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Or Expo SecureStore
+import { API_URL } from "./config"; // Import from the new config file
 
-// Configure this to your backend's URL
-// For local development with an Android emulator, use 'http://10.0.2.2:PORT'
-// For local development with an iOS simulator or web, and when using expo tunnel, use 'http://localhost:PORT'
-// For local development on a physical device, use your machine's local IP address
-const API_URL = "http://192.168.1.81:8080/api";
+// The base URL is now managed in config.js
+// const API_URL = "http://192.168.31.154:8080/api";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -17,11 +15,26 @@ const api = axios.create({
 // Interceptor to add the token to every request if it exists
 api.interceptors.request.use(
   async (config) => {
-    // We will use AsyncStorage for now, but switch to SecureStore for production
-    const token = await AsyncStorage.getItem("userToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // List of routes that don't require authentication
+    const publicRoutes = ["/auth/login", "/auth/register", "/auth/verify"];
+
+    // For public routes, we don't need to do anything with tokens.
+    // Return the config immediately.
+    if (publicRoutes.includes(config.url)) {
+      return config;
     }
+
+    // For protected routes, get the token and add it to the header.
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (e) {
+      // Handle potential errors from AsyncStorage
+      console.error("Failed to get token from storage", e);
+    }
+
     return config;
   },
   (error) => {

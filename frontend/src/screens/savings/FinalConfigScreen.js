@@ -15,6 +15,10 @@ import {
   setWallet,
   setOperator,
 } from "../../store/slices/savingsConfigSlice";
+import {
+  fetchDashboardData,
+  fetchTransactions,
+} from "../../store/slices/dashboardSlice";
 import { COLORS, FONTS, SIZES } from "../../constants/theme";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -28,6 +32,7 @@ const FinalConfigScreen = ({ navigation }) => {
   const { amount, deductionTime, wallet, operator } = useSelector(
     (state) => state.savingsConfig
   );
+  const { user } = useSelector((state) => state.auth);
 
   const [localTime, setLocalTime] = useState("20:00");
   const [showPicker, setShowPicker] = useState(false);
@@ -36,7 +41,12 @@ const FinalConfigScreen = ({ navigation }) => {
     // Initialize local state from Redux state
     if (deductionTime) setLocalTime(deductionTime);
     if (!operator) dispatch(setOperator("Moov")); // Default operator
-  }, [deductionTime, operator, dispatch]);
+
+    // Pre-fill wallet with the user's phone number if it exists and wallet is empty
+    if (user?.phoneNumber && !wallet) {
+      dispatch(setWallet(user.phoneNumber));
+    }
+  }, [deductionTime, operator, dispatch, user, wallet]);
 
   const onTimeChange = (event, selectedDate) => {
     setShowPicker(false);
@@ -62,6 +72,11 @@ const FinalConfigScreen = ({ navigation }) => {
           deductionTime: localTime,
         })
       ).unwrap();
+
+      // After saving, refetch dashboard data to ensure it's up to date
+      await dispatch(fetchDashboardData());
+      await dispatch(fetchTransactions());
+
       Alert.alert(
         "Configuration terminée !",
         "Votre épargne est maintenant active."

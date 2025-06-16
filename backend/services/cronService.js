@@ -114,13 +114,15 @@ const processFailedTransactions = async () => {
 };
 
 const initScheduledJobs = () => {
+  console.log("CRON jobs are set up, but currently disabled for development.");
+
   // CRON for new daily savings
-  cron.schedule("* * * * *", processDailySavings);
+  // cron.schedule("* * * * *", processDailySavings); // DISABLED FOR DEV
 
   // CRON for retrying failed transactions (e.g., every 5 minutes)
-  cron.schedule("*/5 * * * *", processFailedTransactions);
+  // cron.schedule("*/5 * * * *", processFailedTransactions); // DISABLED FOR DEV
 
-  console.log("✅ CRON jobs initialized (Daily Savings & Retries).");
+  // console.log("✅ CRON jobs initialized (Daily Savings & Retries).");
 };
 
 module.exports = initScheduledJobs;

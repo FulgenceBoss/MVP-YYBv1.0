@@ -31,19 +31,33 @@ export const saveSavingsConfig = createAsyncThunk(
   }
 );
 
+const initialState = {
+  amount: 1000,
+  deductionTime: "20:00",
+  wallet: "",
+  operator: "Moov",
+  active: true,
+  config: null,
+  configExists: null,
+  status: "idle",
+  error: null,
+};
+
 const savingsConfigSlice = createSlice({
   name: "savingsConfig",
-  initialState: {
-    amount: 1000,
-    deductionTime: "",
-    wallet: "",
-    active: true,
-    config: null,
-    configExists: null,
-    status: "idle",
-    error: null,
-  },
+  initialState,
   reducers: {
+    resetConfig: (state) => {
+      state.amount = initialState.amount;
+      state.deductionTime = initialState.deductionTime;
+      state.wallet = initialState.wallet;
+      state.operator = initialState.operator;
+      state.active = initialState.active;
+      state.config = initialState.config;
+      state.configExists = initialState.configExists;
+      state.status = initialState.status;
+      state.error = initialState.error;
+    },
     setAmount: (state, action) => {
       state.amount = action.payload;
     },
@@ -100,6 +114,7 @@ const savingsConfigSlice = createSlice({
 });
 
 export const {
+  resetConfig,
   setAmount,
   setDeductionTime,
   setWallet,

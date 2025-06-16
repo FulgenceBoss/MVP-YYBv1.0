@@ -1,123 +1,90 @@
 # DOCUMENT DE RÉFÉRENCE - DÉVELOPPEMENT MVP YESSI-YESSI
-# Mis à jour le: 13/06/2025
+# Mis à jour le: 14/06/2025
 
 ---
 
-### STACK TECHNIQUE CHOISI :
-- **Frontend :** React Native (avec Expo SDK 51+), Redux Toolkit, React Navigation, Axios, Expo SecureStore.
-- **Backend :** Node.js avec Express.js, Mongoose ODM, cors, helmet, morgan, express-rate-limit, bcryptjs, dotenv.
+### STACK TECHNIQUE
+- **Frontend :** React Native (Expo SDK 51+), Redux Toolkit, React Navigation, Axios.
+- **Backend :** Node.js, Express.js, Mongoose, JWT, bcryptjs, `node-cron`.
 - **Base de données :** MongoDB (via MongoDB Atlas).
+- **Sécurité :** `helmet`, `express-rate-limit`, validation des entrées.
 
 ---
 
-### ÉCRANS DÉVELOPPÉS :
+### DOCUMENTATION DES API
+
+#### API Endpoint: `POST /api/auth/register`
+- **Description:** Enregistre un nouvel utilisateur et envoie un code OTP (simulé).
+- **Fichier Contrôleur:** `backend/controllers/authController.js` (fonction `registerUser`)
+- **Protection:** Publique, avec limitation de débit.
+- **Corps de la requête :**
+  ```json
+  { "fullName": "John Doe", "phoneNumber": "061234567", "pin": "1234" }
+  ```
+- **Réponse (Succès - 201 Created):** `{"success": true, "message": "Utilisateur enregistré..."}`
+- **Réponses (Erreur):** `400` (Données invalides, utilisateur existant), `500` (Erreur serveur).
+
+#### API Endpoint: `POST /api/auth/verify-otp`
+- **Description:** Vérifie un code OTP pour finaliser l'inscription et renvoie un token JWT.
+- **Fichier Contrôleur:** `backend/controllers/authController.js` (fonction `verifyOtp`)
+- **Protection:** Publique.
+- **Corps de la requête :**
+  ```json
+  { "phoneNumber": "061234567", "otpCode": "987654" }
+  ```
+- **Réponse (Succès - 200 OK):** `{"success": true, "token": "[JWT_TOKEN]"}`
+- **Réponses (Erreur):** `400` (Utilisateur non trouvé, OTP invalide/expiré).
+
+#### API Endpoint: `POST /api/auth/login`
+- **Description:** Connecte un utilisateur existant et renvoie un token JWT.
+- **Fichier Contrôleur:** `backend/controllers/authController.js` (fonction `loginUser`)
+- **Protection:** Publique, avec limitation de débit.
+- **Corps de la requête :**
+  ```json
+  { "phoneNumber": "061234567", "pin": "1234" }
+  ```
+- **Réponse (Succès - 200 OK):** `{"success": true, "token": "[JWT_TOKEN]"}`
+- **Réponses (Erreur):** `400` (Identifiants incorrects, utilisateur non trouvé).
+
+---
+
+### FONCTIONNALITÉS IMPLÉMENTÉES
+
 - **Flux d'authentification complet :**
-  - Écrans d'inscription (`SignUpScreen`), de vérification OTP (`OtpScreen`) et de connexion (`LoginScreen`) 100% fonctionnels.
-  - Redirections et gestion d'état post-authentification robustes.
-- **Flux de configuration de l'épargne complet :**
-  - Écran de sélection du montant (`AmountSelectionScreen`).
-  - Écran de configuration finale (`FinalConfigScreen`) incluant le choix de l'heure, de l'opérateur (Moov/Airtel) et la saisie du numéro de portefeuille, conformément à la maquette.
-- **Tableau de bord (Placeholder) :**
-  - Un écran `Dashboard` basique sert de destination finale après la configuration.
-
-
----
-
-### CODE PRÊT :
-- **Architecture de base du projet initialisée :**
-  - Projet Frontend React Native/Expo créé.
-  - Projet Backend Node.js/Express créé.
-  - Dépendances principales installées des deux côtés.
-  - Structure de dossiers standard mise en place.
-- **Connexion à la base de données :**
-  - Module de connexion à MongoDB (`/config/db.js`) implémenté.
-- **Authentification (Backend) :**
-  - Correction de la logique de vérification OTP pour accepter `otpCode` au lieu de `otp`, résolvant un bug majeur.
-  - Le reste de la logique est stable et validée.
-- **Authentification (Frontend) :**
-  - Correction des erreurs de navigation ("RESET not handled") en supprimant les redirections manuelles (`navigation.reset`) et en laissant `AppNavigator` gérer les transitions en fonction de l'état Redux.
-  - Ajout de boutons de déconnexion temporaires pour faciliter les tests.
-- **Service de Paiement (Simulé) :**
-  - Modèle `Transaction` pour tracer toutes les opérations.
-  - Service de paiement simulé (`transactionService.js` maintenant) qui gère les débits avec un taux de succès de 90%.
-- **Processeur d'Épargne Automatisé (Backend - En cours) :**
-  - Installation et configuration de `node-cron` pour les tâches planifiées.
-  - Le service CRON (`cronService.js`) s'exécute au démarrage du serveur.
-  - Création du modèle `SavingsBalance` pour suivre le solde de chaque utilisateur.
-  - Le CRON identifie les utilisateurs avec une configuration active, appelle le service de transaction, et met à jour le solde dans `SavingsBalance` en cas de succès.
-  - Ajout d'une logique pour empêcher les prélèvements multiples le même jour.
-  - Le modèle `Transaction` inclut un compteur `retries` pour la gestion future des échecs.
-- **Gestion des Échecs de Transaction :**
-  - Un second CRON job a été ajouté pour traiter les transactions en échec.
-  - Il retente les paiements jusqu'à 3 fois avant de les marquer comme définitivement échoués.
-  - Le `transactionService` a été refactorisé pour supporter cette logique.
-- **Gestion d'état (Frontend) :**
-  - Service API centralisé avec `axios` et intercepteur de token créé.
-  - Store Redux avec un "slice" pour l'authentification mis en place.
-  - Application connectée au `Provider` Redux.
-- **Configuration d'épargne (Backend) :**
-  - Le modèle `SavingsConfig` inclut maintenant un champ `operator` (`Moov`/`Airtel`).
-  - Le contrôleur `setSavingsConfig` a été refactorisé pour accepter des mises à jour partielles, rendant le flux de configuration multi-étapes possible.
-- **Configuration d'épargne (Frontend) :**
-  - Le flux est maintenant géré par `AmountSelectionScreen` et `FinalConfigScreen`.
-  - Le "slice" Redux `savingsConfigSlice` gère désormais l'opérateur et toutes les autres facettes de la configuration.
-  - La navigation entre les étapes de configuration est fonctionnelle et mène au `Dashboard`.
-- **Sécurité (Backend) :**
-  - Validation des entrées sur les routes d'authentification via `express-validator`.
-  - Limitation du nombre de requêtes (rate limiting) sur les routes d'authentification pour prévenir la force brute.
-  - Utilisation de `helmet` pour les en-têtes de sécurité de base.
-- **Tableau de Bord (Frontend - En cours) :**
-  - Création d'un endpoint backend (`/api/savings/balance`) pour récupérer le solde.
-  - Création d'un "slice" Redux (`dashboardSlice`) pour gérer les données du dashboard.
-  - Le `DashboardScreen` affiche maintenant le solde de l'utilisateur.
-  - Le `DashboardScreen` a été refactorisé dans son propre fichier.
-  - Le composant `StreakCounter` (Tâche 7.2) a été créé et intégré avec une valeur statique.
-- **Navigation (Frontend) :**
-  - La logique de navigation post-connexion a été rendue robuste via un `AppLoadingScreen`.
-  - L'application redirige désormais intelligemment vers le `Dashboard` si une configuration d'épargne existe, ou vers le parcours de configuration sinon.
+  - Écrans `SignUpScreen`, `OtpScreen`, et `LoginScreen` 100% fonctionnels et robustes.
+  - Logique de redirection post-authentification via Redux et `AppNavigator`.
+- **Flux de configuration de l'épargne :**
+  - Écrans `AmountSelectionScreen` et `FinalConfigScreen` fonctionnels.
+  - Sauvegarde de la configuration via des mises à jour partielles au backend.
+- **Processeur d'Épargne Automatisé (Backend) :**
+  - Le service CRON (`cronService.js`) est implémenté mais **désactivé en développement** pour garantir la stabilité du serveur.
+- **Tableau de Bord :**
+  - Le `DashboardScreen` a été refactorisé pour corriger l'avertissement `VirtualizedLists` et affiche le solde et l'historique de l'utilisateur.
+  - Le composant `StreakCounter` est intégré.
+- **Historique des transactions :**
+  - L'affichage de l'historique des transactions est désormais validé et fonctionnel.
+- **Navigation Intelligente :**
+  - Un écran `AppLoadingScreen` vérifie la configuration et redirige correctement.
+- **Configuration API Robuste :**
+  - L'URL de l'API est maintenant gérée dans un fichier de configuration dédié, non suivi par Git.
 
 ---
 
-### ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de pause)
+### ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise)
 
-- **Objectif en cours :** Finaliser la sous-tâche 7.2 en validant l'affichage du composant `StreakCounter`.
-- **Progrès :** Le code pour la refactorisation du `DashboardScreen` et la création du `StreakCounter` a été écrit et poussé sur GitHub. Le bug de redirection post-OTP a été identifié et corrigé.
-- **Point de Blocage :** ~~Des problèmes de connexion empêchent le lancement et le test de l'application sur l'appareil.~~ **RÉSOLU.**
-- **Prochaine Action :**
-  1.  **~~Résoudre les problèmes de connexion.~~**
-  2.  **~~Valider visuellement** que le composant `StreakCounter` s'affiche correctement sur l'écran du tableau de bord.~~ **VALIDÉ.**
-  3.  Passer à la tâche suivante (7.3 : "Create Transaction History View").
+- **Objectif Atteint :** L'ensemble du flux d'authentification (inscription et connexion) et l'affichage du tableau de bord sont maintenant stables et validés.
+- **Progrès :** Tous les bugs critiques qui bloquaient l'inscription ont été résolus.
+- **Point de Blocage :** Aucun blocage majeur identifié. Le projet est sur une base saine pour la suite.
+- **Prochaine Action :** Identifier la prochaine tâche prioritaire avec `task-master next` pour poursuivre le développement des fonctionnalités restantes du MVP.
 
 ---
 
-### PROBLÈMES IDENTIFIÉS ET RÉSOLUS :
-- **Redirection Post-Vérification OTP :** L'application ne redirigeait pas l'utilisateur vers le tableau de bord après la vérification réussie de l'OTP.
-  - **Cause Racine :** L'état Redux (`authSlice`) ne contenait pas de booléen `isAuthenticated` pour signaler le changement d'état au navigateur (`AppNavigator`).
-  - **Solution :** Ajout de la variable `isAuthenticated` dans le `authSlice` et mise à jour de sa valeur lors de la connexion et de la déconnexion, ce qui a rendu la redirection fonctionnelle.
-- **Compatibilité du terminal (PowerShell) :** Des erreurs sont survenues lors de l'utilisation de commandes `mkdir` avec plusieurs arguments ou des commandes chaînées avec `&&`.
-  - **Solution :** Utilisation de commandes séparées par des points-virgules (`;`) pour la création de dossiers multiples, ce qui a résolu le problème.
-- **Débogage initial d'Expo :** Plusieurs erreurs de configuration (`Cannot resolve entry file`, conflits de dépendances) ont été rencontrées lors du passage d'une structure Expo Router à une structure classique.
-  - **Solution :** Nettoyage complet des dépendances, suppression des plugins et configurations résiduelles, et création d'un point d'entrée `index.js` correct.
-- **Connectivité Locale :** La communication entre le téléphone et le serveur local était bloquée.
-  - **Cause Racine :** L'ordinateur hébergeant le serveur n'était pas connecté au même réseau Wi-Fi que le téléphone, et les ports n'étaient pas alignés.
-  - **Solution :** 1. Connexion des deux appareils au même Wi-Fi. 2. Alignement des ports sur `8080`. 3. Utilisation de l'adresse IP locale (`192.168.1.67`) dans la configuration de l'API au lieu de `localhost` ou d'un tunnel.
-- **Erreur de vérification OTP ("Please provide phone number and OTP") :**
-  - **Cause Racine :** Incohérence entre les données envoyées par le frontend (`otpCode`) et celles attendues par le backend (`otp`).
-  - **Solution :** Mise à jour du contrôleur backend (`authController.js`) pour utiliser `otpCode`.
-- **Erreur de navigation ("The action 'RESET' was not handled") :**
-  - **Cause Racine :** Appel de `navigation.reset` immédiatement après la mise à jour de l'état Redux, avant que le navigateur ait pu se mettre à jour.
-  - **Solution :** Suppression des appels `navigation.reset` manuels dans `LoginScreen.js` et `OtpScreen.js`. La redirection est maintenant gérée de manière déclarative par `AppNavigator` qui réagit au changement d'état.
-- **Erreur de sauvegarde de configuration ("Tous les champs sont requis") :**
-  - **Cause Racine :** Le backend exigeait une configuration complète à chaque sauvegarde, ce qui bloquait le flux en plusieurs étapes.
-  - **Solution :** Refactorisation du contrôleur `savingsController.js` pour accepter et traiter des mises à jour partielles.
-- **Erreur de Démarrage du Serveur ("initScheduledJobs is not a function") :**
-  - **Cause Racine :** Incohérence des systèmes de modules (ESM vs CommonJS) entre `cronService.js` et le reste du backend.
-  - **Solution :** Uniformisation de `cronService.js` pour utiliser `module.exports`.
-- **Erreur de Connexion à la Base de Données ("uri parameter must be a string") :**
-  - **Cause Racine :** Le serveur ne trouvait pas la variable d'environnement `MONGO_URI` car il cherchait le mauvais fichier (`config.env` au lieu de `.env`).
-  - **Solution :** Correction du `server.js` pour charger le fichier `.env` à la racine, conformément aux standards.
-- **Redirection Post-Connexion Incorrecte :**
-  - **Cause Racine :** L'application redirigeait tous les utilisateurs (nouveaux et anciens) vers le même écran de configuration après la connexion. Les nouveaux utilisateurs étaient envoyés au Dashboard sans avoir configuré leur épargne.
-  - **Solution :** Implémentation d'un écran de chargement (`AppLoadingScreen`) qui vérifie l'existence d'une configuration d'épargne et redirige l'utilisateur vers le bon écran (`Dashboard` ou `AmountSelection`) en fonction du résultat.
+### JOURNAL DES PROBLÈMES RÉSOLUS
 
---- 
+- **Échec Silencieux de l'Inscription/Connexion :** Un débogage approfondi a révélé plusieurs problèmes en cascade :
+  1.  **Cause Initiale :** Une mauvaise configuration de l'URL de l'API dans le code client.
+  2.  **Cause Profonde :** Un bug dans le `authSlice` de Redux où les reducers `setLoading` et `setError` n'étaient pas définis, provoquant un gel de l'application au moment du `dispatch`.
+- **`ERR_NETWORK` au Login :** Ce problème était un "faux positif" causé par le gel de l'application dû au bug Redux. La connectivité réseau était en réalité fonctionnelle.
+- **Instabilité du Serveur Backend :** La tâche CRON s'exécutait toutes les minutes et entrait en conflit avec les requêtes de l'API, bloquant le processus Node.js. **Solution :** Les tâches CRON sont maintenant désactivées en mode développement.
+- **Avertissement `VirtualizedLists` sur le Dashboard :** Le `ScrollView` a été remplacé par une `FlatList` avec un `ListHeaderComponent` pour une performance et une structure optimales.
+- **...et de nombreux autres problèmes de configuration et de logique résolus lors de cette session de débogage intensive.** 

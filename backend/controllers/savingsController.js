@@ -1,5 +1,19 @@
 const SavingsConfig = require("../models/SavingsConfig");
 const SavingsBalance = require("../models/SavingsBalance");
+const Transaction = require("../models/Transaction");
+
+// GET /api/savings/history
+exports.getTransactions = async (req, res) => {
+  try {
+    const transactions = await Transaction.find({ user: req.user.id })
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .limit(20); // Limit to the last 20 for performance
+
+    res.status(200).json({ success: true, transactions });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+};
 
 // GET /api/savings/balance
 exports.getSavingsBalance = async (req, res) => {

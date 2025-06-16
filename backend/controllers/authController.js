@@ -5,8 +5,9 @@ const { generateToken } = require("../middleware/authMiddleware");
 // @desc    Register a new user / Send OTP
 // @route   POST /api/auth/register
 // @access  Public
-exports.register = async (req, res, next) => {
+const registerUser = async (req, res, next) => {
   const { phoneNumber } = req.body;
+  console.log(`[Auth] Tentative d'inscription pour : ${phoneNumber}`);
 
   if (!phoneNumber) {
     return res
@@ -16,6 +17,16 @@ exports.register = async (req, res, next) => {
 
   try {
     let user = await User.findOne({ phoneNumber });
+
+    // If user exists and is already verified, they should log in.
+    if (user && user.verificationStatus === "verified") {
+      return res.status(409).json({
+        success: false,
+        message:
+          "Ce numéro de téléphone est déjà utilisé. Veuillez vous connecter.",
+        errorCode: "USER_ALREADY_EXISTS",
+      });
+    }
 
     const otp = generateOTP();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
@@ -55,61 +66,67 @@ exports.register = async (req, res, next) => {
 // @desc    Verify OTP and create user session
 // @route   POST /api/auth/verify
 // @access  Public
-exports.verifyOTP = async (req, res, next) => {
-  console.log("BODY REÇU :", req.body);
+const verifyOtp = async (req, res, next) => {
   const { phoneNumber, otpCode, pin } = req.body;
+  console.log(`[Auth] Tentative de vérification OTP pour : ${phoneNumber}`);
 
-  if (!phoneNumber || !otpCode) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please provide phone number and OTP" });
+  if (!phoneNumber || !otpCode || !pin) {
+    return res.status(400).json({
+      success: false,
+      message: "Données manquantes (téléphone, OTP ou PIN).",
+    });
   }
 
   try {
     const user = await User.findOne({
       phoneNumber,
       otpCode: otpCode,
-      otpExpiry: { $gt: Date.now() }, // Check if OTP is not expired
+      otpExpiry: { $gt: Date.now() },
     });
 
     if (!user) {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid OTP or OTP has expired" });
+        .json({ success: false, message: "OTP invalide ou expiré." });
     }
 
-    // At this point, the user is real. Now they need to set a PIN.
-    // For now, let's assume they set a PIN on the client and send it.
-    // In a real flow, you'd have a separate `set-pin` endpoint.
-    if (!pin || pin.length !== 4) {
+    if (pin.length !== 4) {
       return res
         .status(400)
-        .json({ success: false, message: "Please provide a 4-digit PIN" });
+        .json({ success: false, message: "Le PIN doit contenir 4 chiffres." });
     }
 
     user.pin = pin;
     user.verificationStatus = "verified";
-    user.otpCode = undefined; // Invalidate OTP
+    user.otpCode = undefined;
     user.otpExpiry = undefined;
+
     await user.save();
+
+    const token = generateToken(user._id);
 
     res.status(201).json({
       success: true,
-      message: "User verified and registered successfully",
-      token: generateToken(user._id),
+      message: "Utilisateur vérifié et enregistré avec succès",
+      token: token,
+      user: { phoneNumber: user.phoneNumber },
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Server Error", error: error.message });
+    console.error("Erreur interne lors de la vérification OTP:", error);
+    res.status(500).json({
+      success: false,
+      message: "Une erreur interne est survenue.",
+      error: error.message,
+    });
   }
 };
 
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-exports.login = async (req, res, next) => {
+const loginUser = async (req, res, next) => {
   const { phoneNumber, pin } = req.body;
+  console.log(`[Auth] Tentative de connexion pour : ${phoneNumber}`);
 
   if (!phoneNumber || !pin) {
     return res
@@ -137,13 +154,22 @@ exports.login = async (req, res, next) => {
     }
 
     // User is logged in, send token
+    const token = generateToken(user._id);
+
     res.status(200).json({
       success: true,
-      token: generateToken(user._id),
+      token: token,
+      user: { phoneNumber: user.phoneNumber },
     });
   } catch (error) {
     res
       .status(500)
       .json({ success: false, message: "Server Error", error: error.message });
   }
+};
+
+module.exports = {
+  registerUser,
+  verifyOtp,
+  loginUser,
 };

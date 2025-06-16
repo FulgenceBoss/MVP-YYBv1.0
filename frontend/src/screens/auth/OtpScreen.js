@@ -95,7 +95,7 @@ const OtpScreen = ({ route, navigation }) => {
       if (response.data.success) {
         const { token } = response.data;
         await AsyncStorage.setItem("userToken", token);
-        dispatch(setUserToken(token));
+        dispatch(setUserToken(response.data));
       } else {
         dispatch(setError(response.data.message));
         Alert.alert("Erreur de vérification", response.data.message);

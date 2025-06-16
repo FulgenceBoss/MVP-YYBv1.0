@@ -13,23 +13,21 @@ const savingsRoutes = require("./routes/savings");
 // Load env vars from root .env file
 dotenv.config();
 
-// Connect to database
-connectDB();
-
 const app = express();
 
 // Middlewares
 app.use(express.json()); // Body parser
 app.use(cors()); // Enable CORS
 app.use(helmet()); // Set security headers
-app.use(morgan("dev")); // Log HTTP requests
+
+// Use morgan for logging, but only in development environment
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 
 // Mount routers
 app.use("/api/auth", authRoutes);
 app.use("/api/savings", savingsRoutes);
-
-// Initialize CRON jobs
-initScheduledJobs();
 
 app.get("/", (req, res) => {
   res.send("API is running...");
@@ -37,4 +35,22 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const startServer = async () => {
+  try {
+    await connectDB();
+    console.log("MongoDB Connected...");
+
+    app.listen(PORT, () => {
+      console.log(
+        `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
+      );
+      // Initialize CRON jobs only after the server is successfully running
+      initScheduledJobs();
+    });
+  } catch (err) {
+    console.error("Failed to connect to MongoDB", err);
+    process.exit(1);
+  }
+};
+
+startServer();

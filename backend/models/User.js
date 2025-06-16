@@ -15,9 +15,7 @@ const UserSchema = new mongoose.Schema(
     },
     pin: {
       type: String,
-      required: false, // Not required on initial creation, but will be set on verification
-      minlength: 4,
-      maxlength: 4,
+      required: false, // Not required on initial creation
       select: false, // Do not return pin by default on queries
     },
     verificationStatus: {
