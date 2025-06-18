@@ -69,3 +69,6 @@ templates/
 PRD.txt
 REF-YESSI-MVP.txt
 WORKFLOW.md
+
+# Fichiers de configuration sensibles
+google-services.json

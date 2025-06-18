@@ -4,8 +4,11 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { useSelector, useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setUserToken } from "../store/slices/authSlice";
-import { ActivityIndicator, View, StyleSheet } from "react-native";
+import { ActivityIndicator, View, StyleSheet, Alert } from "react-native";
 import { COLORS } from "../constants/theme";
+
+// Import du nouveau service
+import { registerForPushNotificationsAsync } from "../services/notificationService";
 
 // Import Screens
 import LoginScreen from "../screens/auth/LoginScreen";
@@ -46,6 +49,22 @@ const AppNavigator = () => {
 
     bootstrapAsync();
   }, [dispatch]);
+
+  // Nouveau useEffect pour les notifications
+  useEffect(() => {
+    const registerAndShowToken = async () => {
+      if (userToken) {
+        const result = await registerForPushNotificationsAsync();
+        if (result.error) {
+          Alert.alert("Erreur de Notification", result.error);
+        } else if (result.token) {
+          // Pour le test, nous affichons le token. Plus tard, nous l'enverrons au serveur.
+          Alert.alert("Token de Notification Obtenu", result.token);
+        }
+      }
+    };
+    registerAndShowToken();
+  }, [userToken]);
 
   if (isLoading) {
     return (
