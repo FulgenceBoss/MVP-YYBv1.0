@@ -5,11 +5,12 @@ import { resetConfig } from "./savingsConfigSlice";
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
-  async ({ phoneNumber, pin }, { rejectWithValue }) => {
+  async ({ phoneNumber, pin }, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.post("/auth/login", { phoneNumber, pin });
       const { token, user } = response.data;
       await AsyncStorage.setItem("userToken", token);
+      dispatch(resetConfig());
       return { token, user };
     } catch (err) {
       // Log the full error for debugging

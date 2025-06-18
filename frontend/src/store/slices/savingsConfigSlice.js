@@ -1,63 +1,44 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
-// Thunk pour récupérer la config
+// Thunk to fetch savings configuration
 export const fetchSavingsConfig = createAsyncThunk(
-  "savingsConfig/fetch",
-  async (_, thunkAPI) => {
+  "savingsConfig/fetchConfig",
+  async (_, { rejectWithValue }) => {
     try {
-      const res = await api.get("/savings/config");
-      return res.data.config;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Erreur serveur"
-      );
+      const response = await api.get("/savings/config");
+      return response.data.config;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
     }
   }
 );
 
-// Thunk pour sauvegarder la config
-export const saveSavingsConfig = createAsyncThunk(
-  "savingsConfig/save",
-  async (payload, thunkAPI) => {
+// Thunk to update savings configuration
+export const updateSavingsConfig = createAsyncThunk(
+  "savingsConfig/updateConfig",
+  async (configData, { rejectWithValue }) => {
     try {
-      const res = await api.post("/savings/config", payload);
-      return res.data.config;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Erreur serveur"
-      );
+      const response = await api.post("/savings/config", configData);
+      return response.data.config;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
     }
   }
 );
-
-const initialState = {
-  amount: 1000,
-  deductionTime: "20:00",
-  wallet: "",
-  operator: "Moov",
-  active: true,
-  config: null,
-  configExists: null,
-  status: "idle",
-  error: null,
-};
 
 const savingsConfigSlice = createSlice({
   name: "savingsConfig",
-  initialState,
+  initialState: {
+    config: null,
+    status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
+    error: null,
+    amount: 1000, // Valeur par défaut
+    deductionTime: "20:00",
+    wallet: "",
+    operator: "Moov",
+  },
   reducers: {
-    resetConfig: (state) => {
-      state.amount = initialState.amount;
-      state.deductionTime = initialState.deductionTime;
-      state.wallet = initialState.wallet;
-      state.operator = initialState.operator;
-      state.active = initialState.active;
-      state.config = initialState.config;
-      state.configExists = initialState.configExists;
-      state.status = initialState.status;
-      state.error = initialState.error;
-    },
     setAmount: (state, action) => {
       state.amount = action.payload;
     },
@@ -70,45 +51,37 @@ const savingsConfigSlice = createSlice({
     setOperator: (state, action) => {
       state.operator = action.payload;
     },
-    setActive: (state, action) => {
-      state.active = action.payload;
+    resetConfig: (state) => {
+      state.config = null;
+      state.status = "idle";
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
+      // Fetch config
       .addCase(fetchSavingsConfig.pending, (state) => {
         state.status = "loading";
       })
       .addCase(fetchSavingsConfig.fulfilled, (state, action) => {
-        state.status = "success";
-        if (action.payload) {
-          state.config = action.payload;
-          state.amount = action.payload.amount;
-          state.deductionTime = action.payload.deductionTime;
-          state.wallet = action.payload.wallet;
-          state.operator = action.payload.operator;
-          state.active = action.payload.active;
-          state.configExists = true;
-        } else {
-          state.configExists = false;
-        }
-      })
-      .addCase(fetchSavingsConfig.rejected, (state, action) => {
-        state.status = "error";
-        state.error = action.payload;
-        state.configExists = false;
-      })
-      .addCase(saveSavingsConfig.pending, (state) => {
-        state.status = "loading";
-        state.error = null;
-      })
-      .addCase(saveSavingsConfig.fulfilled, (state, action) => {
-        state.status = "success";
+        state.status = "succeeded";
         state.config = action.payload;
       })
-      .addCase(saveSavingsConfig.rejected, (state, action) => {
-        state.status = "error";
-        state.error = action.payload;
+      .addCase(fetchSavingsConfig.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload.message;
+      })
+      // Update config
+      .addCase(updateSavingsConfig.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(updateSavingsConfig.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.config = action.payload;
+      })
+      .addCase(updateSavingsConfig.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload.message;
       });
   },
 });
@@ -118,7 +91,7 @@ export const {
   setAmount,
   setDeductionTime,
   setWallet,
-  setActive,
   setOperator,
 } = savingsConfigSlice.actions;
+
 export default savingsConfigSlice.reducer;

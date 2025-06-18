@@ -25,6 +25,26 @@ export const fetchTransactions = createAsyncThunk(
   }
 );
 
+export const saveManualTransaction = createAsyncThunk(
+  "dashboard/saveManualTransaction",
+  async (amount, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/savings/deposit", { amount });
+      return response.data; // Devrait contenir la nouvelle transaction
+    } catch (error) {
+      // Gérer les erreurs où la réponse du serveur existe mais est une erreur (ex: 400, 500)
+      if (error.response && error.response.data) {
+        return rejectWithValue(error.response.data);
+      }
+      // Gérer les erreurs réseau (serveur éteint) ou autres erreurs inattendues
+      return rejectWithValue({
+        message:
+          "Impossible de joindre le serveur. Veuillez vérifier votre connexion internet et réessayer.",
+      });
+    }
+  }
+);
+
 const dashboardSlice = createSlice({
   name: "dashboard",
   initialState: {
@@ -34,6 +54,8 @@ const dashboardSlice = createSlice({
     transactions: [],
     transactionsStatus: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
     transactionsError: null,
+    manualSaveStatus: "idle", // Pour suivre l'état de l'épargne manuelle
+    manualSaveError: null,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -60,6 +82,20 @@ const dashboardSlice = createSlice({
       .addCase(fetchTransactions.rejected, (state, action) => {
         state.transactionsStatus = "failed";
         state.transactionsError = action.payload.message;
+      })
+      .addCase(saveManualTransaction.pending, (state) => {
+        state.manualSaveStatus = "loading";
+        state.manualSaveError = null;
+      })
+      .addCase(saveManualTransaction.fulfilled, (state, action) => {
+        state.manualSaveStatus = "succeeded";
+        // Ajouter la nouvelle transaction à la liste et mettre à jour le solde
+        state.transactions.unshift(action.payload.transaction);
+        state.balance = action.payload.newBalance;
+      })
+      .addCase(saveManualTransaction.rejected, (state, action) => {
+        state.manualSaveStatus = "failed";
+        state.manualSaveError = action.payload.message;
       });
   },
 });

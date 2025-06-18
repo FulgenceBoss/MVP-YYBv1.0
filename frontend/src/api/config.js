@@ -5,6 +5,6 @@
 // 2. Replace the IP address below with your computer's local IP address.
 // 3. Make sure your backend server is running on port 8080.
 
-const API_BASE_URL = "http://192.168.1.81:8080"; // <-- IMPORTANT: CHANGE THIS IP
+const API_BASE_URL = "http://192.168.1.75:8080"; // <-- IMPORTANT: CHANGE THIS IP
 
 export const API_URL = `${API_BASE_URL}/api`;

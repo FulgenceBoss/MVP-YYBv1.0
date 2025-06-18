@@ -6,256 +6,677 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  SafeAreaView,
   Alert,
+  Dimensions,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  interpolate,
+  Extrapolate,
+  runOnJS,
+} from "react-native-reanimated";
 import {
-  saveSavingsConfig,
+  updateSavingsConfig,
   setDeductionTime,
   setWallet,
   setOperator,
 } from "../../store/slices/savingsConfigSlice";
-import {
-  fetchDashboardData,
-  fetchTransactions,
-} from "../../store/slices/dashboardSlice";
-import { COLORS, FONTS, SIZES } from "../../constants/theme";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
-const OPERATORS = {
-  Moov: { name: "Moov", logo: "M", color: "#FF6B00" },
-  Airtel: { name: "Airtel", logo: "A", color: "#E60012" },
+// Ces couleurs sont basées sur le :root de la maquette HTML
+const localColors = {
+  primary: "#2e7d32",
+  secondary: "#1976d2",
+  success: "#4caf50",
+  bg: "#fafafa",
+  surface: "#ffffff",
+  textPrimary: "#212121",
+  textSecondary: "#757575",
+  border: "#e0e0e0",
+  lightGreen: "#e8f5e8",
+  lightBlue: "#e3f2fd",
+  moovOrange: "#ff6b00",
+  airtelRed: "#e60012",
 };
 
-const FinalConfigScreen = ({ navigation }) => {
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const FinalConfigScreenV2 = ({ navigation }) => {
+  console.log("[DEBUG] 1. Rendu du composant FinalConfigScreenV2.");
   const dispatch = useDispatch();
   const { amount, deductionTime, wallet, operator } = useSelector(
     (state) => state.savingsConfig
   );
   const { user } = useSelector((state) => state.auth);
 
-  const [localTime, setLocalTime] = useState("20:00");
-  const [showPicker, setShowPicker] = useState(false);
-
+  // Initialisation de l'état local depuis Redux
   useEffect(() => {
-    // Initialize local state from Redux state
-    if (deductionTime) setLocalTime(deductionTime);
-    if (!operator) dispatch(setOperator("Moov")); // Default operator
-
-    // Pre-fill wallet with the user's phone number if it exists and wallet is empty
+    console.log(
+      "[DEBUG] 2. useEffect - Configuration initiale (opérateur, portefeuille)."
+    );
+    if (!operator) dispatch(setOperator("Moov")); // Opérateur par défaut
     if (user?.phoneNumber && !wallet) {
       dispatch(setWallet(user.phoneNumber));
     }
-  }, [deductionTime, operator, dispatch, user, wallet]);
+  }, [operator, dispatch, user, wallet]);
 
-  const onTimeChange = (event, selectedDate) => {
-    setShowPicker(false);
-    if (event.type === "set" && selectedDate) {
-      const hours = selectedDate.getHours().toString().padStart(2, "0");
-      const minutes = selectedDate.getMinutes().toString().padStart(2, "0");
-      setLocalTime(`${hours}:${minutes}`);
-    }
+  const [sliderWidth, setSliderWidth] = useState(0);
+  const position = useSharedValue(0);
+  const savedPosition = useSharedValue(0);
+
+  const timeContexts = {
+    6: "Tôt le matin",
+    7: "Début de matinée",
+    8: "Avant le travail",
+    9: "Matinée",
+    10: "Matinée",
+    11: "Fin de matinée",
+    12: "Midi",
+    13: "Début d'après-midi",
+    14: "Après-midi",
+    15: "Après-midi",
+    16: "Fin d'après-midi",
+    17: "Fin de journée",
+    18: "Après le travail",
+    19: "Début de soirée",
+    20: "Après votre journée de travail",
+    21: "Soirée",
+    22: "Soirée",
+    23: "Fin de soirée",
   };
+  const [time, setTime] = useState(20);
+  const [timeContext, setTimeContext] = useState(timeContexts[20]);
+
+  const updateReactState = (newHour) => {
+    "worklet";
+    runOnJS(setTime)(newHour);
+    runOnJS(setTimeContext)(timeContexts[newHour] || "Horaire personnalisé");
+  };
+
+  useEffect(() => {
+    if (sliderWidth > 0) {
+      const initialPercentage = ((20 - 6) / 17) * 100;
+      const initialPos = (initialPercentage / 100) * sliderWidth;
+      position.value = initialPos;
+      savedPosition.value = initialPos;
+    }
+  }, [sliderWidth]);
+
+  const panGesture = Gesture.Pan()
+    .onBegin(() => {
+      console.log("[DEBUG] 4. onBegin - Début du geste de glissement.");
+    })
+    .onUpdate((e) => {
+      if (sliderWidth === 0) return;
+      const newPos = savedPosition.value + e.translationX;
+      position.value = Math.max(0, Math.min(newPos, sliderWidth));
+
+      const percentage = (position.value / sliderWidth) * 100;
+      const newHour = Math.round(6 + (percentage / 100) * 17);
+      updateReactState(newHour);
+    })
+    .onEnd(() => {
+      console.log("[DEBUG] 6. onEnd - Fin du geste de glissement.");
+      savedPosition.value = position.value;
+    });
+
+  const animatedThumbStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: position.value }],
+    };
+  });
+
+  const animatedTrackStyle = useAnimatedStyle(() => {
+    return {
+      width: position.value,
+    };
+  });
 
   const handleSave = async () => {
     if (!wallet || wallet.length < 8) {
       Alert.alert("Erreur", "Veuillez saisir un numéro de téléphone valide.");
       return;
     }
-
     try {
       await dispatch(
-        saveSavingsConfig({
+        updateSavingsConfig({
           amount,
           operator,
           wallet,
-          deductionTime: localTime,
+          deductionTime: `${String(time).padStart(2, "0")}:00`,
         })
       ).unwrap();
-
-      // After saving, refetch dashboard data to ensure it's up to date
-      await dispatch(fetchDashboardData());
-      await dispatch(fetchTransactions());
-
       Alert.alert(
         "Configuration terminée !",
         "Votre épargne est maintenant active."
       );
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Dashboard" }],
-      });
+      navigation.reset({ index: 0, routes: [{ name: "Dashboard" }] });
     } catch (e) {
       Alert.alert("Erreur", e.message || "Erreur lors de la sauvegarde");
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Finalisez votre épargne</Text>
-      <Text style={styles.subtitle}>Plus que quelques détails !</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        style={styles.configScreen}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Navigation */}
+        <View style={styles.navHeader}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backButtonText}>←</Text>
+          </TouchableOpacity>
+          <View style={styles.progressIndicator}>
+            <View style={styles.progressBar}>
+              <View style={styles.progressFill} />
+            </View>
+            <Text style={styles.progressText}>Étape 4/4</Text>
+          </View>
+        </View>
 
-      {/* Time Selection */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Heure de prélèvement</Text>
-        <TouchableOpacity
-          style={styles.timeButton}
-          onPress={() => setShowPicker(true)}
-        >
-          <Text style={styles.timeText}>{localTime}</Text>
-        </TouchableOpacity>
-        {showPicker && (
-          <DateTimePicker
-            value={new Date()}
-            mode="time"
-            is24Hour
-            display="default"
-            onChange={onTimeChange}
-          />
-        )}
-      </View>
+        {/* Main Content */}
+        <View style={styles.mainContent}>
+          {/* Hero Section */}
+          <View style={styles.heroSection}>
+            <Text style={styles.mainTitle}>
+              Finalisons votre épargne automatique
+            </Text>
+            <Text style={styles.mainSubtitle}>
+              Plus que quelques détails et c&apos;est parti !
+            </Text>
+          </View>
 
-      {/* Operator Selection */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Choisissez votre mobile money</Text>
-        <View style={styles.operatorContainer}>
-          {Object.values(OPERATORS).map((op) => (
-            <TouchableOpacity
-              key={op.name}
-              style={[
-                styles.operatorCard,
-                operator === op.name && styles.selectedOperator,
-                { borderColor: op.color },
-              ]}
-              onPress={() => dispatch(setOperator(op.name))}
-            >
-              <View style={[styles.logo, { backgroundColor: op.color }]}>
-                <Text style={styles.logoText}>{op.logo}</Text>
+          {/* Time Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Prélèvement quotidien à :</Text>
+            <Text style={styles.sectionSubtitle}>
+              Choisissez l&apos;heure qui vous convient
+            </Text>
+            <View style={styles.timeSelector}>
+              <View style={styles.timeDisplay}>
+                <Text style={styles.timeValue}>{`${String(time).padStart(
+                  2,
+                  "0"
+                )}:00`}</Text>
+                <Text style={styles.timeContext}>{timeContext}</Text>
               </View>
-              <Text style={styles.operatorName}>{op.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+              <GestureDetector gesture={panGesture}>
+                <View
+                  onLayout={(e) => {
+                    console.log(
+                      `[DEBUG] 7. onLayout exécuté. Largeur du slider détectée : ${e.nativeEvent.layout.width}`
+                    );
+                    setSliderWidth(e.nativeEvent.layout.width);
+                  }}
+                  style={styles.timeSlider}
+                >
+                  <Animated.View
+                    style={[styles.timeTrack, animatedTrackStyle]}
+                  />
+                  <Animated.View
+                    style={[styles.timeThumb, animatedThumbStyle]}
+                  />
+                </View>
+              </GestureDetector>
+              <View style={styles.timeLabels}>
+                <Text>6h</Text>
+                <Text>12h</Text>
+                <Text>18h</Text>
+                <Text>23h</Text>
+              </View>
+              <View style={styles.popularTime}>
+                <Text style={styles.popularText}>
+                  ⭐ Horaire populaire : 20h00
+                </Text>
+              </View>
+            </View>
+          </View>
 
-      {/* Phone Number Input */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Votre numéro de portefeuille</Text>
-        <View style={styles.phoneInputContainer}>
-          <Text style={styles.prefix}>+241</Text>
-          <TextInput
-            style={styles.phoneInput}
-            placeholder="0X XX XX XX"
-            keyboardType="phone-pad"
-            value={wallet}
-            onChangeText={(text) => dispatch(setWallet(text))}
-            maxLength={9}
-          />
-        </View>
-      </View>
+          {/* Mobile Money Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Choisissez votre mobile money
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Sélectionnez votre opérateur
+            </Text>
+            <View style={styles.operatorSelection}>
+              <TouchableOpacity
+                style={[
+                  styles.operatorCard,
+                  operator === "Moov" && styles.selectedMoovCard,
+                ]}
+                onPress={() => dispatch(setOperator("Moov"))}
+              >
+                {operator === "Moov" && (
+                  <View style={styles.selectedBadge}>
+                    <Text style={{ color: "white" }}>✓</Text>
+                  </View>
+                )}
+                <View
+                  style={[
+                    styles.operatorLogo,
+                    { backgroundColor: localColors.moovOrange },
+                  ]}
+                >
+                  <Text style={styles.logoText}>M</Text>
+                </View>
+                <Text style={styles.operatorName}>Moov</Text>
+                <Text style={styles.operatorSubtitle}>Partenaire officiel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.operatorCard,
+                  operator === "Airtel" && styles.selectedAirtelCard,
+                ]}
+                onPress={() => dispatch(setOperator("Airtel"))}
+              >
+                {operator === "Airtel" && (
+                  <View style={styles.selectedBadge}>
+                    <Text style={{ color: "white" }}>✓</Text>
+                  </View>
+                )}
+                <View
+                  style={[
+                    styles.operatorLogo,
+                    { backgroundColor: localColors.airtelRed },
+                  ]}
+                >
+                  <Text style={styles.logoText}>A</Text>
+                </View>
+                <Text style={styles.operatorName}>Airtel</Text>
+                <Text style={styles.operatorSubtitle}>Partenaire officiel</Text>
+              </TouchableOpacity>
+            </View>
+            <View
+              style={[
+                styles.phoneInputGroup,
+                wallet?.length >= 8 && styles.validInput,
+              ]}
+            >
+              <View style={styles.operatorPrefix}>
+                <View
+                  style={[
+                    styles.prefixLogo,
+                    {
+                      backgroundColor:
+                        operator === "Moov"
+                          ? localColors.moovOrange
+                          : localColors.airtelRed,
+                    },
+                  ]}
+                >
+                  <Text style={styles.logoTextSmall}>
+                    {operator === "Moov" ? "M" : "A"}
+                  </Text>
+                </View>
+                <Text style={styles.prefixText}>+241</Text>
+              </View>
+              <TextInput
+                style={styles.phoneInput}
+                placeholder="XX XX XX XX"
+                value={wallet}
+                onChangeText={(text) => dispatch(setWallet(text))}
+                maxLength={9}
+                keyboardType="phone-pad"
+              />
+              {wallet?.length >= 8 && (
+                <Text style={styles.validationIcon}>✅</Text>
+              )}
+            </View>
+          </View>
 
-      {/* Summary */}
-      <View style={styles.summary}>
-        <Text style={styles.summaryTitle}>Récapitulatif</Text>
-        <View style={styles.summaryRow}>
-          <Text>Montant quotidien :</Text>
-          <Text style={styles.summaryValue}>{amount} FCFA</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text>Heure de prélèvement :</Text>
-          <Text style={styles.summaryValue}>{localTime}</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text>Opérateur :</Text>
-          <Text style={styles.summaryValue}>{operator}</Text>
-        </View>
-      </View>
+          {/* Security Info */}
+          <View style={styles.securityInfo}>
+            <View style={styles.securityIcon}>
+              <Text>🔒</Text>
+            </View>
+            <View style={styles.securityTextContainer}>
+              <Text style={styles.securityTitle}>Connexion sécurisée</Text>
+              <Text style={styles.securitySubtitle}>
+                Aucun prélèvement sans votre autorisation • Résiliable à tout
+                moment
+              </Text>
+            </View>
+          </View>
 
-      <TouchableOpacity style={styles.ctaButton} onPress={handleSave}>
-        <Text style={styles.ctaText}>🚀 Activer mon épargne</Text>
-      </TouchableOpacity>
-    </ScrollView>
+          {/* Summary Section */}
+          <View style={styles.summarySection}>
+            <Text style={styles.summaryTitle}>
+              Récapitulatif de votre épargne
+            </Text>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Montant quotidien :</Text>
+              <Text style={styles.summaryValue}>
+                {amount?.toLocaleString("fr-FR") || 0} FCFA
+              </Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Heure de prélèvement :</Text>
+              <Text style={styles.summaryValue}>{`${String(time).padStart(
+                2,
+                "0"
+              )}:00`}</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Opérateur :</Text>
+              <Text style={styles.summaryValue}>{operator}</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Objectif annuel :</Text>
+              <Text style={[styles.summaryValue, styles.summaryHighlight]}>
+                365,000 FCFA
+              </Text>
+            </View>
+          </View>
+
+          {/* CTA */}
+          <TouchableOpacity style={styles.ctaPrimary} onPress={handleSave}>
+            <Text style={styles.ctaText}>🚀 Activer mon épargne auto</Text>
+          </TouchableOpacity>
+
+          {/* Help */}
+          <View style={styles.helpSection}>
+            <Text style={styles.helpText}>
+              Besoin d&apos;aide ? Notre support est disponible 24/7
+            </Text>
+            <Text style={styles.helpLink}>📞 Contacter le support</Text>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    padding: SIZES.padding,
-  },
-  title: { ...FONTS.h1, textAlign: "center", marginBottom: SIZES.sm },
-  subtitle: {
-    ...FONTS.body1,
-    textAlign: "center",
-    color: COLORS.textSecondary,
-    marginBottom: SIZES.lg,
-  },
-  section: { marginBottom: SIZES.xl },
-  sectionTitle: { ...FONTS.h3, marginBottom: SIZES.md },
-  timeButton: {
-    backgroundColor: COLORS.surface,
-    padding: SIZES.md,
-    borderRadius: SIZES.radius,
+  safeArea: { flex: 1, backgroundColor: localColors.surface },
+  configScreen: { flex: 1, backgroundColor: "#f8f9fa" },
+  navHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
   },
-  timeText: { ...FONTS.h2, color: COLORS.primary },
-  operatorContainer: { flexDirection: "row", justifyContent: "space-around" },
-  operatorCard: {
-    flex: 1,
-    alignItems: "center",
-    padding: SIZES.md,
-    borderWidth: 2,
-    borderRadius: SIZES.radius_lg,
-    marginHorizontal: SIZES.base,
-  },
-  selectedOperator: {
-    transform: [{ scale: 1.05 }],
-    backgroundColor: COLORS.lightGreen,
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  backButton: {
+    width: 40,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: SIZES.sm,
+    marginRight: 8,
   },
-  logoText: { color: "white", ...FONTS.h3 },
-  operatorName: { ...FONTS.h4 },
-  phoneInputContainer: {
+  backButtonText: {
+    fontSize: 28,
+    color: localColors.primary,
+    fontWeight: "bold",
+  },
+  progressIndicator: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: COLORS.surface,
-    borderRadius: SIZES.radius,
-    paddingHorizontal: SIZES.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    gap: 8,
   },
-  prefix: { ...FONTS.body1, marginRight: SIZES.sm },
-  phoneInput: { flex: 1, ...FONTS.body1, height: 50 },
-  summary: {
-    backgroundColor: COLORS.lightGreen,
-    padding: SIZES.padding,
-    borderRadius: SIZES.radius_lg,
-    marginBottom: SIZES.xl,
+  progressBar: {
+    flex: 1,
+    height: 4,
+    backgroundColor: localColors.border,
+    borderRadius: 2,
   },
-  summaryTitle: { ...FONTS.h3, textAlign: "center", marginBottom: SIZES.md },
-  summaryRow: {
+  progressFill: {
+    width: "90%",
+    height: "100%",
+    backgroundColor: localColors.primary,
+    borderRadius: 2,
+  },
+  progressText: {
+    fontSize: 12,
+    color: localColors.textSecondary,
+    fontWeight: "600",
+  },
+  mainContent: { paddingHorizontal: 24 },
+  heroSection: { alignItems: "center", marginVertical: 32 },
+  mainTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: localColors.textPrimary,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  mainSubtitle: {
+    fontSize: 16,
+    color: localColors.textSecondary,
+    textAlign: "center",
+  },
+  section: { marginBottom: 32 },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: localColors.textPrimary,
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: localColors.textSecondary,
+    marginBottom: 16,
+  },
+  timeSelector: {
+    backgroundColor: localColors.surface,
+    borderRadius: 16,
+    padding: 24,
+    borderWidth: 2,
+    borderColor: localColors.border,
+  },
+  timeDisplay: { alignItems: "center", marginBottom: 24 },
+  timeValue: {
+    fontSize: 36,
+    fontWeight: "800",
+    color: localColors.primary,
+    marginBottom: 8,
+  },
+  timeContext: {
+    fontSize: 14,
+    color: localColors.textSecondary,
+    fontWeight: "500",
+  },
+  timeSlider: {
+    height: 8,
+    backgroundColor: localColors.border,
+    borderRadius: 4,
+    justifyContent: "center",
+  },
+  timeTrack: {
+    height: "100%",
+    backgroundColor: localColors.primary,
+    borderRadius: 4,
+  },
+  timeThumb: {
+    position: "absolute",
+    top: -8,
+    width: 24,
+    height: 24,
+    backgroundColor: localColors.primary,
+    borderWidth: 3,
+    borderColor: "white",
+    borderRadius: 12,
+    elevation: 3,
+  },
+  timeLabels: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: SIZES.sm,
+    marginTop: 8,
+    paddingHorizontal: 4,
   },
-  summaryValue: { ...FONTS.h4 },
-  ctaButton: {
-    backgroundColor: COLORS.primary,
-    padding: SIZES.padding,
-    borderRadius: SIZES.radius_lg,
+  popularTime: {
+    backgroundColor: localColors.lightGreen,
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 16,
     alignItems: "center",
   },
-  ctaText: { color: "white", ...FONTS.h4 },
+  popularText: { fontSize: 12, color: localColors.primary, fontWeight: "600" },
+  operatorSelection: { flexDirection: "row", gap: 16, marginBottom: 24 },
+  operatorCard: {
+    flex: 1,
+    backgroundColor: localColors.surface,
+    borderWidth: 3,
+    borderColor: localColors.border,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+  },
+  selectedMoovCard: {
+    borderColor: localColors.moovOrange,
+    elevation: 4,
+    shadowColor: localColors.moovOrange,
+    transform: [{ translateY: -2 }],
+  },
+  selectedAirtelCard: {
+    borderColor: localColors.airtelRed,
+    elevation: 4,
+    shadowColor: localColors.airtelRed,
+    transform: [{ translateY: -2 }],
+  },
+  selectedBadge: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    width: 24,
+    height: 24,
+    backgroundColor: localColors.success,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  operatorLogo: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  logoText: { color: "white", fontSize: 24, fontWeight: "800" },
+  operatorName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: localColors.textPrimary,
+  },
+  operatorSubtitle: { fontSize: 12, color: localColors.textSecondary },
+  phoneInputGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: localColors.surface,
+    borderWidth: 2,
+    borderColor: localColors.border,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 60,
+  },
+  validInput: {
+    borderColor: localColors.success,
+    backgroundColor: localColors.lightGreen,
+  },
+  operatorPrefix: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingRight: 12,
+    marginRight: 12,
+    borderRightWidth: 1,
+    borderRightColor: localColors.border,
+  },
+  prefixLogo: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logoTextSmall: { color: "white", fontSize: 10, fontWeight: "800" },
+  prefixText: { fontSize: 16, fontWeight: "600" },
+  phoneInput: { flex: 1, fontSize: 16, fontWeight: "600" },
+  validationIcon: { fontSize: 20 },
+  securityInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: localColors.lightBlue,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#b3e5fc",
+    marginBottom: 24,
+  },
+  securityIcon: {
+    width: 32,
+    height: 32,
+    backgroundColor: localColors.secondary,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    color: "white",
+    fontSize: 16,
+  },
+  securityTextContainer: { flex: 1 },
+  securityTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: localColors.textPrimary,
+  },
+  securitySubtitle: {
+    fontSize: 12,
+    color: localColors.textSecondary,
+    lineHeight: 16,
+  },
+  summarySection: {
+    backgroundColor: localColors.lightGreen,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+  },
+  summaryTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: localColors.textPrimary,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  summaryItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  summaryLabel: { fontSize: 14, color: localColors.textSecondary },
+  summaryValue: {
+    fontSize: 14,
+    color: localColors.textPrimary,
+    fontWeight: "600",
+  },
+  summaryHighlight: { color: localColors.primary, fontWeight: "700" },
+  ctaPrimary: {
+    height: 56,
+    backgroundColor: localColors.primary,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+    elevation: 4,
+  },
+  ctaText: { color: "white", fontSize: 16, fontWeight: "700" },
+  helpSection: { alignItems: "center", paddingBottom: 24 },
+  helpText: { fontSize: 12, color: localColors.textSecondary, marginBottom: 8 },
+  helpLink: { color: localColors.primary, fontWeight: "600", fontSize: 14 },
 });
 
-export default FinalConfigScreen;
+export default FinalConfigScreenV2;

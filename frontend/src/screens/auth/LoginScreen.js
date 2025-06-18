@@ -147,19 +147,18 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    justifyContent: "space-between", // Pushes header/form up and footer down
-    padding: SIZES.padding * 1.5,
+    justifyContent: "center",
+    padding: SIZES.padding * 2.5,
   },
   mainContent: {
-    flex: 1, // Takes up available space
-    justifyContent: "center", // Center header and form vertically in their space
+    justifyContent: "center",
   },
   header: {
     alignItems: "center",
-    marginBottom: SIZES.padding * 3, // Increased space between header and form
+    marginBottom: SIZES.padding * 7,
   },
   title: {
-    fontSize: 28, // Bigger title
+    fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
     color: COLORS.textPrimary,
@@ -172,13 +171,13 @@ const styles = StyleSheet.create({
     ...FONTS.body2,
     color: COLORS.textSecondary,
     textAlign: "center",
-    maxWidth: "80%", // Avoid text stretching to edges
+    maxWidth: "80%",
   },
   form: {
     width: "100%",
   },
   inputContainer: {
-    marginBottom: SIZES.xl, // Space between inputs
+    marginBottom: SIZES.xl,
   },
   inputLabel: {
     ...FONTS.h4,
@@ -193,7 +192,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     borderRadius: SIZES.radius_lg,
     paddingHorizontal: SIZES.padding,
-    height: 56, // As per design system
+    height: 56,
   },
   countryPrefix: {
     ...FONTS.h4,
@@ -211,16 +210,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.border,
     borderRadius: SIZES.radius_lg,
-    height: 56, // As per design system
+    height: 56,
     textAlign: "center",
     color: COLORS.textPrimary,
-    fontSize: 24, // Bigger font for pin
-    letterSpacing: Platform.OS === "ios" ? 15 : 10, // Adjust spacing for better visuals
+    fontSize: 24,
+    letterSpacing: Platform.OS === "ios" ? 15 : 10,
   },
   footer: {
     width: "100%",
     alignItems: "center",
-    paddingBottom: SIZES.padding, // Add some padding at the bottom
+    marginTop: SIZES.padding * 2,
+    paddingBottom: SIZES.padding,
   },
   ctaButton: {
     backgroundColor: COLORS.primary,
@@ -228,8 +228,8 @@ const styles = StyleSheet.create({
     height: 56,
     justifyContent: "center",
     alignItems: "center",
-    width: "100%", // Full width
-    marginBottom: SIZES.lg, // Space between button and link
+    width: "100%",
+    marginBottom: SIZES.lg,
     elevation: 3,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
@@ -247,8 +247,8 @@ const styles = StyleSheet.create({
   },
   navLink: {
     ...FONTS.body2,
-    color: COLORS.primary, // Make it stand out more
-    fontWeight: "600", // Bolder
+    color: COLORS.primary,
+    fontWeight: "600",
     padding: SIZES.base,
   },
 });

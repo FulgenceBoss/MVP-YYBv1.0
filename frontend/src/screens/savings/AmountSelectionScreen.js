@@ -54,13 +54,14 @@ const AmountSelectionScreen = ({ navigation }) => {
     dispatch(setAmount(val));
   };
 
-  const handleValidate = async () => {
-    try {
-      await dispatch(saveSavingsConfig({ amount })).unwrap();
-      Alert.alert("Succès", "Montant enregistré !");
+  const handleNextStep = () => {
+    if (amount) {
       navigation.navigate("FinalConfig");
-    } catch (e) {
-      Alert.alert("Erreur", e || "Erreur lors de la sauvegarde");
+    } else {
+      Alert.alert(
+        "Oups",
+        "Veuillez sélectionner un montant avant de continuer."
+      );
     }
   };
 
@@ -166,8 +167,8 @@ const AmountSelectionScreen = ({ navigation }) => {
           style={{ marginVertical: 24 }}
         />
       ) : (
-        <TouchableOpacity style={styles.ctaButton} onPress={handleValidate}>
-          <Text style={styles.ctaText}>💰 Configurer mon épargne</Text>
+        <TouchableOpacity style={styles.ctaButton} onPress={handleNextStep}>
+          <Text style={styles.ctaText}>Suivant ➔</Text>
         </TouchableOpacity>
       )}
       {error && <Text style={styles.error}>{error}</Text>}
