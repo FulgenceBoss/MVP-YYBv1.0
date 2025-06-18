@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "yessi-yessi-bank-mvp",
+  "private_key_id": "6f7373fa4cf4c6fc75a14a476521193806975310",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDu0SsEkZPk5yOb\nVBYbxPL6xEEgXDER+5YhYHE+AHwNSJl0qyllvvPwz2uFo6eIFOdY11NwUuXaSLma\nH51KMYG0oSDuMhQfTG6rppM+wEydaeBTlYkfE52Ekq/Z1YYGnykzlIX468WKVWv5\nt20WBLPw+WKachXxA3rCLjONrDu0kBzpfQZJNMe/1TTCIIc5K1geiZOG6+KqkIVG\nOKNDuw2dcyDCD75RRTbMBKNlLFxgMfgjnwZWmyzt1RWFSgexLUFmWr9essWxxP12\ny+mBo6ZXYFoIaPHQaEyw7mvBkBMQxaPrnsoHE06fPf3L8sL/0bDoWIAvL8Xs+Hi3\nK702K0zhAgMBAAECggEAY2l838T97I5vGwywu1SL1Ol3NtJJtvOktjYgTbAD87+h\n6ZgKfokzoK2nU5UhextAhpHz8NEBT5FweYDph+X92UQtohoEmFbHxvprVvbTrb9S\nG1knIGGY84PgYexpgz4j942/CzSSIZiXfvblGQJSKWCWtDYDfjV1l3mGClaE8A8z\nro0aXBAX5Pce1ld5WLogDxi7o/h4ZE5E6ihf1zMKjCGohNZ0sBvnXXxRJRUlzzf3\nRezxiCj9M8xFofg/m253XidPr2EzlXTojBbfR8J0MgBIJBClpJufRJfMfoj1SHpo\nI8Jre5muFYH6t/HHAszFPbB2Ix57sFAgy2eyo1Gp1QKBgQD3/TC88BRnO+ydO5rW\n7bcgPSCuwv2oN9yxwz5pfdc5anl4NreEemFLY7WH0dGt/WN66VTuqtNMcszZ2o7B\nqVSM+J3Y3y6OG9rFVRTyO+TuktWas3K8MRtRGSsMHrJKcMsp//9x2azuacbCd2dz\n+tuzQLZz/CEwwEUujpcwT35eQwKBgQD2iCCzEvgCGqZtrb5hFYLn7aOJG2MBrZRo\nOO+3P4FgUROboKVpjQPsXs5iSc97jOUn5tF8wKemQYh1fN1ScGZ8oGxESGzVPxKK\nn/hW6nFi3jiU0eZhtuYGUQb+GP64/MS/gl5GVqi2h2LKqzfGOdwLUDdTvHopHzB6\nbIO3JZnACwKBgQCVv//pZ/R6LnaAsBidhyjZP/B3d+oi5bDQa31JyKLp2gEF9cy2\nJAySsOBS5wH+Vg/3jeUqxl8YQA6x00f3bCBRjGQNLSB40hs2pF0ktcRVyLdSVuCH\nAgRj4ZXcGMFDMH+OmjcP8gl6YseScPY41BhNU1uaCHuma8SbC6ICm05M7wKBgQDq\nnk6QXcMNLZOp2anO9wvn8W6rMxccJ7ePIHByMsvLgB1rBI2nT/6l2uwK+jetWz9S\npAZF9YsXXFKjjTuME1BV1s5yhYKdxzK8HtXW0bMq5lVuu/vGjquG42IGPH9eSaBs\nqYNS6XISk/He8udXjQTu915QIJUZwYb/W3pWuEAEVQKBgHIJ6WHrIkU4JT1ft6M7\nqa0DqN5FnmK3MCpORkYp1ktFONd7/G5O1oGIodyiWDQYC5eg0kaXVHXFbCzJDkDx\nypXOie+D9kxODHbchOQzUMnZQhYn56OGxykk00mW3971TiuxSc/dUlM9f90N7ai6\nO3N2Rbos1OOSnXbfPwiWF93j\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@yessi-yessi-bank-mvp.iam.gserviceaccount.com",
+  "client_id": "109439689729072602562",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40yessi-yessi-bank-mvp.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
