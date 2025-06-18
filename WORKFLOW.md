@@ -140,3 +140,35 @@ Face à un bug persistant ou un comportement inexpliqué (ex: une action qui ne 
     - Cette information factuelle doit guider la correction, évitant les hypothèses hasardeuses.
 
 **Post-Débogage :** Une fois le bug résolu et validé, il est impératif de **retirer tous les logs de débogage** pour maintenir un code propre.
+
+---
+
+## Règle d'Or du Débogage Expo : Le Réflexe des Dépendances
+
+Face à une erreur "red screen" de type `Unable to resolve module...` ou `...could not be found within the project` qui apparaît juste après l'installation d'une nouvelle librairie.
+
+**Principe Fondamental :** Une erreur de ce type n'est presque jamais un bug de logique, mais une **incompatibilité de version** entre la librairie et le SDK Expo du projet. La cause est presque toujours l'utilisation de `npm install` ou `yarn add`.
+
+### Le Réflexe Obligatoire : `expo install`
+
+1.  **NE JAMAIS UTILISER** `npm install <librairie>` ou `yarn add <librairie>` pour des paquets ayant du code natif (comme `react-native-svg`, `expo-linear-gradient`, `react-native-maps`, etc.).
+
+2.  **TOUJOURS UTILISER** la commande `npx expo install <librairie>`. Cette commande est la seule qui garantit l'installation d'une version de la librairie **compatible** avec votre version du SDK Expo.
+
+### Procédure de Correction (si l'erreur est déjà faite)
+
+Si le mauvais réflexe a été pris et que l'erreur apparaît, la seule solution fiable est de corriger l'installation :
+
+1.  **Arrêter le serveur** de développement (`Ctrl + C`).
+2.  **Désinstaller la mauvaise version** de la librairie :
+    ```bash
+    npm uninstall <nom-de-la-librairie>
+    ```
+3.  **Installer la bonne version** avec la commande Expo :
+    ```bash
+    npx expo install <nom-de-la-librairie>
+    ```
+4.  **Redémarrer le serveur** en nettoyant le cache pour être certain que le changement est pris en compte :
+    ```bash
+    npx expo start -c
+    ```

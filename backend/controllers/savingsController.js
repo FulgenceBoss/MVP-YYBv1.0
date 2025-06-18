@@ -80,3 +80,43 @@ exports.setSavingsConfig = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+// POST /api/savings/deposit
+exports.manualDeposit = async (req, res) => {
+  const { amount } = req.body;
+  const userId = req.user.id;
+
+  if (!amount || amount < 100) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Le montant est invalide." });
+  }
+
+  try {
+    // 1. Mettre à jour (ou créer) le solde
+    const balanceUpdate = await SavingsBalance.findOneAndUpdate(
+      { user: userId },
+      { $inc: { balance: amount } },
+      { new: true, upsert: true }
+    );
+
+    // 2. Créer l'enregistrement de la transaction
+    const transaction = await Transaction.create({
+      user: userId,
+      amount: amount,
+      type: "manual",
+      status: "completed",
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Dépôt manuel réussi.",
+      transaction: transaction,
+      newBalance: balanceUpdate.balance,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Erreur serveur lors du dépôt." });
+  }
+};

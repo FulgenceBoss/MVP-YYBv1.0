@@ -1,5 +1,5 @@
 # DOCUMENT DE RÉFÉRENCE - DÉVELOPPEMENT MVP YESSI-YESSI
-# Mis à jour le: 14/06/2025
+# Mis à jour le: 16/06/2025
 
 ---
 
@@ -61,30 +61,94 @@
 - **Tableau de Bord :**
   - Le `DashboardScreen` a été refactorisé pour corriger l'avertissement `VirtualizedLists` et affiche le solde et l'historique de l'utilisateur.
   - Le composant `StreakCounter` est intégré.
+  - Intégration des librairies `react-native-svg` et `expo-linear-gradient` pour un design avancé.
 - **Historique des transactions :**
   - L'affichage de l'historique des transactions est désormais validé et fonctionnel.
 - **Navigation Intelligente :**
   - Un écran `AppLoadingScreen` vérifie la configuration et redirige correctement.
 - **Configuration API Robuste :**
   - L'URL de l'API est maintenant gérée dans un fichier de configuration dédié, non suivi par Git.
+- **Écran d'historique dédié (Nouveau) :**
+  - Un nouvel écran `HistoryScreen.js` a été créé pour afficher l'historique détaillé.
+  - L'interface a été implémentée statiquement en se basant sur la maquette `maqHisto.html` et est visuellement validée.
+  - La navigation vers cet écran depuis le tableau de bord est fonctionnelle.
+- **Épargne Manuelle (Nouveau) :**
+  - Le flux complet d'épargne manuelle est désormais implémenté et validé.
+  - L'expérience utilisateur a été améliorée avec un écran de statut de transaction dédié utilisant des animations Lottie pour les états de succès, d'échec et de chargement.
+  - La gestion des erreurs réseau a été renforcée pour fournir des messages clairs à l'utilisateur.
+- **Refonte de l'Écran de Configuration (Nouveau) :**
+  - L'écran de configuration finale de l'épargne (`FinalConfigScreen`) a été entièrement refondu pour correspondre à la maquette de haute-fidélité.
+  - Implémentation d'un slider personnalisé et interactif pour la sélection de l'heure.
+  - Amélioration de l'UX/UI sur la sélection de l'opérateur et la saisie du numéro.
+
+---
+
+### NOTE TECHNIQUE : Approche de Filtrage des Transactions
+
+- **Problématique :** Le filtrage des transactions ("7 jours", "30 jours") doit fonctionner de manière fiable pendant le développement, même avec des données de test qui ne sont pas à jour (ex: transactions datées de 2025 alors que nous sommes en 2024).
+- **Approche Actuelle (pour le Développement) :** La logique de filtrage utilise la **date de la transaction la plus récente** comme point de référence pour "aujourd'hui". Cela garantit que les filtres sont fonctionnels et testables visuellement, peu importe l'âge des données.
+- **Action Requise Avant Production :** Avant le déploiement final, cette logique devra être remplacée par une approche standard qui se base sur la **date réelle du jour**. Le code devra être modifié pour comparer les dates de transaction à `new Date()`. Cette modification ne pourra être validée qu'avec des données de transactions réelles ou à jour.
 
 ---
 
 ### ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise)
 
-- **Objectif Atteint :** L'ensemble du flux d'authentification (inscription et connexion) et l'affichage du tableau de bord sont maintenant stables et validés.
-- **Progrès :** Tous les bugs critiques qui bloquaient l'inscription ont été résolus.
-- **Point de Blocage :** Aucun blocage majeur identifié. Le projet est sur une base saine pour la suite.
-- **Prochaine Action :** Identifier la prochaine tâche prioritaire avec `task-master next` pour poursuivre le développement des fonctionnalités restantes du MVP.
+- **Objectif en cours :** Implémenter le système de notifications push.
+- **Progrès :**
+  - **Refonte de la Configuration :** La refonte de l'écran de configuration finale (Tâche implicite) est terminée et validée. Le nouveau design est en place et entièrement fonctionnel.
+  - **Finalisation de l'Épargne Manuelle :** Le développement et les tests de la fonctionnalité d'épargne manuelle (Tâche #8) sont terminés. Le flux est robuste et l'expérience utilisateur est conforme aux exigences du PRD.
+  - **Finalisation de l'Historique :** La logique de récupération des données et de filtrage sur l'écran `HistoryScreen.js` a été entièrement revue et fiabilisée pour l'environnement de développement. La connexion au store Redux est maintenant complète et fonctionnelle.
+- **Point de Blocage / Difficulté :** Aucun.
+- **Prochaine Action :** Démarrer le développement de la fonctionnalité de **Notifications Push (Tâche #9)**. La première étape sera de changer le statut de la tâche à `in-progress` et d'analyser la première sous-tâche : la configuration du service de notifications push d'Expo.
 
 ---
 
 ### JOURNAL DES PROBLÈMES RÉSOLUS
 
 - **Échec Silencieux de l'Inscription/Connexion :** Un débogage approfondi a révélé plusieurs problèmes en cascade :
-  1.  **Cause Initiale :** Une mauvaise configuration de l'URL de l'API dans le code client.
+  1.  **Cause Initiale :** Une mauvaise configuration de l'URL de l'API dans le code client (`192.168.1.81` au lieu de `192.168.1.74`).
   2.  **Cause Profonde :** Un bug dans le `authSlice` de Redux où les reducers `setLoading` et `setError` n'étaient pas définis, provoquant un gel de l'application au moment du `dispatch`.
-- **`ERR_NETWORK` au Login :** Ce problème était un "faux positif" causé par le gel de l'application dû au bug Redux. La connectivité réseau était en réalité fonctionnelle.
+- **`ERR_NETWORK` au Login :** Ce problème était un "faux positif" causé par le gel de l'application dû au bug Redux. La connectivité réseau était en réalité fonctionnelle. Il a été définitivement résolu en corrigeant l'adresse IP de l'API dans `frontend/src/api/config.js`.
 - **Instabilité du Serveur Backend :** La tâche CRON s'exécutait toutes les minutes et entrait en conflit avec les requêtes de l'API, bloquant le processus Node.js. **Solution :** Les tâches CRON sont maintenant désactivées en mode développement.
 - **Avertissement `VirtualizedLists` sur le Dashboard :** Le `ScrollView` a été remplacé par une `FlatList` avec un `ListHeaderComponent` pour une performance et une structure optimales.
-- **...et de nombreux autres problèmes de configuration et de logique résolus lors de cette session de débogage intensive.** 
+- **Erreur `Unable to resolve module react-native-svg` :** Un problème persistant qui a résisté aux méthodes de nettoyage de cache classiques.
+  1.  **Hypothèse Initiale (Incorrecte) :** Problème de cache de Metro Bundler ou de `npm`.
+  2.  **Cause Réelle :** Installation d'une version de `react-native-svg` incompatible avec le SDK Expo du projet, due à l'utilisation de `npm install` au lieu de la commande propriétaire d'Expo.
+  3.  **Solution Définitive :** Désinstallation de la librairie (`npm uninstall`) et réinstallation avec la commande correcte qui garantit la compatibilité : `npx expo install react-native-svg`.
+- **Conflit de dépendances `react-native-svg` (Erreur "register two views") :**
+  - **Symptôme :** L'application plante au démarrage avec une longue liste d'erreurs "Invariant Violation: Tried to register two views with the same name RNSVG...".
+  - **Cause :** La librairie `react-native-svg` est initialisée deux fois, créant un conflit. Cela se produit souvent à cause de versions conflictuelles des dépendances dans `node_modules`.
+  - **Solution (Robuste) :** Effectuer un nettoyage complet de l'environnement de développement.
+    1.  Fermer tous les terminaux et éditeurs de code.
+    2.  Supprimer manuellement les dossiers `node_modules` à la racine du projet et dans le dossier `frontend`. (Sur Windows, si l'accès est refusé, un redémarrage de l'ordinateur peut être nécessaire pour libérer les fichiers).
+    3.  Exécuter `npm install` à la racine pour réinstaller proprement toutes les dépendances.
+    4.  Lancer l'application avec `npx expo start -c` pour s'assurer que le cache est propre.
+- **...et de nombreux autres problèmes de configuration et de logique résolus lors de cette session de débogage intensive.**
+- **Logique de redirection des nouveaux utilisateurs :**
+  - **Symptôme :** Les nouveaux utilisateurs étaient redirigés vers le `Dashboard` au lieu du flux de configuration de l'épargne.
+  - **Cause :** La logique du composant `InitialRouteResolver` n'était pas assez stricte. Elle considérait un objet de configuration vide comme une configuration valide.
+  - **Solution Définitive :** La logique a été renforcée pour ne considérer une configuration comme valide que si elle possède un champ `_id`, ce qui garantit qu'elle a été sauvegardée en base de données. L'état de la configuration est également réinitialisé à chaque nouvelle connexion pour assurer la fraîcheur des données.
+- **Bugs sur l'écran d'Épargne Manuelle :**
+  - **Symptôme 1 :** Un bouton de montant restait sélectionné visuellement même après le choix d'un autre montant.
+  - **Symptôme 2 :** La validation du numéro de portefeuille était absente.
+  - **Symptôme 3 :** Le récapitulatif des montants n'était pas dynamique.
+  - **Symptôme 4 :** L'appel API pour sauvegarder l'épargne échouait car la route `/savings/deposit` n'existait pas côté backend.
+  - **Solution Intégrale :**
+    1.  La route `POST /api/savings/deposit` et sa logique ont été créées dans le backend.
+    2.  La logique d'affichage et de validation côté frontend a été entièrement corrigée pour être robuste et dynamique.
+- **Erreur non explicite lors d'une panne réseau :**
+  - **Symptôme :** L'application affichait une erreur technique ("Cannot read property 'message' of undefined") lorsque le serveur était injoignable.
+  - **Cause :** La logique de gestion d'erreur dans le `dashboardSlice` ne gérait pas correctement les erreurs réseau.
+  - **Solution :** Le bloc `catch` de l'action `saveManualTransaction` a été renforcé pour intercepter ce type d'erreur et retourner un message clair et compréhensible pour l'utilisateur.
+- **Superposition du bouton de retour :**
+  - **Symptôme :** La barre de navigation système d'Android masquait partiellement le bouton "Retourner à l'accueil" sur l'écran de statut de la transaction.
+  - **Cause :** Le bouton n'avait pas de marge inférieure pour compenser la hauteur de la barre de navigation.
+  - **Solution :** Une marge inférieure a été ajoutée au style du bouton pour le rehausser et garantir son accessibilité.
+- **Crash de l'application sur le slider de l'heure :**
+  - **Symptôme :** L'application se fermait complètement lors de l'interaction avec le slider de sélection de l'heure sur le nouvel écran de configuration.
+  - **Cause :** Une cause double. D'abord, une erreur de communication entre le thread d'animation et le thread principal de l'application. Ensuite, et plus important, l'absence du fichier de configuration `babel.config.js` qui est essentiel pour la librairie `react-native-reanimated`.
+  - **Solution Intégrale :**
+    1.  Le code du slider a été renforcé pour utiliser la fonction `runOnJS`, qui garantit une communication sécurisée entre les threads.
+    2.  Le fichier manquant `babel.config.js` a été créé et configuré avec le plugin requis.
+    3.  Le composant racine de l'application a été encapsulé dans un `GestureHandlerRootView` pour assurer une gestion stable des gestes.
+    4.  La résolution a nécessité un redémarrage du serveur avec nettoyage du cache (`npx expo start -c`) pour que la nouvelle configuration soit prise en compte. 
