@@ -33,12 +33,16 @@ const savingsConfigSlice = createSlice({
     config: null,
     status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
+    goal: null, // To store the selected goal object
     amount: 1000, // Valeur par défaut
     deductionTime: "20:00",
     wallet: "",
     operator: "Moov",
   },
   reducers: {
+    setGoal: (state, action) => {
+      state.goal = action.payload;
+    },
     setAmount: (state, action) => {
       state.amount = action.payload;
     },
@@ -88,6 +92,7 @@ const savingsConfigSlice = createSlice({
 
 export const {
   resetConfig,
+  setGoal,
   setAmount,
   setDeductionTime,
   setWallet,

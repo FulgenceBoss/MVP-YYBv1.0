@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import {
   fetchSavingsConfig,
   updateSavingsConfig,
 } from "../store/slices/savingsConfigSlice";
+import CustomAmountModal from "../components/CustomAmountModal";
 
 const localColors = {
   primary: "#2e7d32",
@@ -45,6 +46,7 @@ const DashboardScreen = ({ navigation }) => {
   const { config: savingsConfig, status: configStatus } = useSelector(
     (state) => state.savingsConfig
   );
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     dispatch(fetchDashboardData());
@@ -85,11 +87,27 @@ const DashboardScreen = ({ navigation }) => {
       });
   };
 
-  const goalTarget = savingsConfig?.goalAmount || 200000;
+  const handleSaveSpeed = (newSpeed) => {
+    dispatch(updateSavingsConfig({ dailyAmount: newSpeed }));
+    setIsModalVisible(false);
+  };
+
+  const goalTarget = savingsConfig?.goal?.amount || 200000;
   const progress = balance && goalTarget ? (balance / goalTarget) * 100 : 0;
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (circumference * progress) / 100;
+
+  const getNextMilestone = () => {
+    if (!goalTarget) return null;
+    if (progress < 25) return { label: "25%", value: goalTarget * 0.25 };
+    if (progress < 50) return { label: "50%", value: goalTarget * 0.5 };
+    if (progress < 75) return { label: "75%", value: goalTarget * 0.75 };
+    if (progress < 100) return { label: "100%", value: goalTarget };
+    return null;
+  };
+
+  const nextMilestone = getNextMilestone();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -160,7 +178,7 @@ const DashboardScreen = ({ navigation }) => {
                 </View>
               </View>
               <Text style={styles.progressText}>
-                Objectif : {savingsConfig?.goalName || "Nouveau téléphone"}
+                Objectif : {savingsConfig?.goal?.name || "Nouveau téléphone"}
               </Text>
               <Text style={styles.progressTarget}>
                 {goalTarget.toLocaleString("fr-FR")} FCFA
@@ -178,20 +196,27 @@ const DashboardScreen = ({ navigation }) => {
                 <Text style={styles.detailLabel}>💵 Épargne quotidienne</Text>
                 <View style={{ alignItems: "flex-end" }}>
                   <Text style={styles.detailValue}>
-                    {savingsConfig?.amount
-                      ? `${savingsConfig.amount.toLocaleString("fr-FR")} FCFA`
+                    {savingsConfig?.dailyAmount
+                      ? `${savingsConfig.dailyAmount.toLocaleString(
+                          "fr-FR"
+                        )} FCFA`
                       : "N/A"}
                   </Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("AmountSelection")}
-                  >
+                  <TouchableOpacity onPress={() => setIsModalVisible(true)}>
                     <Text style={styles.modifyBtn}>Modifier</Text>
                   </TouchableOpacity>
                 </View>
               </View>
               <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
                 <Text style={styles.detailLabel}>🎯 Prochain palier</Text>
-                <Text style={styles.detailValue}>150,000 FCFA</Text>
+                {nextMilestone ? (
+                  <Text style={styles.detailValue}>
+                    {nextMilestone.value.toLocaleString("fr-FR")} FCFA (
+                    {nextMilestone.label})
+                  </Text>
+                ) : (
+                  <Text style={styles.detailValue}>Objectif atteint !</Text>
+                )}
               </View>
             </View>
           </View>
@@ -249,6 +274,28 @@ const DashboardScreen = ({ navigation }) => {
             ))}
           </View>
         </View>
+        <CustomAmountModal
+          isVisible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+          onSave={handleSaveSpeed}
+          modalTitle="Modifier l'épargne quotidienne"
+          inputPlaceholder="Nouveau montant par jour"
+          initialValue={savingsConfig?.dailyAmount?.toString() || ""}
+          goalInfo={
+            savingsConfig?.goal
+              ? {
+                  name: savingsConfig.goal.name,
+                  amount: savingsConfig.goal.amount,
+                  onEdit: () => {
+                    setIsModalVisible(false);
+                    navigation.navigate("GoalSelection", {
+                      source: "dashboard",
+                    });
+                  },
+                }
+              : null
+          }
+        />
       </ScrollView>
     </SafeAreaView>
   );

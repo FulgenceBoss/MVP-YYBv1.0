@@ -1,0 +1,41 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Règle Fondamentale : Clarté Absolue et Accessibilité
+
+## Principe Directeur
+L'objectif premier de chaque écran et de chaque interaction est la **clarté absolue**. Nous devons concevoir en partant du principe que notre utilisateur n'a jamais utilisé d'application similaire, voire qu'il est peu à l'aise avec la lecture. Chaque élément doit être auto-explicatif.
+
+## Lignes Directrices
+
+- **Microcopy Explicite :**
+  - **Toujours préférer une phrase claire à une icône seule.** L'icône renforce le texte, mais ne le remplace pas.
+  - **Utiliser un langage simple et direct.** Éviter le jargon technique ou les formulations complexes.
+  - ✅ **BIEN :** Un titre "Choisissez votre vitesse" suivi du texte d'aide "Chaque jour, nous prélèverons ce montant de votre compte Mobile Money."
+  - ❌ **MAUVAIS :** Un simple titre "Vitesse" sans explication.
+
+- **Un Objectif par Écran :**
+  - Chaque écran doit répondre à une seule question et demander une seule action principale.
+  - ✅ **BIEN :** L'écran `GoalSelectionScreen` demande "Quel est votre objectif ?". L'écran `SpeedSelectionScreen` demande "À quel rythme ?".
+  - ❌ **MAUVAIS :** Demander l'objectif, le rythme, l'heure et le numéro de téléphone sur un seul et même écran complexe.
+
+- **Feedback Immédiat et Informatif :**
+  - L'utilisateur ne doit jamais se demander si son action a été prise en compte.
+  - Chaque bouton cliquable doit avoir un retour visuel (changement de couleur, animation).
+  - Les temps de chargement doivent être explicitement indiqués.
+  - ✅ **BIEN :** Un bouton qui affiche "✅ Sauvegardé" ou "Activation en cours..." avec une icône de chargement.
+  - ❌ **MAUVAIS :** Un simple indicateur de chargement sans texte, ou pire, aucune indication de chargement.
+
+- **Cohérence Visuelle et Interactive :**
+  - Les interactions similaires doivent se comporter de la même manière à travers l'application.
+  - ✅ **BIEN :** Réutiliser le même style de modal (`CustomAmountModal`, `CustomGoalModal`) pour la saisie personnalisée.
+  - ❌ **MAUVAIS :** Avoir une manière différente de saisir un montant sur chaque écran.
+
+- **Guides Visuels Universels :**
+  - Utiliser des symboles universellement compris pour renforcer le texte.
+  - ✅ **BIEN :** Ajouter une icône de crayon (✏️) à côté d'un texte pour suggérer la "modification".
+  - ❌ **MAUVAIS :** Cacher la fonctionnalité de modification derrière un appui long ou un geste non évident.
+
+> Cette règle est la pierre angulaire de notre expérience utilisateur. Elle doit être lue et appliquée avant toute nouvelle implémentation, en complément du `WORKFLOW.md`.

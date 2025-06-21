@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YESSI-YESSI BANK - Écran 11: Définir Objectif MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-red: #ffebee;
+        --light-orange: #fff3e0;
+        --light-purple: #f3e5f5;
+        --moov-orange: #ff6b00;
+        --airtel-red: #e60012;
+      }
+
+      body {
+        font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .phone-mockup {
+        width: 375px;
+        height: 812px;
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 8px;
+        position: relative;
+        box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.1);
+      }
+
+      .phone-mockup::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        z-index: 10;
+      }
+
+      .phone-mockup::after {
+        content: "";
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--surface);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .status-bar {
+        height: 44px;
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 5;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .battery {
+        width: 24px;
+        height: 12px;
+        border: 1px solid var(--text-primary);
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 6px;
+        background: var(--text-primary);
+        border-radius: 0 1px 1px 0;
+      }
+
+      .battery-fill {
+        width: 80%;
+        height: 100%;
+        background: var(--success);
+        border-radius: 1px;
+      }
+
+      .objective-screen {
+        width: 100%;
+        height: calc(100% - 44px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Header Navigation */
+      .nav-header {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px 16px;
+        position: relative;
+        background: var(--surface);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .back-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 16px;
+      }
+
+      .back-button:hover {
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .back-button::before {
+        content: "←";
+        font-size: 20px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .header-title {
+        flex: 1;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .progress-indicator {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        padding: 24px;
+      }
+
+      /* Hero Section */
+      .hero-section {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .main-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        line-height: 1.3;
+      }
+
+      .main-subtitle {
+        font-size: 16px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 24px;
+      }
+
+      .motivation-card {
+        background: linear-gradient(
+          135deg,
+          var(--light-green) 0%,
+          #f1f8e9 100%
+        );
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(46, 125, 50, 0.2);
+        text-align: center;
+      }
+
+      .motivation-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+      }
+
+      .motivation-text {
+        font-size: 14px;
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      /* Objective Categories */
+      .categories-section {
+        margin-bottom: 32px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+      }
+
+      .categories-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .category-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 3px solid transparent;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .category-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          transparent 0%,
+          rgba(46, 125, 50, 0.05) 100%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .category-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+
+      .category-card:hover::before {
+        opacity: 1;
+      }
+
+      .category-card.selected {
+        border-color: var(--primary);
+        background: var(--light-green);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.2);
+      }
+
+      .category-card.selected::before {
+        opacity: 1;
+      }
+
+      .category-icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+        display: block;
+      }
+
+      .category-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+
+      .category-amount {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 4px;
+      }
+
+      .category-description {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.3;
+      }
+
+      .selected-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 24px;
+        height: 24px;
+        background: var(--success);
+        border: 2px solid white;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .category-card.selected .selected-badge {
+        display: flex;
+      }
+
+      /* Custom Amount Section */
+      .custom-section {
+        margin-bottom: 32px;
+      }
+
+      .custom-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 20px;
+        border: 2px dashed var(--border);
+        transition: all 0.3s ease;
+      }
+
+      .custom-card.active {
+        border-color: var(--primary);
+        background: var(--light-green);
+        border-style: solid;
+      }
+
+      .custom-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+        cursor: pointer;
+      }
+
+      .custom-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--warning) 0%, #ff8f00 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: white;
+        margin-right: 16px;
+      }
+
+      .custom-info {
+        flex: 1;
+      }
+
+      .custom-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .custom-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .custom-input-section {
+        display: none;
+      }
+
+      .custom-input-section.show {
+        display: block;
+      }
+
+      .amount-input-group {
+        position: relative;
+        margin-bottom: 16px;
+      }
+
+      .amount-input {
+        width: 100%;
+        height: 56px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 60px 16px 16px;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        background: var(--surface);
+        transition: all 0.3s ease;
+      }
+
+      .amount-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      }
+
+      .currency-label {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .amount-suggestions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .suggestion-chip {
+        padding: 8px 16px;
+        background: var(--border);
+        color: var(--text-primary);
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+      }
+
+      .suggestion-chip:hover {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* Calculator Section */
+      .calculator-section {
+        background: var(--light-blue);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 32px;
+        border: 1px solid rgba(25, 118, 210, 0.2);
+        text-align: center;
+      }
+
+      .calculator-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+      }
+
+      .calculator-result {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--secondary);
+        margin-bottom: 8px;
+      }
+
+      .calculator-details {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+      }
+
+      .calculator-breakdown {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(25, 118, 210, 0.2);
+      }
+
+      .breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+
+      .breakdown-label {
+        color: var(--text-secondary);
+      }
+
+      .breakdown-value {
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      /* CTA Section */
+      .cta-section {
+        padding-bottom: 20px;
+      }
+
+      .cta-primary {
+        width: 100%;
+        height: 56px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+      }
+
+      .cta-primary:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .cta-primary:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+      }
+
+      .cta-primary:not(:disabled):active {
+        transform: translateY(0);
+      }
+
+      /* Animations */
+      @keyframes slideIn {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes bounce {
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+          transform: translateY(0);
+        }
+        40% {
+          transform: translateY(-10px);
+        }
+        60% {
+          transform: translateY(-5px);
+        }
+      }
+
+      .animate-slide {
+        animation: slideIn 0.5s ease-out;
+      }
+
+      .animate-bounce {
+        animation: bounce 2s ease-in-out;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 375px) {
+        .main-content {
+          padding: 16px;
+        }
+
+        .nav-header {
+          padding: 16px 16px 12px;
+        }
+
+        .categories-grid {
+          gap: 12px;
+        }
+
+        .category-card {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <div class="status-left">
+            <span>9:41</span>
+          </div>
+          <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <div class="battery">
+              <div class="battery-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <main class="objective-screen">
+          <!-- Navigation Header -->
+          <section class="nav-header">
+            <button
+              class="back-button"
+              onclick="goBack()"
+              aria-label="Retour"
+            ></button>
+            <h1 class="header-title">Définir mon objectif</h1>
+            <div class="progress-indicator">Étape 1/2</div>
+          </section>
+
+          <!-- Main Content -->
+          <div class="main-content">
+            <!-- Hero Section -->
+            <section class="hero-section animate-slide">
+              <h2 class="main-title">Définissez votre objectif d'épargne</h2>
+              <p class="main-subtitle">
+                Choisissez ce qui vous motive le plus à épargner
+              </p>
+
+              <div class="motivation-card">
+                <div class="motivation-icon">🎯</div>
+                <div class="motivation-text">
+                  Un objectif clair multiplie vos chances de succès par 10 !
+                </div>
+              </div>
+            </section>
+
+            <!-- Categories Section -->
+            <section class="categories-section animate-slide">
+              <h3 class="section-title">Objectifs populaires</h3>
+              <div class="categories-grid">
+                <div
+                  class="category-card"
+                  onclick="selectCategory('house', 2000000)"
+                  data-category="house"
+                >
+                  <div class="selected-badge">✓</div>
+                  <span class="category-icon">🏠</span>
+                  <div class="category-name">Maison</div>
+                  <div class="category-amount">2,000,000 FCFA</div>
+                  <div class="category-description">
+                    Votre première propriété
+                  </div>
+                </div>
+
+                <div
+                  class="category-card"
+                  onclick="selectCategory('education', 500000)"
+                  data-category="education"
+                >
+                  <div class="selected-badge">✓</div>
+                  <span class="category-icon">🎓</span>
+                  <div class="category-name">Éducation</div>
+                  <div class="category-amount">500,000 FCFA</div>
+                  <div class="category-description">Formation ou études</div>
+                </div>
+
+                <div
+                  class="category-card"
+                  onclick="selectCategory('emergency', 200000)"
+                  data-category="emergency"
+                >
+                  <div class="selected-badge">✓</div>
+                  <span class="category-icon">🚨</span>
+                  <div class="category-name">Urgences</div>
+                  <div class="category-amount">200,000 FCFA</div>
+                  <div class="category-description">Fonds d'urgence</div>
+                </div>
+
+                <div
+                  class="category-card"
+                  onclick="selectCategory('business', 1000000)"
+                  data-category="business"
+                >
+                  <div class="selected-badge">✓</div>
+                  <span class="category-icon">💼</span>
+                  <div class="category-name">Business</div>
+                  <div class="category-amount">1,000,000 FCFA</div>
+                  <div class="category-description">Créer votre entreprise</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Custom Amount Section -->
+            <section class="custom-section animate-slide">
+              <div class="custom-card" id="custom-card">
+                <div class="custom-header" onclick="toggleCustom()">
+                  <div class="custom-icon">💰</div>
+                  <div class="custom-info">
+                    <div class="custom-title">Montant personnalisé</div>
+                    <div class="custom-subtitle">
+                      Définissez votre propre objectif
+                    </div>
+                  </div>
+                </div>
+
+                <div class="custom-input-section" id="custom-input">
+                  <div class="amount-input-group">
+                    <input
+                      type="number"
+                      class="amount-input"
+                      id="custom-amount"
+                      placeholder="Entrez votre montant"
+                      oninput="updateCustomAmount()"
+                    />
+                    <span class="currency-label">FCFA</span>
+                  </div>
+
+                  <div class="amount-suggestions">
+                    <button
+                      class="suggestion-chip"
+                      onclick="setCustomAmount(250000)"
+                    >
+                      250k
+                    </button>
+                    <button
+                      class="suggestion-chip"
+                      onclick="setCustomAmount(750000)"
+                    >
+                      750k
+                    </button>
+                    <button
+                      class="suggestion-chip"
+                      onclick="setCustomAmount(1500000)"
+                    >
+                      1.5M
+                    </button>
+                    <button
+                      class="suggestion-chip"
+                      onclick="setCustomAmount(3000000)"
+                    >
+                      3M
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Calculator Section -->
+            <section class="calculator-section animate-slide" id="calculator">
+              <h3 class="calculator-title">📊 Votre plan d'épargne</h3>
+              <div class="calculator-result" id="time-result">
+                Dans 2 ans et 3 mois
+              </div>
+              <div class="calculator-details" id="calculator-details">
+                Au rythme actuel de 1,000 FCFA/jour
+              </div>
+
+              <div class="calculator-breakdown">
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Objectif sélectionné :</span>
+                  <span class="breakdown-value" id="selected-objective"
+                    >2,000,000 FCFA</span
+                  >
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Épargne quotidienne :</span>
+                  <span class="breakdown-value">1,000 FCFA</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Épargne mensuelle :</span>
+                  <span class="breakdown-value">30,000 FCFA</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Temps estimé :</span>
+                  <span class="breakdown-value" id="time-breakdown"
+                    >27 mois</span
+                  >
+                </div>
+              </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section">
+              <button
+                class="cta-primary"
+                id="cta-button"
+                onclick="defineObjective()"
+                disabled
+              >
+                🎯 Définir mon objectif
+              </button>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let selectedCategory = null;
+      let selectedAmount = 0;
+      let customMode = false;
+      const dailySavings = 1000; // FCFA per day
+
+      // DOM Elements
+      const customCard = document.getElementById("custom-card");
+      const customInput = document.getElementById("custom-input");
+      const customAmountInput = document.getElementById("custom-amount");
+      const ctaButton = document.getElementById("cta-button");
+      const calculator = document.getElementById("calculator");
+      const timeResult = document.getElementById("time-result");
+      const calculatorDetails = document.getElementById("calculator-details");
+      const selectedObjective = document.getElementById("selected-objective");
+      const timeBreakdown = document.getElementById("time-breakdown");
+
+      // Category data
+      const categories = {
+        house: {
+          name: "Maison",
+          amount: 2000000,
+          icon: "🏠",
+          description: "Votre première propriété",
+        },
+        education: {
+          name: "Éducation",
+          amount: 500000,
+          icon: "🎓",
+          description: "Formation ou études",
+        },
+        emergency: {
+          name: "Urgences",
+          amount: 200000,
+          icon: "🚨",
+          description: "Fonds d'urgence",
+        },
+        business: {
+          name: "Business",
+          amount: 1000000,
+          icon: "💼",
+          description: "Créer votre entreprise",
+        },
+      };
+
+      // Category selection
+      function selectCategory(category, amount) {
+        // Remove previous selections
+        document.querySelectorAll(".category-card").forEach((card) => {
+          card.classList.remove("selected");
+        });
+
+        // Deactivate custom mode
+        customMode = false;
+        customCard.classList.remove("active");
+        customInput.classList.remove("show");
+        customAmountInput.value = "";
+
+        // Select new category
+        selectedCategory = category;
+        selectedAmount = amount;
+        const categoryCard = document.querySelector(
+          `[data-category="${category}"]`
+        );
+        categoryCard.classList.add("selected");
+
+        // Add bounce animation
+        categoryCard.classList.add("animate-bounce");
+        setTimeout(() => {
+          categoryCard.classList.remove("animate-bounce");
+        }, 2000);
+
+        updateCalculator();
+        enableCTA();
+      }
+
+      // Custom amount functions
+      function toggleCustom() {
+        customMode = !customMode;
+
+        if (customMode) {
+          // Deselect categories
+          document.querySelectorAll(".category-card").forEach((card) => {
+            card.classList.remove("selected");
+          });
+          selectedCategory = null;
+
+          // Activate custom mode
+          customCard.classList.add("active");
+          customInput.classList.add("show");
+          setTimeout(() => {
+            customAmountInput.focus();
+          }, 300);
+        } else {
+          customCard.classList.remove("active");
+          customInput.classList.remove("show");
+          selectedAmount = 0;
+          updateCalculator();
+          disableCTA();
+        }
+      }
+
+      function setCustomAmount(amount) {
+        customAmountInput.value = amount.toLocaleString("fr-FR");
+        updateCustomAmount();
+      }
+
+      function updateCustomAmount() {
+        const value = parseInt(customAmountInput.value.replace(/\s/g, "")) || 0;
+        selectedAmount = value;
+
+        if (value > 0) {
+          updateCalculator();
+          enableCTA();
+        } else {
+          disableCTA();
+        }
+
+        // Format input with spaces
+        if (value > 0) {
+          customAmountInput.value = value.toLocaleString("fr-FR");
+        }
+      }
+
+      // Calculator functions
+      function updateCalculator() {
+        if (selectedAmount <= 0) return;
+
+        const daysNeeded = Math.ceil(selectedAmount / dailySavings);
+        const monthsNeeded = Math.ceil(daysNeeded / 30);
+        const yearsNeeded = Math.floor(monthsNeeded / 12);
+        const remainingMonths = monthsNeeded % 12;
+
+        // Update display
+        selectedObjective.textContent =
+          selectedAmount.toLocaleString("fr-FR") + " FCFA";
+        timeBreakdown.textContent = monthsNeeded + " mois";
+
+        // Format time result
+        let timeText = "";
+        if (yearsNeeded > 0) {
+          timeText = `Dans ${yearsNeeded} an${yearsNeeded > 1 ? "s" : ""}`;
+          if (remainingMonths > 0) {
+            timeText += ` et ${remainingMonths} mois`;
+          }
+        } else {
+          timeText = `Dans ${monthsNeeded} mois`;
+        }
+
+        timeResult.textContent = timeText;
+        calculatorDetails.textContent = `Au rythme actuel de ${dailySavings.toLocaleString(
+          "fr-FR"
+        )} FCFA/jour`;
+
+        // Show calculator with animation
+        calculator.style.display = "block";
+        calculator.classList.add("animate-slide");
+      }
+
+      // CTA functions
+      function enableCTA() {
+        ctaButton.disabled = false;
+      }
+
+      function disableCTA() {
+        ctaButton.disabled = true;
+      }
+
+      function defineObjective() {
+        if (selectedAmount <= 0) return;
+
+        // Visual feedback
+        ctaButton.innerHTML = "⚡ Configuration...";
+        ctaButton.disabled = true;
+
+        setTimeout(() => {
+          ctaButton.innerHTML = "✅ Objectif défini !";
+
+          setTimeout(() => {
+            const objectiveName = selectedCategory
+              ? categories[selectedCategory].name
+              : "Objectif personnalisé";
+            const timeText = timeResult.textContent;
+
+            alert(
+              `🎉 Objectif défini avec succès !\n\n🎯 ${objectiveName}\n💰 ${selectedAmount.toLocaleString(
+                "fr-FR"
+              )} FCFA\n⏱️ ${timeText}\n\n📈 Vous pouvez maintenant suivre vos progrès !\n\n🚀 Redirection vers le suivi...`
+            );
+
+            ctaButton.innerHTML = "🎯 Définir mon objectif";
+            ctaButton.disabled = false;
+          }, 1500);
+        }, 2000);
+      }
+
+      // Navigation
+      function goBack() {
+        const button = document.querySelector(".back-button");
+        button.style.transform = "scale(0.9)";
+        setTimeout(() => {
+          button.style.transform = "scale(1)";
+          if (selectedAmount > 0) {
+            if (
+              confirm(
+                "Vous avez commencé à définir un objectif.\nVoulez-vous vraiment quitter sans sauvegarder ?"
+              )
+            ) {
+              alert("Retour au dashboard...");
+            }
+          } else {
+            alert("Retour au dashboard...");
+          }
+        }, 150);
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        // Default selection - House category
+        selectCategory("house", 2000000);
+
+        // Animate sections entrance
+        const sections = document.querySelectorAll(".animate-slide");
+        sections.forEach((section, index) => {
+          section.style.opacity = "0";
+          section.style.transform = "translateY(20px)";
+          setTimeout(() => {
+            section.style.transition = "all 0.5s ease";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+          }, 100 * index);
+        });
+
+        // Demo mode
+        setTimeout(() => {
+          if (confirm("🎯 DEMO: Montrer l'interaction avec les objectifs ?")) {
+            setTimeout(() => {
+              selectCategory("education", 500000);
+            }, 1000);
+
+            setTimeout(() => {
+              toggleCustom();
+            }, 2500);
+
+            setTimeout(() => {
+              setCustomAmount(750000);
+            }, 3500);
+
+            setTimeout(() => {
+              alert(
+                "💡 Démonstration terminée !\n\n✅ Fonctionnalités testées :\n• Sélection objectifs prédéfinis\n• Montant personnalisé\n• Calcul automatique du temps\n• Interface motivante"
+              );
+            }, 4500);
+          }
+        }, 2000);
+      });
+
+      console.log("🎯 YESSI-YESSI Define Objective Screen loaded!");
+      console.log("🎯 Target: 70%+ objective definition rate");
+      console.log("💪 Motivation maximized, engagement optimized");
+    </script>
+  </body>
+</html>

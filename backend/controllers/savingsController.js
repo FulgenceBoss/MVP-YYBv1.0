@@ -37,10 +37,55 @@ exports.getSavingsBalance = async (req, res) => {
 // GET /api/savings/config
 exports.getSavingsConfig = async (req, res) => {
   try {
-    const config = await SavingsConfig.findOne({ user: req.user.id });
+    const config = await SavingsConfig.findOne({ user: req.user.id }).lean(); // Use .lean() for a plain object
     if (!config) {
       return res.status(200).json({ success: true, config: null });
     }
+
+    // --- Streak Calculation ---
+    const transactions = await Transaction.find({
+      user: req.user.id,
+      status: "completed",
+      type: "auto",
+    }).sort({ createdAt: -1 });
+
+    let streak = 0;
+    if (transactions.length > 0) {
+      let today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Check if the most recent transaction was yesterday or today
+      const lastTransactionDate = new Date(transactions[0].createdAt);
+      lastTransactionDate.setHours(0, 0, 0, 0);
+
+      const diffTime = today - lastTransactionDate;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 1) {
+        streak = 1;
+        let previousDay = new Date(lastTransactionDate);
+
+        for (let i = 1; i < transactions.length; i++) {
+          let currentTransactionDate = new Date(transactions[i].createdAt);
+          currentTransactionDate.setHours(0, 0, 0, 0);
+
+          let expectedPreviousDay = new Date(previousDay);
+          expectedPreviousDay.setDate(previousDay.getDate() - 1);
+
+          if (
+            currentTransactionDate.getTime() === expectedPreviousDay.getTime()
+          ) {
+            streak++;
+            previousDay = currentTransactionDate;
+          } else {
+            break; // Streak is broken
+          }
+        }
+      }
+    }
+    config.streak = streak;
+    // --- End Streak Calculation ---
+
     res.status(200).json({ success: true, config });
   } catch (error) {
     res.status(500).json({
@@ -54,11 +99,13 @@ exports.getSavingsConfig = async (req, res) => {
 // POST /api/savings/config
 exports.setSavingsConfig = async (req, res) => {
   try {
-    const { amount, deductionTime, wallet, active, operator } = req.body;
+    const { goal, dailyAmount, deductionTime, wallet, active, operator } =
+      req.body;
 
     // Build the update object with only the fields provided in the request
     const updateFields = {};
-    if (amount !== undefined) updateFields.amount = amount;
+    if (goal !== undefined) updateFields.goal = goal;
+    if (dailyAmount !== undefined) updateFields.dailyAmount = dailyAmount;
     if (deductionTime !== undefined) updateFields.deductionTime = deductionTime;
     if (wallet !== undefined) updateFields.wallet = wallet;
     if (active !== undefined) updateFields.active = active;
@@ -78,10 +125,11 @@ exports.setSavingsConfig = async (req, res) => {
     );
 
     // Track event
-    if (amount && deductionTime) {
+    if (dailyAmount && deductionTime) {
       trackEvent(req.user.id, "savings_configured", {
-        amount: config.amount,
+        amount: config.dailyAmount,
         deductionTime: config.deductionTime,
+        goal: config.goal,
       });
     }
 

@@ -20,9 +20,10 @@ import ManualSavingsScreen from "../screens/savings/ManualSavingsScreen";
 import TransactionStatusScreen from "../screens/savings/TransactionStatusScreen";
 import HistoryScreen from "../screens/HistoryScreen";
 // import SavingsConfigScreen from "../screens/savings/SavingsConfigScreen";
-import AmountSelectionScreen from "../screens/savings/AmountSelectionScreen";
-import FinalConfigScreen from "../screens/savings/FinalConfigScreen";
 import InitialRouteResolver from "./InitialRouteResolver";
+import GoalSelectionScreen from "../screens/savings/GoalSelectionScreen";
+import SpeedSelectionScreen from "../screens/savings/SpeedSelectionScreen";
+import ConfirmationScreen from "../screens/savings/ConfirmationScreen";
 
 const Stack = createStackNavigator();
 
@@ -84,11 +85,6 @@ const AppNavigator = () => {
             <Stack.Screen name="Resolver" component={InitialRouteResolver} />
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
             <Stack.Screen
-              name="AmountSelection"
-              component={AmountSelectionScreen}
-            />
-            <Stack.Screen name="FinalConfig" component={FinalConfigScreen} />
-            <Stack.Screen
               name="ManualSavings"
               component={ManualSavingsScreen}
             />
@@ -97,6 +93,15 @@ const AppNavigator = () => {
               component={TransactionStatusScreen}
             />
             <Stack.Screen name="History" component={HistoryScreen} />
+            <Stack.Screen
+              name="GoalSelection"
+              component={GoalSelectionScreen}
+            />
+            <Stack.Screen
+              name="SpeedSelection"
+              component={SpeedSelectionScreen}
+            />
+            <Stack.Screen name="Confirmation" component={ConfirmationScreen} />
             {/* <Stack.Screen
               name="SavingsConfig"
               component={SavingsConfigScreen}

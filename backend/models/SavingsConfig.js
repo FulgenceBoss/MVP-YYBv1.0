@@ -1,5 +1,16 @@
 const mongoose = require("mongoose");
 
+const GoalSchema = new mongoose.Schema(
+  {
+    key: { type: String, required: true },
+    icon: { type: String, required: true },
+    name: { type: String, required: true },
+    amount: { type: Number, required: true },
+    bgColor: { type: String },
+  },
+  { _id: false }
+);
+
 const SavingsConfigSchema = new mongoose.Schema(
   {
     user: {
@@ -13,14 +24,17 @@ const SavingsConfigSchema = new mongoose.Schema(
       required: true,
       enum: ["Moov", "Airtel"],
     },
-    amount: {
+    goal: {
+      type: GoalSchema,
+      required: false, // Not required immediately on user creation
+    },
+    dailyAmount: {
       type: Number,
       required: true,
       min: 100,
-      max: 5000,
     },
     deductionTime: {
-      type: String, // Format HH:mm ou ISO string
+      type: String, // Format HH:mm en UTC
       required: true,
     },
     wallet: {
@@ -44,5 +58,8 @@ const SavingsConfigSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// We remove the old 'amount' field as it's replaced by 'dailyAmount'
+SavingsConfigSchema.remove("amount");
 
 module.exports = mongoose.model("SavingsConfig", SavingsConfigSchema);

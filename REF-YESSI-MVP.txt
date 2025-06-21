@@ -48,61 +48,52 @@
 
 ---
 
-### FONCTIONNALITÉS IMPLÉMENTÉES
+### FONCTIONNALITÉS IMPLÉMENTÉES (Refonte Majeure)
 
-- **Flux d'authentification complet :**
-  - Écrans `SignUpScreen`, `OtpScreen`, et `LoginScreen` 100% fonctionnels et robustes.
-  - Logique de redirection post-authentification via Redux et `AppNavigator`.
-- **Flux de configuration de l'épargne :**
-  - Écrans `AmountSelectionScreen` et `FinalConfigScreen` fonctionnels.
-  - Sauvegarde de la configuration via des mises à jour partielles au backend.
-- **Processeur d'Épargne Automatisé (Backend) :**
-  - Le service CRON (`cronService.js`) est implémenté mais **désactivé en développement** pour garantir la stabilité du serveur.
-- **Tableau de Bord :**
-  - Le `DashboardScreen` a été refactorisé pour corriger l'avertissement `VirtualizedLists` et affiche le solde et l'historique de l'utilisateur.
-  - Le composant `StreakCounter` est intégré.
-  - Intégration des librairies `react-native-svg` et `expo-linear-gradient` pour un design avancé.
-- **Historique des transactions :**
-  - L'affichage de l'historique des transactions est désormais validé et fonctionnel.
-- **Navigation Intelligente :**
-  - Un écran `AppLoadingScreen` vérifie la configuration et redirige correctement.
-- **Configuration API Robuste :**
-  - L'URL de l'API est maintenant gérée dans un fichier de configuration dédié, non suivi par Git.
-- **Écran d'historique dédié (Nouveau) :**
-  - Un nouvel écran `HistoryScreen.js` a été créé pour afficher l'historique détaillé.
-  - L'interface a été implémentée statiquement en se basant sur la maquette `maqHisto.html` et est visuellement validée.
-  - La navigation vers cet écran depuis le tableau de bord est fonctionnelle.
-- **Épargne Manuelle (Nouveau) :**
-  - Le flux complet d'épargne manuelle est désormais implémenté et validé.
-  - L'expérience utilisateur a été améliorée avec un écran de statut de transaction dédié utilisant des animations Lottie pour les états de succès, d'échec et de chargement.
-  - La gestion des erreurs réseau a été renforcée pour fournir des messages clairs à l'utilisateur.
-  - Amélioration de l'UX/UI sur la sélection de l'opérateur et la saisie du numéro.
-- **Refonte de l'Écran de Configuration (Nouveau) :**
-  - L'écran de configuration finale de l'épargne (`FinalConfigScreen`) a été entièrement refondu pour correspondre à la maquette de haute-fidélité.
-  - Implémentation d'un slider personnalisé et interactif pour la sélection de l'heure.
-  - Amélioration de l'UX/UI sur la sélection de l'opérateur et la saisie du numéro.
+- **Refonte Complète du Flux d'Accueil :**
+  - L'ancien parcours a été remplacé par un flux plus psychologique et intuitif : `GoalSelectionScreen` -> `SpeedSelectionScreen` -> `ConfirmationScreen`.
+  - **`GoalSelectionScreen` :**
+    - Permet à l'utilisateur de choisir un objectif prédéfini parmi une grille visuelle ou de créer le sien.
+    - Utilise un modal (`CustomGoalModal`) pour la création/modification d'objectifs personnalisés (nom + montant).
+    - Logique de navigation intelligente qui gère le retour au `Dashboard` pour un utilisateur existant.
+  - **`SpeedSelectionScreen` :**
+    - Récupère l'objectif choisi et affiche un récapitulatif.
+    - Propose des "vitesses" d'épargne claires et permet la saisie d'un montant personnalisé via un modal (`CustomAmountModal`).
+    - Intègre des composants réutilisables (`TimeSelector`, `MobileMoneySelector`) pour une expérience cohérente.
+    - Affiche un récapitulatif complet et dynamique (incluant le temps estimé pour atteindre l'objectif).
+    - Implémente un feedback de chargement clair sur le bouton d'activation.
+  - **`ConfirmationScreen` :**
+    - Célèbre la fin de la configuration avec une animation Lottie.
 
----
+- **Synchronisation Backend/Frontend :**
+  - Le modèle de données `SavingsConfig` a été mis à jour pour inclure la nouvelle structure (`goal` et `dailyAmount`).
+  - Le `savingsController` a été corrigé pour sauvegarder et renvoyer les bonnes données.
+  - Le calcul du `streak` (série de jours) est maintenant implémenté côté backend.
 
-### NOTE TECHNIQUE : Approche de Filtrage des Transactions
+- **Amélioration du `DashboardScreen` :**
+  - Affiche désormais correctement le nom de l'objectif, son montant, et l'épargne quotidienne.
+  - Le calcul de la barre de progression est synchronisé avec l'objectif réel de l'utilisateur.
+  - Le bouton "Modifier" ouvre un modal pour un changement rapide de la vitesse d'épargne, avec un lien pour modifier l'objectif.
+  - La section "Prochain palier" est maintenant dynamique.
 
-- **Problématique :** Le filtrage des transactions ("7 jours", "30 jours") doit fonctionner de manière fiable pendant le développement, même avec des données de test qui ne sont pas à jour (ex: transactions datées de 2025 alors que nous sommes en 2024).
-- **Approche Actuelle (pour le Développement) :** La logique de filtrage utilise la **date de la transaction la plus récente** comme point de référence pour "aujourd'hui". Cela garantit que les filtres sont fonctionnels et testables visuellement, peu importe l'âge des données.
-- **Action Requise Avant Production :** Avant le déploiement final, cette logique devra être remplacée par une approche standard qui se base sur la **date réelle du jour**. Le code devra être modifié pour comparer les dates de transaction à `new Date()`. Cette modification ne pourra être validée qu'avec des données de transactions réelles ou à jour.
+- **Nettoyage du Code :**
+  - Les anciens écrans (`AmountSelectionScreen.js`, `FinalConfigScreen.js`) ont été supprimés.
+  - Le navigateur (`AppNavigator.js`) a été nettoyé.
 
 ---
 
 ### ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise)
 
-- **Objectif Actuel :** Refonte de l'interface utilisateur (UI) du parcours d'authentification pour une expérience utilisateur améliorée.
+- **Objectif Actuel :** Terminé. La refonte du flux d'accueil et la synchronisation du tableau de bord sont complètes.
 - **Progrès Récents :**
-  - Le système de notifications push a été implémenté et validé de bout en bout (sauvegarde du token, notifications manuelles et automatiques).
-  - Le système de suivi analytique a été mis en place pour les événements clés du parcours utilisateur.
-- **Point de Blocage / Difficulté :** Aucune. En attente de la reprise du développement.
+  - Finalisation de l'ensemble du parcours de configuration de l'épargne.
+  - Correction des bugs de synchronisation des données entre le frontend et le backend.
+  - Amélioration de l'UX/UI avec des modaux, des feedbacks de chargement et des micro-textes plus clairs.
+  - Création d'une nouvelle règle de design (`ClarityAndAccessibility.mdc`).
+- **Point de Blocage / Difficulté :** Aucune. Le flux est stable et fonctionnel.
 - **Prochaine Action :**
-  1.  Commencer le développement statique de la nouvelle version de l'écran d'inscription (`SignUpScreen`).
-  2.  Poursuivre avec le développement statique de l'écran de validation OTP et de création de PIN (`OtpScreen`).
-  3.  Intégrer progressivement ces nouvelles interfaces dans l'application existante.
+  1.  Passer à la prochaine fonctionnalité majeure du backlog (ex: la mise en pause de l'épargne, la gestion du profil utilisateur, ou le retrait des fonds).
+  2.  Commencer un nouveau cycle en suivant le `WORKFLOW.md` : `task-master next`, planification, etc.
 
 ---
 
@@ -168,3 +159,71 @@
       - **Symptôme :** La compilation sur les serveurs d'EAS échouait lors du traitement du fichier `google-services.json`.
       - **Cause :** Le fichier avait été téléversé via une méthode incorrecte et obsolète (`eas credentials` -> `FCM Legacy Key`), ce qui a corrompu son format.
       - **Solution :** La clé incorrecte a été supprimée. Le fichier `google-services.json` a été téléversé de manière sécurisée via la méthode moderne (`npx eas secret:create ... --type file`). Le fichier `eas.json` a été mis à jour pour lier ce secret à la variable d'environnement `GOOGLE_SERVICES_JSON` lors de la compilation.
+
+---
+
+### NOUVEAU FLUX D'ACCUEIL UTILISATEUR (À IMPLÉMENTER)
+
+- **Contexte :** Le flux d'accueil initial (`Inscription -> Choix Montant -> Config Finale`) a été jugé peu engageant. Un nouveau flux, plus centré sur la motivation de l'utilisateur, a été validé et son implémentation a commencé.
+- **Objectif :** Remplacer l'ancien flux par un parcours plus psychologique pour améliorer l'activation et la rétention des nouveaux utilisateurs.
+
+- **Nouveau Flux Cible Validé :**
+  `Inscription -> Choix Objectif -> Choix Vitesse (Montant) -> Config Finale (sur la même page) -> Célébration -> Dashboard`
+
+---
+
+### PRINCIPES CLÉS DE LA REFONTE
+
+#### Fluidifier la Configuration Finale
+- **Observation actuelle :** L'utilisateur passe de `AmountSelectionScreen` à `FinalConfigScreen`, ce qui crée une étape supplémentaire.
+- **Conseil :** Une fois le montant sélectionné, au lieu de naviguer vers un nouvel écran, faites apparaître les deux dernières questions directement en dessous sur la même page : "À quelle heure ?" et "Quel portefeuille ?". Utilisez des valeurs par défaut intelligentes (ex: 20h00, qui est souvent une bonne heure).
+- **Bénéfice :** Le flux semble plus rapide et moins fragmenté. L'utilisateur a l'impression de tout configurer en un seul endroit, ce qui réduit la perception de l'effort.
+
+#### Ajouter une Étape de Célébration
+- **Observation actuelle :** Après la configuration, l'utilisateur arrive sur le tableau de bord, qui peut sembler un peu vide au début.
+- **Conseil :** Juste avant d'afficher le tableau de bord pour la première fois, insérez un écran de félicitations et de confirmation. Un message simple et puissant comme : "C'est parti ! Votre plan d'épargne est activé. Votre premier prélèvement de 1000 FCFA aura lieu ce soir. Vous êtes sur la bonne voie pour acheter votre scooter !". Vous pouvez même y ajouter une animation Lottie pour un effet "wow".
+- **Bénéfice :** Cela termine le parcours d'accueil sur une note extrêmement positive, renforce la décision de l'utilisateur, et gère ses attentes en lui confirmant ce qui va se passer ensuite.
+
+---
+
+### PLAN D'ACTION VALIDÉ POUR LA REFONTE DU FLUX
+
+**Principe Directeur :** Développer le nouveau flux en parallèle de l'existant pour ne pas casser l'application. Créer de nouveaux écrans (ex: `GoalSelectionScreen.js`), les rendre dynamiques, les tester, puis les substituer à l'ancien flux.
+
+**Phase 1 : Création des Nouveaux Écrans (Statiques)**
+
+1.  **Créer `GoalSelectionScreen.js` :**
+    *   **Action :** Créer un fichier `frontend/src/screens/savings/GoalSelectionScreen.js`.
+    *   **Contenu :** Développer l'interface statique basée sur la maquette `maqDefGoal.html` et la capture d'écran de référence. L'écran doit présenter une liste d'objectifs cliquables.
+
+2.  **Créer `SpeedSelectionScreen.js` :**
+    *   **Action :** Créer un fichier `frontend/src/screens/savings/SpeedSelectionScreen.js`.
+    *   **Contenu :** Développer une interface qui affiche l'objectif choisi, propose 3 options de vitesse (montant), et intègre sur la même page les champs pour l'heure et le portefeuille Mobile Money.
+
+3.  **Créer `ConfirmationScreen.js` :**
+    *   **Action :** Créer un fichier `frontend/src/screens/savings/ConfirmationScreen.js`.
+    *   **Contenu :** Développer un écran de félicitations avec un résumé du plan d'épargne et un bouton de redirection vers le tableau de bord.
+
+**Phase 2 : Intégration et Logique**
+
+4.  **Rendre `GoalSelectionScreen.js` Dynamique :**
+    *   **Action :** Ajouter la gestion de l'état (`useState`) pour la sélection. Modifier le slice Redux `savingsConfigSlice` pour y ajouter un champ `goal`. Connecter le bouton "Suivant" pour sauvegarder l'objectif et naviguer vers l'écran suivant.
+
+5.  **Rendre `SpeedSelectionScreen.js` Dynamique :**
+    *   **Action :** Connecter la logique de sélection de montant, l'heure et le portefeuille. Connecter le bouton "Activer" à l'action `saveSavingsConfig`. Naviguer vers l'écran de confirmation en cas de succès.
+
+**Phase 3 : Finalisation et Remplacement**
+
+6.  **Connecter `ConfirmationScreen.js` :**
+    *   **Action :** Implémenter la navigation vers le `Dashboard`.
+
+7.  **Modifier `InitialRouteResolver.js` :**
+    *   **Action :** Mettre à jour la redirection pour que les nouveaux utilisateurs soient dirigés vers `GoalSelectionScreen`.
+
+8.  **Nettoyage Final :**
+    *   **Action :** Une fois le nouveau flux entièrement validé, supprimer les anciens écrans (`AmountSelectionScreen.js`, `FinalConfigScreen.js`) et nettoyer les routes dans `AppNavigator.js`.
+
+**État Actuel (Point de reprise pour le prochain agent) :**
+- Un bug critique a été corrigé : la déconnexion d'un utilisateur vide désormais l'état de la configuration d'épargne, garantissant que le flux pour un nouvel utilisateur démarre correctement. Le code a été sauvegardé sur Git.
+- Le plan d'action pour la refonte du flux d'accueil a été validé.
+- **Prochaine étape :** Commencer l'implémentation de la **Phase 1** du plan d'action : Créer l'écran statique `GoalSelectionScreen.js` (Phase 1, Étape 1 du plan ci-dessus).
