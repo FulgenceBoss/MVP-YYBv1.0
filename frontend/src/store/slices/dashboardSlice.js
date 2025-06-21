@@ -1,6 +1,22 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
+export const trackAnalyticsEvent = createAsyncThunk(
+  "dashboard/trackEvent",
+  async ({ eventName, eventData }, { rejectWithValue }) => {
+    try {
+      // "Fire-and-forget" - nous n'attendons pas la réponse pour optimiser la réactivité
+      api.post("/analytics/track", { eventName, eventData });
+      return; // Pas besoin de retourner quoi que ce soit
+    } catch (error) {
+      // Nous ne voulons pas que l'échec du tracking affecte l'UI, donc on log seulement
+      console.error("[Analytics] Frontend tracking failed:", error);
+      // On ne rejette pas pour ne pas déclencher de changement d'état "failed"
+      return;
+    }
+  }
+);
+
 export const fetchDashboardData = createAsyncThunk(
   "dashboard/fetchData",
   async (_, thunkAPI) => {

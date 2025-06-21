@@ -46,7 +46,6 @@ const localColors = {
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const FinalConfigScreenV2 = ({ navigation }) => {
-  console.log("[DEBUG] 1. Rendu du composant FinalConfigScreenV2.");
   const dispatch = useDispatch();
   const { amount, deductionTime, wallet, operator } = useSelector(
     (state) => state.savingsConfig
@@ -55,9 +54,6 @@ const FinalConfigScreenV2 = ({ navigation }) => {
 
   // Initialisation de l'état local depuis Redux
   useEffect(() => {
-    console.log(
-      "[DEBUG] 2. useEffect - Configuration initiale (opérateur, portefeuille)."
-    );
     if (!operator) dispatch(setOperator("Moov")); // Opérateur par défaut
     if (user?.phoneNumber && !wallet) {
       dispatch(setWallet(user.phoneNumber));
@@ -107,9 +103,6 @@ const FinalConfigScreenV2 = ({ navigation }) => {
   }, [sliderWidth]);
 
   const panGesture = Gesture.Pan()
-    .onBegin(() => {
-      console.log("[DEBUG] 4. onBegin - Début du geste de glissement.");
-    })
     .onUpdate((e) => {
       if (sliderWidth === 0) return;
       const newPos = savedPosition.value + e.translationX;
@@ -120,7 +113,6 @@ const FinalConfigScreenV2 = ({ navigation }) => {
       updateReactState(newHour);
     })
     .onEnd(() => {
-      console.log("[DEBUG] 6. onEnd - Fin du geste de glissement.");
       savedPosition.value = position.value;
     });
 
@@ -142,12 +134,27 @@ const FinalConfigScreenV2 = ({ navigation }) => {
       return;
     }
     try {
+      // --- Logique de conversion UTC ---
+      const localTime = time; // ex: 20
+      const now = new Date();
+      // Créer une date avec l'heure locale sélectionnée
+      now.setHours(localTime, 0, 0, 0);
+
+      const utcHour = now.getUTCHours();
+      const utcMinute = now.getUTCMinutes();
+
+      // Formater en "HH:MM"
+      const utcDeductionTime = `${String(utcHour).padStart(2, "0")}:${String(
+        utcMinute
+      ).padStart(2, "0")}`;
+      // --- Fin de la logique de conversion ---
+
       await dispatch(
         updateSavingsConfig({
           amount,
           operator,
           wallet,
-          deductionTime: `${String(time).padStart(2, "0")}:00`,
+          deductionTime: utcDeductionTime, // Envoyer l'heure UTC
         })
       ).unwrap();
       Alert.alert(
@@ -212,9 +219,6 @@ const FinalConfigScreenV2 = ({ navigation }) => {
               <GestureDetector gesture={panGesture}>
                 <View
                   onLayout={(e) => {
-                    console.log(
-                      `[DEBUG] 7. onLayout exécuté. Largeur du slider détectée : ${e.nativeEvent.layout.width}`
-                    );
                     setSliderWidth(e.nativeEvent.layout.width);
                   }}
                   style={styles.timeSlider}

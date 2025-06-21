@@ -29,6 +29,10 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    pushToken: {
+      type: String,
+      default: null, // To store the Expo Push Token
+    },
     // You can add more fields for savings configuration later
     // savingAmount: Number,
     // savingTime: String,

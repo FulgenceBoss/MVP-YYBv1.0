@@ -1,7 +1,8 @@
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { Platform, Alert } from "react-native";
+import { Platform } from "react-native";
 import Constants from "expo-constants";
+import api from "../api/api";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -38,7 +39,6 @@ export const registerForPushNotificationsAsync = async () => {
     }
 
     try {
-      // --- C'est la ligne la plus importante ---
       const projectId = Constants.expoConfig?.extra?.eas?.projectId;
       if (!projectId) {
         throw new Error(
@@ -46,6 +46,17 @@ export const registerForPushNotificationsAsync = async () => {
         );
       }
       token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+
+      if (token) {
+        try {
+          await api.post("/users/save-push-token", { token });
+        } catch (apiError) {
+          console.error(
+            "Erreur lors de la sauvegarde du token de notification sur le backend:",
+            apiError.response ? apiError.response.data : apiError.message
+          );
+        }
+      }
     } catch (e) {
       const errorMessage = `Erreur lors de la récupération du token : ${e.message}`;
       console.error(errorMessage);

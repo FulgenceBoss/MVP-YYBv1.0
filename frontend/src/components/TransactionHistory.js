@@ -18,6 +18,7 @@ import {
 import {
   fetchSavingsConfig,
   updateSavingsConfig,
+  resetConfig,
 } from "../store/slices/savingsConfigSlice";
 import { logout } from "../store/slices/authSlice";
 import Svg, { Circle } from "react-native-svg";
@@ -248,7 +249,10 @@ const TransactionHistory = ({
   const ListFooter = () => (
     <TouchableOpacity
       style={styles.logoutButtonContainer}
-      onPress={() => dispatch(logout())}
+      onPress={() => {
+        dispatch(logout());
+        dispatch(resetConfig());
+      }}
     >
       <Text style={styles.logoutButton}>Déconnexion</Text>
     </TouchableOpacity>

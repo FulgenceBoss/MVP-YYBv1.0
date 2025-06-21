@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDashboardData,
   fetchTransactions,
+  trackAnalyticsEvent,
 } from "../store/slices/dashboardSlice";
 import {
   fetchSavingsConfig,
@@ -51,6 +52,20 @@ const DashboardScreen = ({ navigation }) => {
     dispatch(fetchSavingsConfig());
   }, [dispatch]);
 
+  const convertUTCToLocalTime = (utcTime) => {
+    if (!utcTime || typeof utcTime !== "string" || !utcTime.includes(":")) {
+      return "N/A"; // Retourne une valeur par défaut si le format est incorrect
+    }
+    const [hours, minutes] = utcTime.split(":").map(Number);
+    const date = new Date();
+    date.setUTCHours(hours, minutes, 0, 0);
+
+    const localHours = String(date.getHours()).padStart(2, "0");
+    const localMinutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${localHours}:${localMinutes}`;
+  };
+
   const handleRefresh = useCallback(() => {
     dispatch(fetchDashboardData());
     dispatch(fetchTransactions());
@@ -61,6 +76,10 @@ const DashboardScreen = ({ navigation }) => {
     if (configStatus === "loading") return;
     dispatch(updateSavingsConfig({ active: value }))
       .unwrap()
+      .then(() => {
+        const eventName = value ? "savings_toggled_on" : "savings_toggled_off";
+        dispatch(trackAnalyticsEvent({ eventName }));
+      })
       .catch(() => {
         Alert.alert("Erreur", "Impossible de mettre à jour la configuration.");
       });
@@ -182,7 +201,7 @@ const DashboardScreen = ({ navigation }) => {
               <Text style={styles.toggleTitle}>Épargne automatique</Text>
               <Text style={styles.toggleSubtitle}>
                 Prélèvement quotidien à{" "}
-                {savingsConfig?.deductionTime || "20:00"}
+                {convertUTCToLocalTime(savingsConfig?.deductionTime) || "20:00"}
               </Text>
             </View>
             <Switch

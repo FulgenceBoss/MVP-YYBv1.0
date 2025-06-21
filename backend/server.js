@@ -9,6 +9,8 @@ const initScheduledJobs = require("./services/cronService");
 // Route files
 const authRoutes = require("./routes/auth");
 const savingsRoutes = require("./routes/savings");
+const userRoutes = require("./routes/user");
+const analyticsRoutes = require("./routes/analytics");
 
 // Load env vars from root .env file
 dotenv.config();
@@ -28,6 +30,8 @@ if (process.env.NODE_ENV === "development") {
 // Mount routers
 app.use("/api/auth", authRoutes);
 app.use("/api/savings", savingsRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running...");

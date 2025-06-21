@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   setAmount,
   saveSavingsConfig,
   fetchSavingsConfig,
+  resetConfig,
 } from "../../store/slices/savingsConfigSlice";
 import { logout } from "../../store/slices/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -40,14 +41,15 @@ const GOALS = [
 const AmountSelectionScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { amount, status, error } = useSelector((state) => state.savingsConfig);
+  const [selectedAmount, setSelectedAmount] = useState(null);
 
   useEffect(() => {
     dispatch(fetchSavingsConfig());
   }, [dispatch]);
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("userToken");
     dispatch(logout());
+    dispatch(resetConfig());
   };
 
   const handleSelect = (val) => {

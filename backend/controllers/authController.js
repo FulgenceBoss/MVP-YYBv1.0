@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const { generateOTP, sendSms } = require("../services/smsService");
 const { generateToken } = require("../middleware/authMiddleware");
+const { trackEvent } = require("../services/analyticsService");
 
 // @desc    Register a new user / Send OTP
 // @route   POST /api/auth/register
@@ -103,6 +104,9 @@ const verifyOtp = async (req, res, next) => {
 
     await user.save();
 
+    // Track user registration event
+    trackEvent(user._id, "user_registered");
+
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -152,6 +156,9 @@ const loginUser = async (req, res, next) => {
         .status(401)
         .json({ success: false, message: "Invalid credentials" });
     }
+
+    // Track user login event
+    trackEvent(user._id, "user_loggedIn");
 
     // User is logged in, send token
     const token = generateToken(user._id);

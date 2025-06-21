@@ -1,6 +1,9 @@
 const SavingsConfig = require("../models/SavingsConfig");
 const SavingsBalance = require("../models/SavingsBalance");
 const Transaction = require("../models/Transaction");
+const User = require("../models/User");
+const { sendPushNotification } = require("../services/pushNotificationService");
+const { trackEvent } = require("../services/analyticsService");
 
 // GET /api/savings/history
 exports.getTransactions = async (req, res) => {
@@ -73,6 +76,15 @@ exports.setSavingsConfig = async (req, res) => {
       { $set: updateFields, $setOnInsert: { user: req.user.id } },
       { new: true, upsert: true, runValidators: true }
     );
+
+    // Track event
+    if (amount && deductionTime) {
+      trackEvent(req.user.id, "savings_configured", {
+        amount: config.amount,
+        deductionTime: config.deductionTime,
+      });
+    }
+
     res
       .status(200)
       .json({ success: true, config, message: "Configuration sauvegardée." });
@@ -93,6 +105,9 @@ exports.manualDeposit = async (req, res) => {
   }
 
   try {
+    // Track event
+    trackEvent(userId, "manual_deposit_initiated", { amount });
+
     // 1. Mettre à jour (ou créer) le solde
     const balanceUpdate = await SavingsBalance.findOneAndUpdate(
       { user: userId },
@@ -107,6 +122,18 @@ exports.manualDeposit = async (req, res) => {
       type: "manual",
       status: "completed",
     });
+
+    // 3. Envoyer une notification de confirmation (fire and forget)
+    // Nous ne bloquons pas la réponse de l'API pour cela.
+    const user = await User.findById(userId);
+    if (user && user.pushToken) {
+      console.log(`Sending push notification to token: ${user.pushToken}`);
+      sendPushNotification(
+        user.pushToken,
+        "Épargne Réussie ! 🎉",
+        `Félicitations ! Vous venez d'épargner ${amount} FCFA.`
+      );
+    }
 
     res.status(201).json({
       success: true,

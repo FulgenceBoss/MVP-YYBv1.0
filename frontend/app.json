@@ -11,15 +11,6 @@
     "ios": {
       "supportsTablet": true
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "com.bossapp25.frontend",
-      "googleServicesFile": "./google-services.json"
-    },
     "web": {
       "bundler": "metro",
       "output": "single",
@@ -34,12 +25,17 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {
         "projectId": "ecd13757-7054-4ffd-b270-067dda12c867"
       }
+    },
+    "android": {
+      "package": "com.bossapp25.frontend",
+      "googleServicesFile": "./google-services.json"
     }
   }
 }

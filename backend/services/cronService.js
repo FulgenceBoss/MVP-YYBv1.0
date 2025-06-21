@@ -3,52 +3,77 @@ const SavingsConfig = require("../models/SavingsConfig");
 const SavingsBalance = require("../models/SavingsBalance");
 const Transaction = require("../models/Transaction");
 const { initiateDebit } = require("./transactionService");
+const { sendPushNotification } = require("./pushNotificationService");
+const { trackEvent } = require("../services/analyticsService");
 
 const MAX_RETRIES = 3;
 
-const processDailySavings = async () => {
-  console.log("🚀 Starting daily savings processing...");
+const processScheduledSavings = async () => {
+  const now = new Date();
+  const currentHour = now.getUTCHours();
+  const currentMinute = now.getUTCMinutes();
+  // Format HH:MM en UTC
+  const currentTimeUTC = `${String(currentHour).padStart(2, "0")}:${String(
+    currentMinute
+  ).padStart(2, "0")}`;
+
+  console.log(
+    `🚀 CRON job running at UTC: ${currentTimeUTC}. Checking for scheduled savings.`
+  );
 
   try {
-    const activeConfigs = await SavingsConfig.find({ active: true }).populate(
-      "user"
-    );
+    // Trouver les configs actives qui correspondent à l'heure actuelle (en UTC)
+    // Note: Pour une app en prod, il faudrait une conversion de timezone plus robuste.
+    // Ici, on suppose que deductionTime est stocké en UTC.
+    const configsToProcess = await SavingsConfig.find({
+      active: true,
+      deductionTime: currentTimeUTC,
+    }).populate("user");
 
-    if (activeConfigs.length === 0) {
-      console.log("No active savings configurations to process.");
+    if (configsToProcess.length === 0) {
+      console.log("No savings scheduled for this minute.");
       return;
     }
 
-    for (const config of activeConfigs) {
-      console.log(
-        `-> Found active user: ${config.user.phoneNumber}. Preparing to process ${config.amount} FCFA.`
-      );
-
-      const balance = await SavingsBalance.findOne({ user: config.user._id });
-
+    for (const config of configsToProcess) {
+      // Vérifier si l'utilisateur a déjà été traité aujourd'hui
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-
+      const balance = await SavingsBalance.findOne({ user: config.user._id });
       if (
         balance &&
         balance.lastTransactionDate &&
         balance.lastTransactionDate >= today
       ) {
         console.log(
-          `   - User ${config.user.phoneNumber} already processed today. Skipping.`
+          `-> User ${config.user.phoneNumber} already processed today. Skipping.`
         );
-        continue; // Skip to the next user
+        continue;
       }
 
+      console.log(
+        `-> Processing user: ${config.user.phoneNumber} for ${config.amount} FCFA.`
+      );
+
+      // 1. Envoyer une notification de rappel
+      if (config.user.pushToken) {
+        sendPushNotification(
+          config.user.pushToken,
+          "Rappel d'Épargne Yessi-Yessi",
+          `Nous allons tenter de prélever ${config.amount} FCFA dans un instant.`
+        );
+      }
+
+      // 2. Tenter le débit
       const transactionResult = await initiateDebit(
         config.user,
         config.amount,
         "automatic"
       );
 
+      // 3. Envoyer une notification de succès ou d'échec
       if (transactionResult.success) {
-        // Find or create the savings balance for the user
-        const updatedBalance = await SavingsBalance.findOneAndUpdate(
+        await SavingsBalance.findOneAndUpdate(
           { user: config.user._id },
           {
             $inc: { balance: config.amount },
@@ -56,13 +81,36 @@ const processDailySavings = async () => {
           },
           { upsert: true, new: true }
         );
-        console.log(
-          `   - Balance updated for ${config.user.phoneNumber}. New balance: ${updatedBalance.balance} FCFA.`
-        );
+
+        // Track event
+        trackEvent(config.user._id, "automatic_deposit_success", {
+          amount: config.amount,
+        });
+
+        if (config.user.pushToken) {
+          sendPushNotification(
+            config.user.pushToken,
+            "Épargne Automatique Réussie ! ✅",
+            `Super ! ${config.amount} FCFA ont été ajoutés à votre cagnotte.`
+          );
+        }
+      } else {
+        // Track event
+        trackEvent(config.user._id, "automatic_deposit_failure", {
+          amount: config.amount,
+        });
+
+        if (config.user.pushToken) {
+          sendPushNotification(
+            config.user.pushToken,
+            "Échec de l'Épargne Automatique ❌",
+            `Nous n'avons pas pu prélever ${config.amount} FCFA. Veuillez vérifier votre solde.`
+          );
+        }
       }
     }
   } catch (error) {
-    console.error("Error during savings processing:", error);
+    console.error("Error during scheduled savings processing:", error);
   }
 };
 
@@ -114,15 +162,22 @@ const processFailedTransactions = async () => {
 };
 
 const initScheduledJobs = () => {
-  console.log("CRON jobs are set up, but currently disabled for development.");
+  // --- NOUVELLE LOGIQUE ---
+  // Remplacer la tâche quotidienne par une tâche qui s'exécute toutes les minutes
+  // pour une planification plus précise.
+  console.log(
+    "CRON jobs setup. Scheduled savings check will run every minute."
+  );
 
-  // CRON for new daily savings
-  // cron.schedule("* * * * *", processDailySavings); // DISABLED FOR DEV
+  // Exécuter le job toutes les minutes.
+  cron.schedule("* * * * *", processScheduledSavings);
 
-  // CRON for retrying failed transactions (e.g., every 5 minutes)
-  // cron.schedule("*/5 * * * *", processFailedTransactions); // DISABLED FOR DEV
+  // Le CRON pour les transactions échouées peut rester le même (ex: toutes les 5 mins)
+  // cron.schedule("*/5 * * * *", processFailedTransactions); // Toujours désactivé pour le moment
 
-  // console.log("✅ CRON jobs initialized (Daily Savings & Retries).");
+  console.log(
+    "✅ CRON jobs initialized (Scheduled Savings every minute & Retries disabled)."
+  );
 };
 
 module.exports = initScheduledJobs;

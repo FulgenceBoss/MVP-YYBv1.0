@@ -53,6 +53,7 @@ const authSlice = createSlice({
       state.error = null;
       state.user = null;
       AsyncStorage.removeItem("userToken");
+      // On ne peut pas dispatcher ici, mais on va le faire dans le composant qui appelle logout
     },
   },
   extraReducers: (builder) => {

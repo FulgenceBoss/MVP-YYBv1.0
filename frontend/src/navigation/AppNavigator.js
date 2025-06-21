@@ -57,9 +57,6 @@ const AppNavigator = () => {
         const result = await registerForPushNotificationsAsync();
         if (result.error) {
           Alert.alert("Erreur de Notification", result.error);
-        } else if (result.token) {
-          // Pour le test, nous affichons le token. Plus tard, nous l'enverrons au serveur.
-          Alert.alert("Token de Notification Obtenu", result.token);
         }
       }
     };
