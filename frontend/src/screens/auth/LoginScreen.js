@@ -29,14 +29,14 @@ const LoginScreen = ({ route, navigation }) => {
   const { isLoading, error } = useSelector((state) => state.auth);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pin, setPin] = useState("");
+  const [attemptedLogin, setAttemptedLogin] = useState(false);
 
   useEffect(() => {
-    if (error) {
-      Alert.alert("Erreur de connexion", error, [
-        { text: "OK", onPress: () => dispatch(setError(null)) },
-      ]);
+    if (attemptedLogin && error) {
+      Alert.alert("Connexion impossible", error);
+      setAttemptedLogin(false); // Reset after showing alert
     }
-  }, [error, dispatch]);
+  }, [error, attemptedLogin]);
 
   useEffect(() => {
     // Pre-fill phone number if it's passed from the sign-up screen
@@ -47,14 +47,10 @@ const LoginScreen = ({ route, navigation }) => {
 
   const handleLogin = () => {
     if (!phoneNumber || !pin) {
-      Alert.alert("Erreur", "Veuillez saisir votre numéro et votre PIN.");
+      Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
-    // Simple validation, can be improved
-    if (phoneNumber.length < 9 || pin.length < 4) {
-      Alert.alert("Erreur", "Le numéro ou le PIN est invalide.");
-      return;
-    }
+    setAttemptedLogin(true);
     dispatch(loginUser({ phoneNumber, pin }));
   };
 

@@ -7,7 +7,7 @@ const { trackEvent } = require("../services/analyticsService");
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res, next) => {
-  const { phoneNumber } = req.body;
+  const { phoneNumber, fullName } = req.body;
   console.log(`[Auth] Tentative d'inscription pour : ${phoneNumber}`);
 
   if (!phoneNumber) {
@@ -41,6 +41,7 @@ const registerUser = async (req, res, next) => {
       // Create a new user if not found
       user = await User.create({
         phoneNumber,
+        fullName,
         otpCode: otp,
         otpExpiry: otpExpiry,
       });
@@ -68,7 +69,7 @@ const registerUser = async (req, res, next) => {
 // @route   POST /api/auth/verify
 // @access  Public
 const verifyOtp = async (req, res, next) => {
-  const { phoneNumber, otpCode, pin } = req.body;
+  const { phoneNumber, otpCode, pin, fullName } = req.body;
   console.log(`[Auth] Tentative de vérification OTP pour : ${phoneNumber}`);
 
   if (!phoneNumber || !otpCode || !pin) {
@@ -97,7 +98,9 @@ const verifyOtp = async (req, res, next) => {
         .json({ success: false, message: "Le PIN doit contenir 4 chiffres." });
     }
 
+    // Update user with PIN and fullName
     user.pin = pin;
+    user.fullName = fullName || user.fullName; // Use new fullName if provided
     user.verificationStatus = "verified";
     user.otpCode = undefined;
     user.otpExpiry = undefined;
@@ -113,7 +116,10 @@ const verifyOtp = async (req, res, next) => {
       success: true,
       message: "Utilisateur vérifié et enregistré avec succès",
       token: token,
-      user: { phoneNumber: user.phoneNumber },
+      user: {
+        phoneNumber: user.phoneNumber,
+        fullName: user.fullName,
+      },
     });
   } catch (error) {
     console.error("Erreur interne lors de la vérification OTP:", error);
@@ -166,7 +172,10 @@ const loginUser = async (req, res, next) => {
     res.status(200).json({
       success: true,
       token: token,
-      user: { phoneNumber: user.phoneNumber },
+      user: {
+        phoneNumber: user.phoneNumber,
+        fullName: user.fullName,
+      },
     });
   } catch (error) {
     res
@@ -175,8 +184,71 @@ const loginUser = async (req, res, next) => {
   }
 };
 
+// GET /api/auth/me - Get current user data based on token
+const getMe = async (req, res) => {
+  try {
+    // req.user is populated by the 'protect' middleware from the token
+    const user = await User.findById(req.user.id).select("-pin"); // Exclude PIN from response
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Utilisateur non trouvé." });
+    }
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+};
+
+// @desc    Change user PIN
+// @route   PUT /api/auth/change-pin
+// @access  Private
+const changePin = async (req, res) => {
+  const { oldPin, newPin } = req.body;
+
+  if (!oldPin || !newPin || newPin.length !== 4) {
+    return res.status(400).json({
+      success: false,
+      message: "Veuillez fournir l'ancien et le nouveau PIN (4 chiffres).",
+    });
+  }
+
+  try {
+    const user = await User.findById(req.user.id).select("+pin");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Utilisateur non trouvé." });
+    }
+
+    const isMatch = await user.matchPin(oldPin);
+
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Ancien PIN incorrect." });
+    }
+
+    user.pin = newPin;
+    await user.save();
+
+    res.json({ success: true, message: "PIN mis à jour avec succès." });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Erreur serveur",
+        error: error.message,
+      });
+  }
+};
+
 module.exports = {
   registerUser,
   verifyOtp,
   loginUser,
+  getMe,
+  changePin,
 };

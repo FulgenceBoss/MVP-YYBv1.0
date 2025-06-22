@@ -13,6 +13,10 @@ const UserSchema = new mongoose.Schema(
         "Please add a valid Gabonese phone number starting with 06 or 07",
       ],
     },
+    fullName: {
+      type: String,
+      required: false, // Will be set during OTP verification
+    },
     pin: {
       type: String,
       required: false, // Not required on initial creation

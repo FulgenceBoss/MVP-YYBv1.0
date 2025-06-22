@@ -18,23 +18,15 @@ const InitialRouteResolver = ({ navigation }) => {
     if (status === "succeeded") {
       // If a config object with an _id exists in the database, the user is fully set up.
       if (config && config._id) {
-        console.log(
-          "[InitialRouteResolver] User has a valid savings config. Redirecting to Dashboard."
-        );
         navigation.replace("Dashboard");
       } else {
         // No valid config found, user needs to go through the new setup flow.
-        console.log(
-          "[InitialRouteResolver] No savings config found. Redirecting to GoalSelection."
-        );
         navigation.replace("GoalSelection");
       }
     } else if (status === "failed") {
-      Alert.alert(
-        "Erreur de chargement",
-        "Nous n'avons pas pu vérifier votre configuration d'épargne. Vous pourrez la définir plus tard."
-      );
-      navigation.replace("Dashboard");
+      // If the request fails (e.g., 404 Not Found), it means the user has no config.
+      // Redirect them to the setup flow.
+      navigation.replace("GoalSelection");
     }
   }, [status, config, navigation]);
 

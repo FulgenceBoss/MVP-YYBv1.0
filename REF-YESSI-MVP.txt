@@ -84,16 +84,27 @@
 
 ### ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise)
 
-- **Objectif Actuel :** Terminé. La refonte du flux d'accueil et la synchronisation du tableau de bord sont complètes.
-- **Progrès Récents :**
-  - Finalisation de l'ensemble du parcours de configuration de l'épargne.
-  - Correction des bugs de synchronisation des données entre le frontend et le backend.
-  - Amélioration de l'UX/UI avec des modaux, des feedbacks de chargement et des micro-textes plus clairs.
-  - Création d'une nouvelle règle de design (`ClarityAndAccessibility.mdc`).
-- **Point de Blocage / Difficulté :** Aucune. Le flux est stable et fonctionnel.
+- **Objectif Actuel :** Finaliser l'implémentation de la fonctionnalité "Profil Utilisateur".
+- **Progrès Récents :** Le socle backend est complet et validé. Les fondations du frontend (écrans, state management) sont posées. La gestion des erreurs de connexion a été améliorée pour afficher des messages clairs.
+- **Point de Blocage / Difficulté :**
+  - **Nature du Problème :** Une erreur de réseau persistante (`ERR_NETWORK`) empêche l'application mobile (sur l'émulateur/téléphone) de communiquer avec le serveur backend qui tourne sur le PC.
+  - **Cause Identifiée :** L'application tente d'atteindre le serveur via son adresse IP sur le réseau local (ex: `192.168.1.67`), mais la connexion échoue. Cela peut être dû à plusieurs facteurs : un pare-feu (Windows/antivirus) qui bloque le port `8080`, ou des configurations réseau spécifiques qui empêchent la communication entre l'appareil mobile et le PC sur le même réseau Wi-Fi.
+  - **Ce qui a été tenté :** Le passage de `localhost` à l'adresse IP locale était la bonne direction, mais n'a pas suffi.
 - **Prochaine Action :**
-  1.  Passer à la prochaine fonctionnalité majeure du backlog (ex: la mise en pause de l'épargne, la gestion du profil utilisateur, ou le retrait des fonds).
-  2.  Commencer un nouveau cycle en suivant le `WORKFLOW.md` : `task-master next`, planification, etc.
+  1.  **Résoudre le problème de connectivité réseau :**
+      - **Vérification du Pare-feu :** S'assurer que le pare-feu de Windows ou de tout logiciel de sécurité autorise les connexions entrantes sur le port `8080` pour le processus Node.js.
+      - **Test de connectivité simple :** Essayer d'accéder à l'adresse `http://VOTRE_IP:8080/` depuis le navigateur web du téléphone mobile. Si la page "API is running..." ne s'affiche pas, le problème est bien lié au réseau et non à l'application.
+  2.  **Une fois la connexion rétablie,** finaliser la **Phase 3** en rendant les écrans de profil et de paramètres entièrement dynamiques, puis passer à la **Phase 4** pour implémenter les actions (modification du nom, du PIN, etc.).
+
+---
+
+### CONFIGURATIONS SPÉCIFIQUES AU DÉVELOPPEMENT
+
+- **Accès au Serveur Backend via le Réseau Local :**
+  - **Contexte :** Pour permettre à l'application mobile (lancée avec `npx expo start --tunnel`) de communiquer avec le serveur backend Node.js sur le PC de développement, le serveur doit accepter les connexions externes.
+  - **Changement Appliqué :** Dans le fichier `backend/server.js`, la ligne `app.listen(PORT)` a été modifiée en `app.listen(PORT, "0.0.0.0")`.
+  - **Justification :** Le `0.0.0.0` indique au serveur d'écouter sur toutes les interfaces réseau disponibles, et pas seulement sur `localhost`. C'est ce qui permet au tunnel Expo de fonctionner.
+  - **NOTE POUR LA PRODUCTION :** Cette configuration est **strictement réservée au développement local**. En production, le serveur applicatif doit être placé derrière un reverse proxy (ex: Nginx) pour des raisons de sécurité, et la configuration d'écoute devra être adaptée en conséquence.
 
 ---
 
@@ -103,6 +114,18 @@
   - **Contexte :** Pour débloquer le développement, un push contenant le fichier `google-services.json` (et donc des clés secrètes) a été manuellement autorisé sur GitHub.
   - **Risque :** Le secret est maintenant présent dans l'historique du dépôt. Bien que le risque soit limité pour ce projet, c'est une mauvaise pratique de sécurité.
   - **Action Requise :** Après le MVP, il faudra suivre une procédure de nettoyage de l'historique (ex: avec `git filter-repo` ou `BFG Repo-Cleaner`) pour supprimer définitivement le fichier secret de tous les commits. Il faudra ensuite invalider et remplacer les clés compromises sur la console Google Firebase.
+
+---
+
+### FONCTIONNALITÉS EN ATTENTE / AMÉLIORATIONS FUTURES
+
+- **Réactiver et Fiabiliser le Calcul du "Streak" :**
+  - **Contexte :** La logique de calcul des jours d'épargne d'affilée (`streak`) dans `savingsController.js` s'est avérée complexe et renvoyait des résultats incorrects.
+  - **État Actuel :** La fonctionnalité a été temporairement désactivée (logique commentée dans le backend, affichage commenté dans le frontend) pour ne pas présenter une information erronée à l'utilisateur.
+  - **Action Requise :** Il faudra allouer une session de développement dédiée pour :
+    1.  Déboguer en profondeur la logique de comparaison des dates des transactions.
+    2.  Écrire des tests unitaires (si possible) pour valider le calcul dans différents scénarios (jours consécutifs, jours manquants, etc.).
+    3.  Une fois la logique fiabilisée, réactiver l'affichage sur le `DashboardScreen`.
 
 ---
 
@@ -227,3 +250,52 @@
 - Un bug critique a été corrigé : la déconnexion d'un utilisateur vide désormais l'état de la configuration d'épargne, garantissant que le flux pour un nouvel utilisateur démarre correctement. Le code a été sauvegardé sur Git.
 - Le plan d'action pour la refonte du flux d'accueil a été validé.
 - **Prochaine étape :** Commencer l'implémentation de la **Phase 1** du plan d'action : Créer l'écran statique `GoalSelectionScreen.js` (Phase 1, Étape 1 du plan ci-dessus).
+
+---
+
+### NOUVELLE FONCTIONNALITÉ EN PLANIFICATION : GESTION DU PROFIL ET PARAMÈTRES
+
+- **Objectif Stratégique :** Donner à l'utilisateur le contrôle sur son compte, lui permettre de personnaliser ses informations et de gérer ses paramètres de sécurité, renforçant ainsi la confiance et l'engagement à long terme.
+
+- **Plan d'Action Détaillé :**
+
+  - **Phase 1 : Backend & API (Le Socle)**
+    1.  **Améliorer `GET /api/auth/me` :** S'assurer que cet endpoint (dans `authController.js`) renvoie toutes les informations utilisateur nécessaires (nom, prénom si ajoutés, etc.).
+    2.  **Créer `PUT /api/users/me` :** Créer un nouvel endpoint et un contrôleur (`userController.js`) pour permettre la mise à jour des informations de l'utilisateur (ex: `fullName`).
+    3.  **Créer `PUT /api/auth/change-pin` :** Créer un endpoint sécurisé dans `authController.js` qui demande l'ancien PIN et le nouveau pour le changement.
+
+  - **Phase 2 : Frontend - Écrans Statiques (L'Interface)**
+    1.  **Créer `frontend/src/screens/user/ProfileScreen.js` :**
+        - Affichera un avatar par défaut, le nom de l'utilisateur, et le numéro de téléphone.
+        - Contiendra une liste (`FlatList`) d'options : "Modifier le profil", "Sécurité", "Notifications", "Aide", "Se déconnecter".
+    2.  **Créer `frontend/src/screens/user/SettingsScreen.js` :**
+        - Accessible depuis le `ProfileScreen`.
+        - Contiendra les options détaillées comme "Changer mon code PIN".
+
+  - **Phase 3 : Frontend - Logique & State (Le Cerveau)**
+    1.  **Créer `frontend/src/store/slices/userSlice.js` :**
+        - Gérera l'état des informations du profil (`userInfo`).
+        - Contiendra les thunks `fetchUserProfile`, `updateUserProfile`, et `changeUserPin`.
+    2.  **Connecter `ProfileScreen.js` :** Le faire appeler `fetchUserProfile` au chargement pour afficher les données à jour.
+    3.  **Implémenter la modification :** Utiliser des modaux pour la modification du nom et le changement de PIN afin de fournir une UX fluide.
+
+  - **Phase 4 : Intégration & Navigation (Le Câblage)**
+    1.  **Connecter le `DashboardScreen.js` :** Le bouton "Paramètres" (⚙️) naviguera vers le `ProfileScreen`.
+    2.  **Mettre à jour `AppNavigator.js` :** Ajouter les nouvelles routes pour `ProfileScreen` et `SettingsScreen`.
+
+- **Point de Reprise pour la Prochaine Session :**
+  - **Action :** Commencer par la **Phase 1, Étape 1** : Améliorer l'endpoint `GET /api/auth/me` pour s'assurer qu'il renvoie un objet utilisateur complet et non juste le numéro de téléphone.
+
+- **Implémentation de la Base pour le Profil Utilisateur (Session Actuelle) :**
+  - **Backend (Phase 1 Terminée et Validée) :**
+    - Amélioration de l'endpoint `GET /api/auth/me` pour qu'il s'appuie sur un modèle utilisateur enrichi.
+    - Création de l'endpoint sécurisé `PUT /api/users/me` pour permettre la mise à jour du nom de l'utilisateur. La logique se trouve dans `backend/controllers/userController.js` et la route dans `backend/routes/user.js`.
+    - Création de l'endpoint sécurisé `PUT /api/auth/change-pin` pour le changement de PIN. La logique est dans `authController.js` et la route dans `auth.js`.
+    - Le modèle `User.js` a été mis à jour pour inclure le champ `fullName`.
+    - **Validation :** Tous ces endpoints ont été testés avec succès via des requêtes `curl`/`Invoke-WebRequest`, confirmant leur bon fonctionnement.
+  - **Frontend (Phase 2 & 3 en cours) :**
+    - Création de l'écran statique `ProfileScreen.js` (dans `frontend/src/screens/user/`) basé sur la maquette `maqProfUser.html`.
+    - Création d'un écran placeholder `SettingsScreen.js`.
+    - Mise en place du `userSlice.js` dans le store Redux pour gérer l'état du profil, avec un thunk `fetchUserProfile` pour appeler l'API.
+    - L'écran `ProfileScreen.js` est maintenant connecté au store et tente de récupérer les données au chargement.
+    - La navigation a été ajoutée dans `AppNavigator.js` et le `DashboardScreen.js` a été mis à jour pour inclure un lien vers le profil.

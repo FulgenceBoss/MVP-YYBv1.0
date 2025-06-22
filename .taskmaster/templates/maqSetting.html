@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YESSI-YESSI BANK - Écran 9: Paramètres Généraux MVP</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2e7d32;
+        --secondary: #1976d2;
+        --success: #4caf50;
+        --error: #f44336;
+        --warning: #ff9800;
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --text-primary: #212121;
+        --text-secondary: #757575;
+        --border: #e0e0e0;
+        --light-green: #e8f5e8;
+        --light-blue: #e3f2fd;
+        --light-red: #ffebee;
+        --light-orange: #fff3e0;
+        --moov-orange: #ff6b00;
+        --airtel-red: #e60012;
+      }
+
+      body {
+        font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .phone-mockup {
+        width: 375px;
+        height: 812px;
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 8px;
+        position: relative;
+        box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.1);
+      }
+
+      .phone-mockup::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        z-index: 10;
+      }
+
+      .phone-mockup::after {
+        content: "";
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--surface);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .status-bar {
+        height: 44px;
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 5;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .battery {
+        width: 24px;
+        height: 12px;
+        border: 1px solid var(--text-primary);
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 6px;
+        background: var(--text-primary);
+        border-radius: 0 1px 1px 0;
+      }
+
+      .battery-fill {
+        width: 80%;
+        height: 100%;
+        background: var(--success);
+        border-radius: 1px;
+      }
+
+      .settings-screen {
+        width: 100%;
+        height: calc(100% - 44px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #fafafa 0%, #f8f9fa 100%);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      /* Header Navigation */
+      .nav-header {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px 16px;
+        position: relative;
+        background: var(--surface);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .back-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 16px;
+      }
+
+      .back-button:hover {
+        background: rgba(46, 125, 50, 0.1);
+      }
+
+      .back-button::before {
+        content: "←";
+        font-size: 20px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .header-title {
+        flex: 1;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .save-indicator {
+        font-size: 12px;
+        color: var(--text-secondary);
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      .save-indicator.show {
+        opacity: 1;
+        color: var(--success);
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        padding: 24px;
+      }
+
+      /* Settings Sections */
+      .settings-section {
+        background: var(--surface);
+        border-radius: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+      }
+
+      .section-header {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .section-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .section-content {
+        padding: 0;
+      }
+
+      /* Setting Items */
+      .setting-item {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+      }
+
+      .setting-item:last-child {
+        border-bottom: none;
+      }
+
+      .setting-item:hover {
+        background: var(--bg);
+      }
+
+      .setting-item.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .setting-item.disabled:hover {
+        background: transparent;
+      }
+
+      .setting-info {
+        flex: 1;
+      }
+
+      .setting-label {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .setting-description {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.3;
+      }
+
+      .setting-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--primary);
+        margin-right: 12px;
+      }
+
+      .setting-action {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Toggle Switch */
+      .toggle-switch {
+        position: relative;
+        width: 52px;
+        height: 32px;
+        background: var(--border);
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .toggle-switch.active {
+        background: var(--primary);
+      }
+
+      .toggle-switch.disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+
+      .toggle-thumb {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 28px;
+        height: 28px;
+        background: white;
+        border-radius: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle-switch.active .toggle-thumb {
+        transform: translateX(20px);
+      }
+
+      /* Modify Button */
+      .modify-button {
+        background: transparent;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .modify-button:hover {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* Pause Controls */
+      .pause-controls {
+        padding: 16px 20px;
+        background: var(--light-orange);
+        border-radius: 12px;
+        margin: 16px 20px;
+        border: 1px solid rgba(255, 152, 0, 0.2);
+      }
+
+      .pause-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .pause-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .pause-status {
+        font-size: 12px;
+        background: var(--warning);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      .pause-slider-container {
+        margin-bottom: 12px;
+      }
+
+      .pause-slider {
+        position: relative;
+        width: 100%;
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .pause-track {
+        height: 100%;
+        background: linear-gradient(90deg, var(--warning), var(--error));
+        border-radius: 4px;
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .pause-thumb {
+        position: absolute;
+        top: -8px;
+        right: 100%;
+        width: 24px;
+        height: 24px;
+        background: var(--warning);
+        border: 3px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .pause-thumb:hover {
+        transform: scale(1.1);
+      }
+
+      .pause-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+      }
+
+      .pause-info {
+        font-size: 14px;
+        color: var(--text-secondary);
+        text-align: center;
+      }
+
+      /* Save Button */
+      .save-section {
+        padding: 20px 24px;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+      }
+
+      .save-button {
+        width: 100%;
+        height: 56px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--success) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+      }
+
+      .save-button:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .save-button:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+      }
+
+      .save-button:not(:disabled):active {
+        transform: translateY(0);
+      }
+
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .modal {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 320px;
+        margin: 0 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+
+      .modal-message {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        line-height: 1.4;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 12px;
+      }
+
+      .modal-button {
+        flex: 1;
+        height: 44px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+      }
+
+      .modal-button.secondary {
+        background: var(--border);
+        color: var(--text-primary);
+      }
+
+      .modal-button.primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .modal-button:hover {
+        opacity: 0.8;
+      }
+
+      /* Animations */
+      @keyframes slideIn {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .animate-slide {
+        animation: slideIn 0.5s ease-out;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 375px) {
+        .main-content {
+          padding: 16px;
+        }
+
+        .nav-header {
+          padding: 16px 16px 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <div class="status-left">
+            <span>9:41</span>
+          </div>
+          <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <div class="battery">
+              <div class="battery-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <main class="settings-screen">
+          <!-- Navigation Header -->
+          <section class="nav-header">
+            <button
+              class="back-button"
+              onclick="goBack()"
+              aria-label="Retour"
+            ></button>
+            <h1 class="header-title">Mes Paramètres</h1>
+            <div class="save-indicator" id="save-indicator">✓ Sauvegardé</div>
+          </section>
+
+          <!-- Main Content -->
+          <div class="main-content">
+            <!-- Épargne Automatique Section -->
+            <section class="settings-section animate-slide">
+              <div class="section-header">
+                <h2 class="section-title">Épargne automatique</h2>
+                <p class="section-subtitle">
+                  Gérez vos paramètres d'épargne quotidienne
+                </p>
+              </div>
+              <div class="section-content">
+                <div class="setting-item" onclick="modifyAmount()">
+                  <div class="setting-info">
+                    <div class="setting-label">Montant quotidien</div>
+                    <div class="setting-description">
+                      Somme prélevée chaque jour
+                    </div>
+                  </div>
+                  <div class="setting-action">
+                    <span class="setting-value" id="daily-amount"
+                      >1,000 FCFA</span
+                    >
+                    <button class="modify-button">Modifier</button>
+                  </div>
+                </div>
+
+                <div class="setting-item" onclick="modifyTime()">
+                  <div class="setting-info">
+                    <div class="setting-label">Heure prélèvement</div>
+                    <div class="setting-description">
+                      Moment du prélèvement quotidien
+                    </div>
+                  </div>
+                  <div class="setting-action">
+                    <span class="setting-value" id="daily-time">20:00</span>
+                    <button class="modify-button">Modifier</button>
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Épargne automatique activée</div>
+                    <div class="setting-description">
+                      Prélèvements automatiques quotidiens
+                    </div>
+                  </div>
+                  <div class="setting-action">
+                    <div
+                      class="toggle-switch active"
+                      id="auto-savings-toggle"
+                      onclick="toggleAutoSavings()"
+                    >
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pause Temporaire -->
+              <div
+                class="pause-controls"
+                id="pause-controls"
+                style="display: none"
+              >
+                <div class="pause-header">
+                  <div class="pause-title">Pause temporaire</div>
+                  <div class="pause-status" id="pause-status">Inactif</div>
+                </div>
+                <div class="pause-slider-container">
+                  <div class="pause-slider" onclick="handlePauseSlider(event)">
+                    <div class="pause-track" id="pause-track"></div>
+                    <div class="pause-thumb" id="pause-thumb"></div>
+                  </div>
+                  <div class="pause-labels">
+                    <span>0 jour</span>
+                    <span>7 jours</span>
+                  </div>
+                </div>
+                <div class="pause-info" id="pause-info">
+                  Sélectionnez la durée de pause (1-7 jours)
+                </div>
+              </div>
+            </section>
+
+            <!-- Notifications Section -->
+            <section class="settings-section animate-slide">
+              <div class="section-header">
+                <h2 class="section-title">Notifications</h2>
+                <p class="section-subtitle">Restez informé de vos épargnes</p>
+              </div>
+              <div class="section-content">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Notifications push</div>
+                    <div class="setting-description">
+                      Alertes dans l'application
+                    </div>
+                  </div>
+                  <div class="setting-action">
+                    <div
+                      class="toggle-switch active"
+                      id="push-toggle"
+                      onclick="togglePush()"
+                    >
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Notifications SMS</div>
+                    <div class="setting-description">
+                      Alertes par message texte
+                    </div>
+                  </div>
+                  <div class="setting-action">
+                    <div
+                      class="toggle-switch"
+                      id="sms-toggle"
+                      onclick="toggleSMS()"
+                    >
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Account Section -->
+            <section class="settings-section animate-slide">
+              <div class="section-header">
+                <h2 class="section-title">Compte</h2>
+                <p class="section-subtitle">Informations et sécurité</p>
+              </div>
+              <div class="section-content">
+                <div class="setting-item" onclick="viewProfile()">
+                  <div class="setting-info">
+                    <div class="setting-label">Mon profil</div>
+                    <div class="setting-description">
+                      Informations personnelles
+                    </div>
+                  </div>
+                  <div class="setting-action">
+                    <span style="color: var(--text-secondary)">›</span>
+                  </div>
+                </div>
+
+                <div class="setting-item" onclick="viewSecurity()">
+                  <div class="setting-info">
+                    <div class="setting-label">Sécurité</div>
+                    <div class="setting-description">
+                      PIN et comptes mobile money
+                    </div>
+                  </div>
+                  <div class="setting-action">
+                    <span style="color: var(--text-secondary)">›</span>
+                  </div>
+                </div>
+
+                <div class="setting-item" onclick="viewHelp()">
+                  <div class="setting-info">
+                    <div class="setting-label">Aide et support</div>
+                    <div class="setting-description">
+                      Centre d'aide et contact
+                    </div>
+                  </div>
+                  <div class="setting-action">
+                    <span style="color: var(--text-secondary)">›</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Save Section -->
+          <section class="save-section">
+            <button
+              class="save-button"
+              id="save-button"
+              onclick="saveSettings()"
+              disabled
+            >
+              💾 Sauvegarder les modifications
+            </button>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal">
+        <h3 class="modal-title" id="modal-title">Modifier le montant</h3>
+        <p class="modal-message" id="modal-message">
+          Choisissez votre nouveau montant quotidien
+        </p>
+        <div class="modal-actions">
+          <button class="modal-button secondary" onclick="closeModal()">
+            Annuler
+          </button>
+          <button class="modal-button primary" onclick="confirmModal()">
+            Confirmer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let settings = {
+        dailyAmount: 1000,
+        dailyTime: "20:00",
+        autoSavingsEnabled: true,
+        pauseDays: 0,
+        pushNotifications: true,
+        smsNotifications: false,
+        hasChanges: false,
+      };
+
+      let pauseDays = 0;
+      let currentModal = null;
+
+      // DOM Elements
+      const dailyAmountEl = document.getElementById("daily-amount");
+      const dailyTimeEl = document.getElementById("daily-time");
+      const autoSavingsToggle = document.getElementById("auto-savings-toggle");
+      const pauseControls = document.getElementById("pause-controls");
+      const pauseTrack = document.getElementById("pause-track");
+      const pauseThumb = document.getElementById("pause-thumb");
+      const pauseStatus = document.getElementById("pause-status");
+      const pauseInfo = document.getElementById("pause-info");
+      const pushToggle = document.getElementById("push-toggle");
+      const smsToggle = document.getElementById("sms-toggle");
+      const saveButton = document.getElementById("save-button");
+      const saveIndicator = document.getElementById("save-indicator");
+      const modalOverlay = document.getElementById("modal-overlay");
+      const modalTitle = document.getElementById("modal-title");
+      const modalMessage = document.getElementById("modal-message");
+
+      // Settings modification functions
+      function modifyAmount() {
+        showModal(
+          "amount",
+          "Modifier le montant quotidien",
+          "Choisissez votre nouveau montant d'épargne quotidienne"
+        );
+      }
+
+      function modifyTime() {
+        showModal(
+          "time",
+          "Modifier l'heure",
+          "Choisissez votre nouvelle heure de prélèvement"
+        );
+      }
+
+      function toggleAutoSavings() {
+        settings.autoSavingsEnabled = !settings.autoSavingsEnabled;
+        autoSavingsToggle.classList.toggle(
+          "active",
+          settings.autoSavingsEnabled
+        );
+
+        // Show/hide pause controls based on auto savings status
+        if (settings.autoSavingsEnabled) {
+          pauseControls.style.display = "block";
+          updatePauseStatus();
+        } else {
+          pauseControls.style.display = "none";
+          settings.pauseDays = 0;
+          updatePauseSlider(0);
+        }
+
+        markAsChanged();
+      }
+
+      function togglePush() {
+        settings.pushNotifications = !settings.pushNotifications;
+        pushToggle.classList.toggle("active", settings.pushNotifications);
+        markAsChanged();
+      }
+
+      function toggleSMS() {
+        settings.smsNotifications = !settings.smsNotifications;
+        smsToggle.classList.toggle("active", settings.smsNotifications);
+        markAsChanged();
+      }
+
+      // Pause slider functionality
+      function handlePauseSlider(event) {
+        if (!settings.autoSavingsEnabled) return;
+
+        const slider = event.currentTarget;
+        const rect = slider.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const days = Math.round((percentage / 100) * 7);
+
+        updatePauseSlider(days);
+        markAsChanged();
+      }
+
+      function updatePauseSlider(days) {
+        pauseDays = days;
+        settings.pauseDays = days;
+
+        const percentage = (days / 7) * 100;
+        pauseTrack.style.width = percentage + "%";
+        pauseThumb.style.right = 100 - percentage + "%";
+
+        updatePauseStatus();
+      }
+
+      function updatePauseStatus() {
+        if (pauseDays === 0) {
+          pauseStatus.textContent = "Inactif";
+          pauseStatus.style.background = "var(--text-secondary)";
+          pauseInfo.textContent = "Sélectionnez la durée de pause (1-7 jours)";
+        } else {
+          pauseStatus.textContent =
+            pauseDays + " jour" + (pauseDays > 1 ? "s" : "");
+          pauseStatus.style.background = "var(--warning)";
+          pauseInfo.textContent =
+            "Épargne en pause pendant " +
+            pauseDays +
+            " jour" +
+            (pauseDays > 1 ? "s" : "");
+        }
+      }
+
+      // Modal functions
+      function showModal(type, title, message) {
+        currentModal = type;
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modalOverlay.style.display = "flex";
+      }
+
+      function closeModal() {
+        modalOverlay.style.display = "none";
+        currentModal = null;
+      }
+
+      function confirmModal() {
+        if (currentModal === "amount") {
+          // In a real app, this would show an amount selector
+          const amounts = [500, 1000, 1500, 2000, 2500, 3000];
+          const currentIndex = amounts.indexOf(settings.dailyAmount);
+          const newIndex = (currentIndex + 1) % amounts.length;
+          settings.dailyAmount = amounts[newIndex];
+          dailyAmountEl.textContent =
+            settings.dailyAmount.toLocaleString("fr-FR") + " FCFA";
+        } else if (currentModal === "time") {
+          // In a real app, this would show a time picker
+          const times = ["08:00", "12:00", "18:00", "20:00", "22:00"];
+          const currentIndex = times.indexOf(settings.dailyTime);
+          const newIndex = (currentIndex + 1) % times.length;
+          settings.dailyTime = times[newIndex];
+          dailyTimeEl.textContent = settings.dailyTime;
+        }
+
+        markAsChanged();
+        closeModal();
+      }
+
+      // Change tracking
+      function markAsChanged() {
+        settings.hasChanges = true;
+        saveButton.disabled = false;
+        saveButton.style.background =
+          "linear-gradient(135deg, var(--warning) 0%, var(--error) 100%)";
+      }
+
+      function saveSettings() {
+        if (!settings.hasChanges) return;
+
+        // Visual feedback
+        saveButton.innerHTML = "⚡ Sauvegarde...";
+        saveButton.disabled = true;
+
+        setTimeout(function () {
+          saveButton.innerHTML = "✅ Sauvegardé !";
+
+          setTimeout(function () {
+            settings.hasChanges = false;
+            saveButton.disabled = true;
+            saveButton.innerHTML = "💾 Sauvegarder les modifications";
+            saveButton.style.background = "var(--text-secondary)";
+
+            // Show save indicator
+            saveIndicator.classList.add("show");
+            setTimeout(function () {
+              saveIndicator.classList.remove("show");
+            }, 2000);
+
+            // Show success message
+            alert(
+              "✅ Paramètres sauvegardés avec succès !\n\nVos modifications ont été appliquées à votre compte YESSI-YESSI."
+            );
+          }, 1000);
+        }, 1500);
+      }
+
+      // Navigation
+      function goBack() {
+        if (settings.hasChanges) {
+          if (
+            confirm(
+              "Vous avez des modifications non sauvegardées.\nVoulez-vous les sauvegarder avant de quitter ?"
+            )
+          ) {
+            saveSettings();
+            setTimeout(function () {
+              alert("Retour au dashboard...");
+            }, 2000);
+          } else {
+            alert("Retour au dashboard...");
+          }
+        } else {
+          alert("Retour au dashboard...");
+        }
+      }
+
+      function viewProfile() {
+        alert(
+          "🏠 Redirection vers Mon Profil...\n\nVous pourrez modifier :\n• Photo de profil\n• Informations personnelles\n• Numéro de téléphone"
+        );
+      }
+
+      function viewSecurity() {
+        alert(
+          "🔒 Redirection vers Sécurité...\n\nVous pourrez :\n• Changer votre PIN\n• Gérer vos comptes mobile money\n• Voir l'historique de connexion"
+        );
+      }
+
+      function viewHelp() {
+        alert(
+          "❓ Redirection vers Aide & Support...\n\nAccès à :\n• Centre d'aide\n• Chat en direct\n• FAQ\n• Contact support"
+        );
+      }
+
+      // Touch drag for pause slider
+      let isDragging = false;
+
+      function startDrag(e) {
+        if (!settings.autoSavingsEnabled) return;
+        isDragging = true;
+        e.preventDefault();
+      }
+
+      function handleDrag(e) {
+        if (!isDragging || !settings.autoSavingsEnabled) return;
+
+        const slider = document.querySelector(".pause-slider");
+        const rect = slider.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const x = clientX - rect.left;
+        const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const days = Math.round((percentage / 100) * 7);
+        updatePauseSlider(days);
+        markAsChanged();
+      }
+
+      function endDrag() {
+        isDragging = false;
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        // Setup initial states
+        updatePauseSlider(0);
+        pauseControls.style.display = settings.autoSavingsEnabled
+          ? "block"
+          : "none";
+
+        // Setup drag events for pause slider
+        pauseThumb.addEventListener("mousedown", startDrag);
+        document.addEventListener("mousemove", handleDrag);
+        document.addEventListener("mouseup", endDrag);
+
+        pauseThumb.addEventListener("touchstart", startDrag);
+        document.addEventListener("touchmove", handleDrag);
+        document.addEventListener("touchend", endDrag);
+
+        // Animate sections entrance
+        const sections = document.querySelectorAll(".settings-section");
+        sections.forEach(function (section, index) {
+          section.style.opacity = "0";
+          section.style.transform = "translateY(20px)";
+          setTimeout(function () {
+            section.style.transition = "all 0.5s ease";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+          }, 100 * index);
+        });
+
+        // Demo functionality
+        setTimeout(function () {
+          if (
+            confirm("🎯 DEMO: Activer le mode démonstration des paramètres ?")
+          ) {
+            // Simulate user interactions
+            setTimeout(function () {
+              toggleSMS();
+            }, 1000);
+
+            setTimeout(function () {
+              updatePauseSlider(3);
+              markAsChanged();
+            }, 2000);
+
+            setTimeout(function () {
+              alert(
+                "💡 Démonstration terminée !\n\nVous pouvez maintenant tester toutes les fonctionnalités."
+              );
+            }, 3000);
+          }
+        }, 2000);
+      });
+
+      console.log("⚙️ YESSI-YESSI Settings Screen loaded!");
+      console.log("🎯 Target: 30%+ modification rate");
+      console.log("🔧 User control maximized, flexibility optimized");
+    </script>
+  </body>
+</html>

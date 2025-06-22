@@ -42,7 +42,27 @@ exports.getSavingsConfig = async (req, res) => {
       return res.status(200).json({ success: true, config: null });
     }
 
-    // --- Streak Calculation ---
+    // --- Data Migration for older users ---
+    if (!config.goal) {
+      config.goal = {
+        key: "default",
+        icon: "🎯",
+        name: "Mon Premier Objectif",
+        amount: 200000,
+        bgColor: "#E3F2FD",
+      };
+    }
+    if (config.amount && !config.dailyAmount) {
+      // Migrate old 'amount' field to 'dailyAmount'
+      config.dailyAmount = config.amount;
+    }
+    if (!config.dailyAmount) {
+      config.dailyAmount = 1000; // Default daily amount if none exists
+    }
+    // --- End Data Migration ---
+
+    // --- Streak Calculation (Temporarily Disabled) ---
+    /*
     const transactions = await Transaction.find({
       user: req.user.id,
       status: "completed",
@@ -69,8 +89,9 @@ exports.getSavingsConfig = async (req, res) => {
           let currentTransactionDate = new Date(transactions[i].createdAt);
           currentTransactionDate.setHours(0, 0, 0, 0);
 
-          let expectedPreviousDay = new Date(previousDay);
-          expectedPreviousDay.setDate(previousDay.getDate() - 1);
+          // Correctly calculate the expected previous day without modifying the original
+          const expectedPreviousDay = new Date(previousDay);
+          expectedPreviousDay.setDate(expectedPreviousDay.getDate() - 1);
 
           if (
             currentTransactionDate.getTime() === expectedPreviousDay.getTime()
@@ -84,6 +105,8 @@ exports.getSavingsConfig = async (req, res) => {
       }
     }
     config.streak = streak;
+    */
+    config.streak = 0; // Default to 0 for now
     // --- End Streak Calculation ---
 
     res.status(200).json({ success: true, config });

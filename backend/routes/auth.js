@@ -5,12 +5,15 @@ const {
   registerUser,
   verifyOtp,
   loginUser,
+  getMe,
+  changePin,
 } = require("../controllers/authController");
 const {
   validateRegister,
   validateVerify,
   validateLogin,
 } = require("../middleware/validators/authValidator");
+const { protect } = require("../middleware/authMiddleware");
 
 // Rate Limiter for auth routes
 const authLimiter = rateLimit({
@@ -39,5 +42,13 @@ router.post("/verify", validateVerify, verifyOtp);
 // @route   POST /api/auth/login
 // @access  Public
 router.post("/login", validateLogin, loginUser);
+
+// @desc    Get user profile
+// @route   GET /api/auth/me
+// @access  Private
+router.get("/me", protect, getMe);
+
+// PUT /api/auth/change-pin - Requires token
+router.put("/change-pin", protect, changePin);
 
 module.exports = router;

@@ -139,7 +139,7 @@ Face à un bug persistant ou un comportement inexpliqué (ex: une action qui ne 
     - La **dernière ligne de log qui s'affiche** indique la section de code qui s'est exécutée avec succès. Le bug se trouve **immédiatement après**, sur la ligne qui aurait dû produire le log suivant.
     - Cette information factuelle doit guider la correction, évitant les hypothèses hasardeuses.
 
-**Post-Débogage :** Une fois le bug résolu et validé, il est impératif de **retirer tous les logs de débogage** pour maintenir un code propre.
+**Post-Débogage :** Une fois le bug résolu et **validé par un test réussi de votre part**, il est impératif de retirer tous les logs de débogage pour maintenir un code propre. Ne jamais retirer les logs avant d'avoir eu la confirmation que le problème est résolu.
 
 ---
 

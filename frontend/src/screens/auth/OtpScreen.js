@@ -17,7 +17,7 @@ import {
   setLoading,
   setError,
 } from "../../store/slices/authSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 const OtpScreen = ({ route, navigation }) => {
   const { phoneNumber } = route.params;
@@ -94,7 +94,8 @@ const OtpScreen = ({ route, navigation }) => {
 
       if (response.data.success) {
         const { token } = response.data;
-        await AsyncStorage.setItem("userToken", token);
+        await SecureStore.setItemAsync("userToken", token);
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         dispatch(setUserToken(response.data));
       } else {
         dispatch(setError(response.data.message));

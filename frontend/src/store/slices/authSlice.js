@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import api from "../../api/api";
 import { resetConfig } from "./savingsConfigSlice";
 
@@ -7,16 +7,51 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async ({ phoneNumber, pin }, { dispatch, rejectWithValue }) => {
     try {
+      console.log("[DEBUG] Login: Démarrage pour", phoneNumber);
       const response = await api.post("/auth/login", { phoneNumber, pin });
       const { token, user } = response.data;
-      await AsyncStorage.setItem("userToken", token);
+      await SecureStore.setItemAsync("userToken", token);
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      console.log(
+        "[DEBUG] Login: Token sauvegardé et en-tête Axios mis à jour."
+      );
       dispatch(resetConfig());
       return { token, user };
     } catch (err) {
-      // Log the full error for debugging
-      console.error("Login Error:", JSON.stringify(err, null, 2));
+      let errorMessage = "Une erreur inconnue est survenue.";
+      // Handle network errors
+      if (err.code === "ERR_NETWORK") {
+        errorMessage =
+          "Erreur de réseau. Vérifiez votre connexion et l'adresse du serveur.";
+      } else if (err.response?.data?.message) {
+        // Handle server-side errors
+        errorMessage = err.response.data.message;
+      }
+      // Log a clean error message
+      console.error("Login Error:", errorMessage);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const rehydrateAuth = createAsyncThunk(
+  "auth/rehydrate",
+  async (_, { rejectWithValue }) => {
+    try {
+      console.log("[DEBUG] Rehydrate: Démarrage.");
+      const token = await SecureStore.getItemAsync("userToken");
+      if (!token) {
+        return rejectWithValue("No token found");
+      }
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      console.log("[DEBUG] Rehydrate: Token trouvé, appel /me.");
+      const response = await api.get("/auth/me");
+      console.log("[DEBUG] Rehydrate: Appel /me réussi.");
+      return { token, user: response.data.user };
+    } catch (error) {
+      SecureStore.deleteItemAsync("userToken"); // Token is invalid, remove it
       const message =
-        err.response?.data?.message || "Une erreur de connexion est survenue.";
+        error?.response?.data?.message || "Session invalide ou expirée.";
       return rejectWithValue(message);
     }
   }
@@ -47,13 +82,13 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.error = null;
     },
-    logout: (state) => {
+    logoutSuccess: (state) => {
       state.userToken = null;
-      state.isAuthenticated = false;
-      state.error = null;
       state.user = null;
-      AsyncStorage.removeItem("userToken");
-      // On ne peut pas dispatcher ici, mais on va le faire dans le composant qui appelle logout
+      state.isLoading = false;
+      state.error = null;
+      SecureStore.deleteItemAsync("userToken");
+      delete api.defaults.headers.common["Authorization"];
     },
   },
   extraReducers: (builder) => {
@@ -75,10 +110,33 @@ const authSlice = createSlice({
         state.error = action.payload;
         state.userToken = null;
         state.user = null;
+      })
+      .addCase(rehydrateAuth.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(rehydrateAuth.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.userToken = action.payload.token;
+        state.user = action.payload.user;
+        state.error = null;
+      })
+      .addCase(rehydrateAuth.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+        state.userToken = null;
+        state.user = null;
+        state.error = action.payload; // Store the error message
       });
   },
 });
 
-export const { logout, setLoading, setError, setUserToken } = authSlice.actions;
+export const { setUserToken, setLoading, setError, logoutSuccess } =
+  authSlice.actions;
+
+export const logout = () => (dispatch) => {
+  dispatch(logoutSuccess());
+  dispatch(resetConfig()); // Reset savings config on logout
+};
 
 export default authSlice.reducer;

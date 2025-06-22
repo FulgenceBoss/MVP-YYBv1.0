@@ -35,7 +35,7 @@ const savingsConfigSlice = createSlice({
     error: null,
     goal: null, // To store the selected goal object
     amount: 1000, // Valeur par défaut
-    deductionTime: "20:00",
+    deductionTime: 20, // Always a number (hour of the day)
     wallet: "",
     operator: "Moov",
   },
@@ -47,7 +47,7 @@ const savingsConfigSlice = createSlice({
       state.amount = action.payload;
     },
     setDeductionTime: (state, action) => {
-      state.deductionTime = action.payload;
+      state.deductionTime = Number(action.payload); // Ensure it's always a number
     },
     setWallet: (state, action) => {
       state.wallet = action.payload;

@@ -9,6 +9,7 @@ import {
   Switch,
   RefreshControl,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,11 +19,14 @@ import {
   fetchTransactions,
   trackAnalyticsEvent,
 } from "../store/slices/dashboardSlice";
+import { logout } from "../store/slices/authSlice";
 import {
   fetchSavingsConfig,
   updateSavingsConfig,
 } from "../store/slices/savingsConfigSlice";
 import CustomAmountModal from "../components/CustomAmountModal";
+import { Ionicons } from "@expo/vector-icons";
+import { registerForPushNotificationsAsync } from "../services/notificationService";
 
 const localColors = {
   primary: "#2e7d32",
@@ -37,7 +41,7 @@ const localColors = {
 
 const DashboardScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user, userToken } = useSelector((state) => state.auth);
   const {
     balance,
     transactions,
@@ -47,6 +51,14 @@ const DashboardScreen = ({ navigation }) => {
     (state) => state.savingsConfig
   );
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [localSwitchState, setLocalSwitchState] = useState(
+    savingsConfig?.active || false
+  );
+  const dashboardData = useSelector((state) => state.dashboard);
+
+  useEffect(() => {
+    setLocalSwitchState(savingsConfig?.active || false);
+  }, [savingsConfig?.active]);
 
   useEffect(() => {
     dispatch(fetchDashboardData());
@@ -54,19 +66,12 @@ const DashboardScreen = ({ navigation }) => {
     dispatch(fetchSavingsConfig());
   }, [dispatch]);
 
-  const convertUTCToLocalTime = (utcTime) => {
-    if (!utcTime || typeof utcTime !== "string" || !utcTime.includes(":")) {
-      return "N/A"; // Retourne une valeur par défaut si le format est incorrect
+  // Handle Push Notification registration
+  useEffect(() => {
+    if (userToken) {
+      registerForPushNotificationsAsync();
     }
-    const [hours, minutes] = utcTime.split(":").map(Number);
-    const date = new Date();
-    date.setUTCHours(hours, minutes, 0, 0);
-
-    const localHours = String(date.getHours()).padStart(2, "0");
-    const localMinutes = String(date.getMinutes()).padStart(2, "0");
-
-    return `${localHours}:${localMinutes}`;
-  };
+  }, [userToken]);
 
   const handleRefresh = useCallback(() => {
     dispatch(fetchDashboardData());
@@ -75,7 +80,9 @@ const DashboardScreen = ({ navigation }) => {
   }, [dispatch]);
 
   const toggleSavings = (value) => {
-    if (configStatus === "loading") return;
+    // Optimistic UI update
+    setLocalSwitchState(value);
+
     dispatch(updateSavingsConfig({ active: value }))
       .unwrap()
       .then(() => {
@@ -84,6 +91,8 @@ const DashboardScreen = ({ navigation }) => {
       })
       .catch(() => {
         Alert.alert("Erreur", "Impossible de mettre à jour la configuration.");
+        // Revert UI on failure
+        setLocalSwitchState(!value);
       });
   };
 
@@ -92,22 +101,21 @@ const DashboardScreen = ({ navigation }) => {
     setIsModalVisible(false);
   };
 
-  const goalTarget = savingsConfig?.goal?.amount || 200000;
+  const goal = savingsConfig?.goal;
+  const goalTarget = goal?.amount || 200000;
   const progress = balance && goalTarget ? (balance / goalTarget) * 100 : 0;
-  const radius = 50;
+  const radius = 60;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (circumference * progress) / 100;
 
-  const getNextMilestone = () => {
-    if (!goalTarget) return null;
-    if (progress < 25) return { label: "25%", value: goalTarget * 0.25 };
-    if (progress < 50) return { label: "50%", value: goalTarget * 0.5 };
-    if (progress < 75) return { label: "75%", value: goalTarget * 0.75 };
-    if (progress < 100) return { label: "100%", value: goalTarget };
-    return null;
-  };
-
-  const nextMilestone = getNextMilestone();
+  // Render a loading indicator if essential data is not yet available
+  if (configStatus === "loading" || balanceStatus === "loading" || !user) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color={localColors.primary} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -123,44 +131,55 @@ const DashboardScreen = ({ navigation }) => {
         }
       >
         <LinearGradient
-          colors={[localColors.primary, localColors.success]}
+          colors={["#2E7D32", "#4CAF50"]}
           style={styles.headerSection}
         >
-          <Text style={styles.greeting}>
-            Bonjour {user?.firstName || "Utilisateur"} 👋
-          </Text>
-          <Text style={styles.greetingTime}>Bonne soirée !</Text>
+          <View style={styles.headerTopRow}>
+            <Text style={styles.greeting}>
+              Bonjour, {user?.fullName || "Utilisateur"}
+            </Text>
+            <View style={styles.headerIcons}>
+              <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+                <Text style={styles.settingsIcon}>⚙️</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => dispatch(logout())}
+                style={styles.logoutButton}
+              >
+                <Text style={styles.logoutText}>Déco</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </LinearGradient>
 
         <View style={styles.mainContent}>
-          <View style={styles.savingsCard}>
-            <View style={styles.savingsHeader}>
-              <Text style={styles.savingsTitle}>💰 MON ÉPARGNE</Text>
-              <TouchableOpacity style={styles.settingsBtn}>
-                <Text>⚙️</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.savingsAmount}>
-              <Text style={styles.amountValue}>
-                {balance ? balance.toLocaleString("fr-FR") : "0"}
-              </Text>
-              <Text style={styles.amountSubtitle}>FCFA épargnés</Text>
-            </View>
+          <View style={[styles.card, styles.balanceCard]}>
+            <Text style={styles.cardTitle}>Ma cagnotte actuelle</Text>
+            <Text style={styles.balanceValue}>
+              {balance ? balance.toLocaleString("fr-FR") : "0"} FCFA
+            </Text>
+          </View>
 
-            <View style={styles.progressSection}>
-              <View style={{ width: radius * 2 + 20, height: radius * 2 + 20 }}>
-                <Svg height="100%" width="100%" viewBox="0 0 120 120">
+          {goal && (
+            <View style={[styles.card, styles.goalCard]}>
+              <Text style={styles.cardTitle}>Mon objectif en cours</Text>
+              <View style={styles.progressContainer}>
+                <Svg
+                  height={radius * 2 + 20}
+                  width={radius * 2 + 20}
+                  viewBox="0 0 140 140"
+                >
                   <Circle
-                    cx="60"
-                    cy="60"
+                    cx="70"
+                    cy="70"
                     r={radius}
                     stroke={localColors.border}
                     strokeWidth="8"
                     fill="transparent"
                   />
                   <Circle
-                    cx="60"
-                    cy="60"
+                    cx="70"
+                    cy="70"
                     r={radius}
                     stroke={localColors.primary}
                     strokeWidth="8"
@@ -168,110 +187,110 @@ const DashboardScreen = ({ navigation }) => {
                     strokeDasharray={circumference}
                     strokeDashoffset={strokeDashoffset}
                     strokeLinecap="round"
-                    transform="rotate(-90 60 60)"
+                    transform="rotate(-90 70 70)"
                   />
                 </Svg>
                 <View style={styles.progressCenter}>
+                  <Text style={styles.goalIcon}>{goal.icon}</Text>
                   <Text style={styles.progressPercentage}>
                     {Math.round(progress)}%
                   </Text>
                 </View>
               </View>
-              <Text style={styles.progressText}>
-                Objectif : {savingsConfig?.goal?.name || "Nouveau téléphone"}
-              </Text>
-              <Text style={styles.progressTarget}>
-                {goalTarget.toLocaleString("fr-FR")} FCFA
+              <Text style={styles.goalProgressText}>
+                Vous avez fait {Math.round(progress)}% du chemin pour votre{" "}
+                <Text style={{ fontWeight: "bold" }}>{goal.name}</Text> !
               </Text>
             </View>
+          )}
 
-            <View style={styles.savingsDetails}>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>📅 Jours d&apos;épargne</Text>
-                <Text style={styles.detailValue}>
-                  {savingsConfig?.streak || 0} jours
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>💵 Épargne quotidienne</Text>
-                <View style={{ alignItems: "flex-end" }}>
-                  <Text style={styles.detailValue}>
-                    {savingsConfig?.dailyAmount
-                      ? `${savingsConfig.dailyAmount.toLocaleString(
-                          "fr-FR"
-                        )} FCFA`
-                      : "N/A"}
-                  </Text>
-                  <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-                    <Text style={styles.modifyBtn}>Modifier</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
-                <Text style={styles.detailLabel}>🎯 Prochain palier</Text>
-                {nextMilestone ? (
-                  <Text style={styles.detailValue}>
-                    {nextMilestone.value.toLocaleString("fr-FR")} FCFA (
-                    {nextMilestone.label})
-                  </Text>
-                ) : (
-                  <Text style={styles.detailValue}>Objectif atteint !</Text>
-                )}
-              </View>
+          <View style={styles.pillsContainer}>
+            {/* <View style={styles.pill}>
+              <Text style={styles.pillText}>
+                🔥 {savingsConfig?.streak || 0} Jours d&apos;affilée
+              </Text>
+            </View> */}
+            <View style={styles.pill}>
+              <Text style={styles.pillText}>
+                💸{" "}
+                {savingsConfig?.dailyAmount?.toLocaleString("fr-FR") || "N/A"} /
+                jour
+              </Text>
             </View>
           </View>
 
-          <View style={styles.autoSaveSection}>
-            <View style={styles.toggleInfo}>
-              <Text style={styles.toggleTitle}>Épargne automatique</Text>
-              <Text style={styles.toggleSubtitle}>
-                Prélèvement quotidien à{" "}
-                {convertUTCToLocalTime(savingsConfig?.deductionTime) || "20:00"}
-              </Text>
+          <View style={[styles.card, styles.controlCenter]}>
+            <Text style={styles.cardTitle}>Centre de contrôle</Text>
+            <View style={styles.controlRow}>
+              <Text style={styles.controlLabel}>Épargne automatique</Text>
+              <Switch
+                value={localSwitchState}
+                onValueChange={toggleSavings}
+                trackColor={{
+                  false: localColors.border,
+                  true: localColors.lightGreen,
+                }}
+                thumbColor={localColors.primary}
+                style={{ transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }] }}
+              />
             </View>
-            <Switch
-              value={savingsConfig?.active || false}
-              onValueChange={toggleSavings}
-              trackColor={{
-                false: localColors.border,
-                true: localColors.lightGreen,
-              }}
-              thumbColor={localColors.primary}
-            />
-          </View>
-
-          <View style={styles.actionButtons}>
             <TouchableOpacity
-              style={styles.btnPrimary}
+              style={styles.mainActionButton}
               onPress={() => navigation.navigate("ManualSavings")}
             >
-              <Text style={{ color: "white" }}>💰 Épargner maintenant</Text>
+              <Text style={styles.mainActionButtonText}>
+                💰 Épargner maintenant
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.btnSecondary}
+              style={styles.secondaryActionButton}
               onPress={() => navigation.navigate("History")}
             >
-              <Text style={{ color: localColors.primary }}>
-                📊 Voir historique
+              <Text style={styles.secondaryActionButtonText}>
+                📊 Voir l&apos;historique
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.secondaryActionButton}
+              onPress={() => setIsModalVisible(true)}
+            >
+              <Text style={styles.secondaryActionButtonText}>
+                ⚙️ Modifier mon rythme
               </Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.recentActivity}>
+          {/* Recent Activity */}
+          <View style={[styles.card, styles.recentActivity]}>
             <View style={styles.activityHeader}>
-              <Text style={styles.activityTitle}>Activité récente</Text>
+              <Text style={styles.cardTitle}>Activité Récente</Text>
               <TouchableOpacity onPress={() => navigation.navigate("History")}>
-                <Text style={{ color: localColors.primary }}>Tout voir</Text>
+                <Text style={styles.seeAllText}>Tout voir</Text>
               </TouchableOpacity>
             </View>
             {transactions?.slice(0, 3).map((item) => (
               <View key={item._id} style={styles.activityItem}>
-                <Text>
-                  {item.status === "completed" ? "✅" : "❌"} {item.type}: +
-                  {item.amount.toLocaleString("fr-FR")}
+                <Text style={styles.activityEmoji}>
+                  {item.status === "completed" ? "✅" : "❌"}
+                </Text>
+                <View style={styles.activityInfo}>
+                  <Text style={styles.activityType}>
+                    {item.type === "auto" ? "Épargne auto" : "Épargne manuelle"}
+                  </Text>
+                  <Text style={styles.activityDate}>
+                    {new Date(item.createdAt).toLocaleDateString("fr-FR")}
+                  </Text>
+                </View>
+                <Text style={styles.activityAmount}>
+                  +{item.amount.toLocaleString("fr-FR")} FCFA
                 </Text>
               </View>
             ))}
+            {transactions?.length === 0 && (
+              <Text style={styles.noActivityText}>
+                Aucune transaction pour le moment.
+              </Text>
+            )}
           </View>
         </View>
         <CustomAmountModal
@@ -312,23 +331,41 @@ const styles = StyleSheet.create({
   headerSection: {
     padding: 24,
   },
+  headerTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 40,
+  },
   greeting: {
     fontSize: 24,
     fontWeight: "700",
     color: "white",
-    marginBottom: 8,
   },
-  greetingTime: {
-    fontSize: 14,
+  headerIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  settingsIcon: {
+    fontSize: 24,
+  },
+  logoutButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 8,
+  },
+  logoutText: {
     color: "white",
-    opacity: 0.9,
-    marginBottom: 16,
+    fontWeight: "bold",
+    fontSize: 12,
   },
   mainContent: {
     padding: 16,
-    marginTop: -40,
+    marginTop: -20,
   },
-  savingsCard: {
+  card: {
     backgroundColor: localColors.surface,
     borderRadius: 20,
     padding: 24,
@@ -339,39 +376,24 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginBottom: 24,
   },
-  savingsHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  savingsTitle: {
+  cardTitle: {
     fontSize: 18,
     fontWeight: "700",
     color: localColors.textPrimary,
+    marginBottom: 16,
   },
-  settingsBtn: {
-    width: 36,
-    height: 36,
-    backgroundColor: localColors.lightGreen,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
+  balanceCard: {
+    backgroundColor: "#2E7D32",
   },
-  savingsAmount: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  amountValue: {
+  balanceValue: {
     fontSize: 42,
     fontWeight: "800",
-    color: localColors.primary,
+    color: "white",
   },
-  amountSubtitle: {
-    fontSize: 14,
-    color: localColors.textSecondary,
+  goalCard: {
+    // Add appropriate styles for the goal card
   },
-  progressSection: {
+  progressContainer: {
     alignItems: "center",
     marginBottom: 24,
   },
@@ -384,58 +406,64 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  goalIcon: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "white",
+  },
   progressPercentage: {
     fontSize: 20,
     fontWeight: "700",
-    color: localColors.primary,
+    color: "white",
   },
-  progressText: {
+  goalProgressText: {
     marginTop: 16,
     fontSize: 14,
-    color: localColors.textSecondary,
+    color: "white",
   },
-  progressTarget: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: localColors.textPrimary,
-  },
-  autoSaveSection: {
-    backgroundColor: localColors.surface,
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: localColors.border,
-  },
-  toggleInfo: {
-    flex: 1,
-  },
-  toggleTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: localColors.textPrimary,
-  },
-  toggleSubtitle: {
-    fontSize: 12,
-    color: localColors.textSecondary,
-  },
-  actionButtons: {
+  pillsContainer: {
     flexDirection: "row",
     gap: 12,
     marginBottom: 24,
   },
-  btnPrimary: {
+  pill: {
+    backgroundColor: localColors.lightGreen,
+    borderRadius: 12,
+    padding: 12,
+  },
+  pillText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: localColors.textPrimary,
+  },
+  controlCenter: {
+    // Add appropriate styles for the control center card
+  },
+  controlRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  controlLabel: {
+    fontSize: 14,
+    color: localColors.textSecondary,
+  },
+  mainActionButton: {
     flex: 1,
     height: 56,
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: localColors.primary,
+    marginBottom: 12,
   },
-  btnSecondary: {
+  mainActionButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  secondaryActionButton: {
     flex: 1,
     height: 56,
     borderRadius: 12,
@@ -443,63 +471,62 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderColor: localColors.primary,
+    marginBottom: 12,
+  },
+  secondaryActionButtonText: {
+    color: localColors.primary,
+    fontSize: 16,
+    fontWeight: "700",
   },
   recentActivity: {
-    backgroundColor: localColors.surface,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: localColors.border,
+    // Styles for the recent activity card
   },
   activityHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 8,
   },
-  activityTitle: {
-    fontSize: 18,
+  seeAllText: {
+    color: localColors.primary,
     fontWeight: "600",
-    color: localColors.textPrimary,
   },
   activityItem: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: localColors.border,
   },
-  savingsDetails: {
-    backgroundColor: localColors.lightGreen,
-    borderRadius: 12,
-    padding: 16,
+  activityEmoji: {
+    fontSize: 16,
+    marginRight: 12,
   },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
+  activityInfo: {
+    flex: 1,
   },
-  detailLabel: {
-    fontSize: 14,
-    color: localColors.textSecondary,
-  },
-  detailValue: {
-    fontSize: 14,
+  activityType: {
     fontWeight: "600",
     color: localColors.textPrimary,
   },
-  modifyBtn: {
-    color: localColors.primary,
+  activityDate: {
     fontSize: 12,
-    fontWeight: "700",
-    textDecorationLine: "underline",
-    marginTop: 4,
+    color: localColors.textSecondary,
   },
-  statLabel: {
-    fontSize: 12,
-    color: "white",
-    opacity: 0.9,
+  activityAmount: {
+    fontWeight: "bold",
+    color: localColors.primary,
+  },
+  noActivityText: {
+    textAlign: "center",
+    color: localColors.textSecondary,
+    paddingVertical: 20,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: localColors.background,
   },
 });
 

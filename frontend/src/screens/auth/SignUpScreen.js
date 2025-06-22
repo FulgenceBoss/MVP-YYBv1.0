@@ -11,15 +11,15 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { COLORS, FONTS, SIZES } from "../../constants/theme";
 import api from "../../api/api";
-import { setLoading, setError } from "../../store/slices/authSlice";
+import { setError } from "../../store/slices/authSlice";
 
 const SignUpScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isValid, setIsValid] = useState(false);
-  const { isLoading } = useSelector((state) => state.auth);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
 
   const validateGabonPhone = (phone) => {
@@ -46,7 +46,7 @@ const SignUpScreen = ({ navigation }) => {
   const handleReceiveCode = async () => {
     if (!isValid) return;
 
-    dispatch(setLoading(true));
+    setIsSubmitting(true);
     try {
       const response = await api.post("/auth/register", { phoneNumber });
       if (response.data.success) {
@@ -73,7 +73,7 @@ const SignUpScreen = ({ navigation }) => {
         dispatch(setError(message));
       }
     } finally {
-      dispatch(setLoading(false));
+      setIsSubmitting(false);
     }
   };
 
@@ -183,12 +183,12 @@ const SignUpScreen = ({ navigation }) => {
         <TouchableOpacity
           style={[
             styles.ctaButton,
-            (!isValid || isLoading) && styles.ctaDisabled,
+            (!isValid || isSubmitting) && styles.ctaDisabled,
           ]}
           onPress={handleReceiveCode}
-          disabled={!isValid || isLoading}
+          disabled={!isValid || isSubmitting}
         >
-          {isLoading ? (
+          {isSubmitting ? (
             <ActivityIndicator color={COLORS.surface} />
           ) : (
             <Text style={styles.ctaText}>📨 Recevoir mon code</Text>
@@ -207,7 +207,7 @@ const SignUpScreen = ({ navigation }) => {
         <TouchableOpacity
           style={styles.loginSection}
           onPress={() => navigation.navigate("Login")}
-          disabled={isLoading}
+          disabled={isSubmitting}
         >
           <Text style={styles.loginLink}>Déjà membre ? Se connecter</Text>
         </TouchableOpacity>

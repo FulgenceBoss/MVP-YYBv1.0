@@ -7,7 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  TextInput,
   ActivityIndicator,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
@@ -123,7 +122,7 @@ const SpeedSelectionScreen = ({ navigation }) => {
     }
     setIsLoading(true);
     // --- Convert local time to UTC ---
-    const localTime = deductionTime;
+    const localTime = deductionTime || 20; // It's a number, ensure fallback
     const now = new Date();
     now.setHours(localTime, 0, 0, 0);
     const utcDeductionTime = `${String(now.getUTCHours()).padStart(
