@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const initScheduledJobs = require("./services/cronService");
+const path = require("path");
 
 // Route files
 const authRoutes = require("./routes/auth");
@@ -26,6 +27,9 @@ app.use(helmet()); // Set security headers
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+
+// Serve static files from the 'uploads' directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Mount routers
 app.use("/api/auth", authRoutes);

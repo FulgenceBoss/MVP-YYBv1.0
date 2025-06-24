@@ -1,4 +1,8 @@
 const User = require("../models/User");
+const asyncHandler = require("express-async-handler");
+const cloudinary = require("../config/cloudinary");
+const DatauriParser = require("datauri/parser");
+const path = require("path");
 
 // @desc    Update user profile
 // @route   PUT /api/users/me
@@ -57,7 +61,51 @@ const savePushToken = async (req, res) => {
   }
 };
 
+// @desc    Update user avatar
+// @route   PUT /api/users/me/avatar
+// @access  Private
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    res.status(400);
+    throw new Error("Veuillez fournir une image.");
+  }
+
+  const parser = new DatauriParser();
+  const extName = path.extname(req.file.originalname).toString();
+  const file64 = parser.format(extName, req.file.buffer);
+
+  try {
+    const result = await cloudinary.uploader.upload(file64.content, {
+      folder: "yessi-yessi-avatars",
+      public_id: `avatar_${req.user.id}`,
+      overwrite: true,
+    });
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { avatarUrl: result.secure_url },
+      { new: true }
+    ).select("-pin");
+
+    if (!updatedUser) {
+      res.status(404);
+      throw new Error("Utilisateur non trouvé.");
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Avatar mis à jour avec succès.",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Cloudinary Upload Error:", error);
+    res.status(500);
+    throw new Error("Erreur lors de l'upload de l'image.");
+  }
+});
+
 module.exports = {
   updateUserProfile,
   savePushToken,
+  updateUserAvatar,
 };

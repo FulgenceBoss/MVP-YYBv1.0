@@ -89,12 +89,50 @@
 - **Point de Blocage / Difficulté :**
   - **Nature du Problème :** Une erreur de réseau persistante (`ERR_NETWORK`) empêche l'application mobile (sur l'émulateur/téléphone) de communiquer avec le serveur backend qui tourne sur le PC.
   - **Cause Identifiée :** L'application tente d'atteindre le serveur via son adresse IP sur le réseau local (ex: `192.168.1.67`), mais la connexion échoue. Cela peut être dû à plusieurs facteurs : un pare-feu (Windows/antivirus) qui bloque le port `8080`, ou des configurations réseau spécifiques qui empêchent la communication entre l'appareil mobile et le PC sur le même réseau Wi-Fi.
-  - **Ce qui a été tenté :** Le passage de `localhost` à l'adresse IP locale était la bonne direction, mais n'a pas suffi.
+  - **Ce qui a été tenté :** Le passage de `localhost` à l'adresse IP locale, puis l'utilisation de `npx expo start --tunnel` ont échoué à cause des restrictions du réseau Wi-Fi de l'hôtel, empêchant la connexion entre le téléphone et le serveur de développement local.
 - **Prochaine Action :**
   1.  **Résoudre le problème de connectivité réseau :**
       - **Vérification du Pare-feu :** S'assurer que le pare-feu de Windows ou de tout logiciel de sécurité autorise les connexions entrantes sur le port `8080` pour le processus Node.js.
       - **Test de connectivité simple :** Essayer d'accéder à l'adresse `http://VOTRE_IP:8080/` depuis le navigateur web du téléphone mobile. Si la page "API is running..." ne s'affiche pas, le problème est bien lié au réseau et non à l'application.
   2.  **Une fois la connexion rétablie,** finaliser la **Phase 3** en rendant les écrans de profil et de paramètres entièrement dynamiques, puis passer à la **Phase 4** pour implémenter les actions (modification du nom, du PIN, etc.).
+
+---
+
+### STRATÉGIE DE DÉPLOIEMENT POUR LE DÉVELOPPEMENT
+
+- **Contexte :** Face aux problèmes de connectivité réseau persistants qui empêchent le bon fonctionnement du duo "Expo Go + Serveur Local", une nouvelle stratégie a été adoptée pour garantir un environnement de développement stable et fiable.
+- **Solution Mise en Place :**
+  1.  **Backend Déployé sur Render :** Le serveur backend a été déployé sur la plateforme Render. Il est maintenant accessible publiquement et de manière stable via l'URL `https://yessi-yessi-backend.onrender.com`. Cela élimine tous les problèmes liés au réseau local, aux pare-feux et aux adresses IP.
+  2.  **Build de Développement (APK) :** Au lieu d'utiliser l'application Expo Go (qui nécessite une connexion directe au PC), nous construisons un APK de développement dédié via le service EAS Build (`eas build`). Cet APK embarque tout le code JavaScript, le rendant autonome. Il n'a plus besoin de se connecter au serveur de développement sur le PC et peut communiquer directement avec le backend sur Render.
+
+### ÉTAT ACTUEL DU PROJET (Point de reprise)
+
+- **Objectif Immédiat :** Valider le bon fonctionnement de l'application avec la nouvelle architecture de déploiement.
+- **Action en Cours :** La construction de l'APK de développement a été lancée avec la commande `eas build --profile development --platform android` dans le dossier `frontend/`.
+- **Prochaine Action à la Reprise :**
+  1.  **Télécharger et Installer l'APK :** Une fois le build terminé, suivre le lien fourni par EAS pour télécharger et installer le fichier APK sur le téléphone de test.
+  2.  **Effectuer les Tests de Validation Critiques :**
+      - **Test 1 (Nouvel Utilisateur) :** Créer un compte de A à Z et s'assurer que l'activation de l'épargne fonctionne sans erreur "Not authorized".
+      - **Test 2 (Utilisateur Existant) :** Se connecter et accéder à l'écran de profil pour vérifier qu'il n'y a plus d'écran noir ou de crash.
+  3.  **Une fois la validation réussie,** nous pourrons enfin reprendre le développement des fonctionnalités en attaquant la **Phase 3** (rendre les écrans de profil et de paramètres dynamiques).
+
+---
+
+### NOUVEAU WORKFLOW DE DÉVELOPPEMENT QUOTIDIEN
+
+- **Contexte:** Le déploiement sur Render et l'utilisation d'un APK de développement modifient notre manière de travailler. Voici le nouveau processus à suivre.
+
+- **Pour modifier le BACKEND :**
+  1.  **Coder en Local :** Modifiez les fichiers dans le dossier `backend` sur votre PC comme d'habitude.
+  2.  **Tester en Local (Optionnel) :** Vous pouvez toujours lancer votre serveur localement (`node server.js`) pour des tests rapides.
+  3.  **Déployer les Changements :** Pour que les changements soient effectifs pour votre application mobile, faites un `git commit` puis un `git push`. Render détectera le push et mettra à jour le serveur en ligne automatiquement en quelques minutes.
+
+- **Pour modifier le FRONTEND :**
+  1.  **Coder en Local :** Modifiez les fichiers dans le dossier `frontend` sur votre PC.
+  2.  **Tester les Changements :**
+      - **Pour les petits changements (texte, couleurs, logique simple) :** Après avoir sauvegardé vos fichiers, il suffit de **redémarrer l'application** sur votre téléphone (la fermer depuis le gestionnaire d'applications, puis la rouvrir). L'APK de développement va automatiquement télécharger les dernières modifications JavaScript. **Vous n'avez PAS besoin de reconstruire l'APK.**
+      - **Pour les gros changements (ajout de nouvelles librairies, modification de la configuration native) :** Vous devrez reconstruire un nouvel APK avec la commande `eas build --profile development --platform android` (lancée depuis le dossier `frontend/`).
+  3.  **Règle simple :** Essayez toujours de simplement redémarrer l'application d'abord. Si cela ne fonctionne pas ou si vous avez ajouté un nouveau paquet, alors seulement lancez un nouveau build.
 
 ---
 
@@ -250,6 +288,37 @@
 - Un bug critique a été corrigé : la déconnexion d'un utilisateur vide désormais l'état de la configuration d'épargne, garantissant que le flux pour un nouvel utilisateur démarre correctement. Le code a été sauvegardé sur Git.
 - Le plan d'action pour la refonte du flux d'accueil a été validé.
 - **Prochaine étape :** Commencer l'implémentation de la **Phase 1** du plan d'action : Créer l'écran statique `GoalSelectionScreen.js` (Phase 1, Étape 1 du plan ci-dessus).
+
+---
+
+### **[SESSION DU 24/06 - REPRISE]** GESTION DU PROFIL & STABILISATION
+
+- **Contexte :** Cette session a été consacrée à la finalisation de la gestion du profil utilisateur et à la résolution de bugs d'instabilité persistants.
+
+- **CODE PRÊT (Validé & Fonctionnel) :**
+  1.  **Architecture Stable :** Le duo APK de développement + Backend sur Render est 100% fonctionnel.
+  2.  **Gestion du Profil Utilisateur (TERMINÉE) :**
+      - La modification du **nom** est fonctionnelle et le changement est correctement synchronisé sur le `Dashboard`.
+      - Le changement de **PIN** est fonctionnel, avec un retour visuel (indicateur de chargement) pour une meilleure expérience utilisateur.
+  3.  **Préparation à l'Upload d'Avatar (TERMINÉE) :**
+      - **Frontend :** La librairie `expo-image-picker` est installée. La logique pour sélectionner une image depuis la galerie du téléphone est implémentée.
+      - **Backend :** Le serveur est entièrement prêt à recevoir des images. `multer` est configuré, la route `PUT /api/users/me/avatar` est créée, et la logique de sauvegarde de l'image est en place.
+  4.  **Bugs Stoppeurs Résolus :**
+      - Le bug de la redirection vers l'inscription après un échec de connexion a été identifié (erreur 429 "Too Many Requests" du limiteur de débit) et le message d'erreur a été rendu plus clair pour l'utilisateur.
+      - Les problèmes de "disparition" du bug étaient dus au caractère intermittent du rate limiting.
+
+- **ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise) :**
+  - **Objectif en cours :** Finaliser la fonctionnalité d'upload et d'affichage de la photo de profil.
+  - **Dernier Point d'Attention :**
+    - Nous avons découvert que le **déploiement automatique sur Render ne fonctionnait pas** car le filtre "Included Paths" était vide. Nous avons lancé un déploiement manuel du backend.
+    - Nous avons également lancé un **nouveau build du frontend (`eas build`)** pour inclure la nouvelle dépendance native `expo-image-picker`. Ces deux processus doivent se terminer.
+  - **PROCHAINE ACTION À LA REPRISE :**
+    1.  **Vérifier** que le déploiement manuel du backend sur Render est bien terminé avec le statut "Live".
+    2.  **Installer** le nouvel APK généré par `eas build` sur le téléphone de test.
+    3.  **Tester de bout en bout la fonctionnalité d'avatar :**
+        - Cliquer sur l'avatar dans le profil.
+        - Choisir une image dans la galerie.
+        - Confirmer que l'image s'affiche correctement dans le profil après l'upload.
 
 ---
 
