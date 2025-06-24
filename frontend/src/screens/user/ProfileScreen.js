@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,26 +7,107 @@ import {
   TouchableOpacity,
   StatusBar,
   ActivityIndicator,
+  Alert,
+  Image,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUserProfile } from "../../store/slices/userSlice";
+import {
+  fetchUserProfile,
+  updateUserProfile,
+  changeUserPin,
+  updateUserAvatar,
+} from "../../store/slices/userSlice";
+import EditProfileModal from "../../components/EditProfileModal";
+import ChangePinModal from "../../components/ChangePinModal";
+import * as ImagePicker from "expo-image-picker";
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
   const { userInfo, status, error } = useSelector((state) => state.user);
+  const [isEditModalVisible, setEditModalVisible] = useState(false);
+  const [isPinModalVisible, setPinModalVisible] = useState(false);
+  const [isPinChanging, setPinChanging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchUserProfile());
-  }, [dispatch]);
+    console.log(
+      "[DEBUG] 1. ProfileScreen: useEffect déclenché. Lancement de fetchUserProfile."
+    );
+    if (!userInfo) {
+      dispatch(fetchUserProfile());
+    }
+  }, [dispatch, userInfo]);
 
-  if (status === "loading") {
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission refusée",
+        "Désolé, nous avons besoin de la permission d'accéder à votre galerie pour que cela fonctionne."
+      );
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setIsUploading(true);
+      dispatch(updateUserAvatar(uri))
+        .unwrap()
+        .catch((err) => {
+          Alert.alert("Erreur d'upload", err);
+        })
+        .finally(() => {
+          setIsUploading(false);
+        });
+    }
+  };
+
+  const handleEditName = () => {
+    setEditModalVisible(true);
+  };
+
+  const handleSaveName = (newName) => {
+    dispatch(updateUserProfile({ fullName: newName }));
+    setEditModalVisible(false);
+  };
+
+  const handleSavePin = ({ oldPin, newPin }) => {
+    setPinChanging(true);
+    dispatch(changeUserPin({ oldPin, newPin }))
+      .unwrap()
+      .then(() => {
+        Alert.alert("Succès", "Votre PIN a été changé avec succès.");
+        setPinModalVisible(false);
+      })
+      .catch((error) => {
+        Alert.alert("Erreur", error);
+      })
+      .finally(() => {
+        setPinChanging(false);
+      });
+  };
+
+  if (status === "loading" && !userInfo) {
+    console.log(
+      "[DEBUG] 4. ProfileScreen: status='loading'. Affichage du loader."
+    );
     return <ActivityIndicator size="large" style={styles.loader} />;
   }
 
   if (status === "failed") {
+    console.log(
+      `[DEBUG] 5. ProfileScreen: status='failed'. Affichage de l'erreur: ${error}`
+    );
     return (
       <Text style={styles.errorText}>
-        Erreur: {error.message || "Impossible de charger le profil"}
+        Erreur: {error || "Impossible de charger le profil"}
       </Text>
     );
   }
@@ -34,6 +115,18 @@ const ProfileScreen = () => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
+      <EditProfileModal
+        isVisible={isEditModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        onSave={handleSaveName}
+        currentName={userInfo?.fullName || ""}
+      />
+      <ChangePinModal
+        isVisible={isPinModalVisible}
+        onClose={() => setPinModalVisible(false)}
+        onSave={handleSavePin}
+        isLoading={isPinChanging}
+      />
       <View style={styles.navHeader}>
         <TouchableOpacity style={styles.backButton}>
           <Text style={styles.backButtonText}>←</Text>
@@ -44,14 +137,26 @@ const ProfileScreen = () => {
         {userInfo && (
           <View style={styles.profileCard}>
             <View style={styles.avatarContainer}>
-              <View style={styles.avatarImage}>
-                <Text style={styles.avatarText}>
-                  {userInfo.fullName
-                    ? userInfo.fullName.charAt(0).toUpperCase()
-                    : ""}
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.avatarEdit}>
+              <TouchableOpacity onPress={pickImage} style={styles.avatarImage}>
+                {isUploading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : userInfo.avatarUrl ? (
+                  <Image
+                    source={{ uri: userInfo.avatarUrl }}
+                    style={styles.avatarImage}
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>
+                    {userInfo.fullName
+                      ? userInfo.fullName.charAt(0).toUpperCase()
+                      : ""}
+                  </Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.avatarEdit}
+                onPress={handleEditName}
+              >
                 <Text>✏️</Text>
               </TouchableOpacity>
             </View>
@@ -75,7 +180,10 @@ const ProfileScreen = () => {
               Protégez votre compte et vos données
             </Text>
           </View>
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => setPinModalVisible(true)}
+          >
             <View style={styles.settingInfo}>
               <View style={[styles.settingIcon, styles.securityIcon]}>
                 <Text>🔐</Text>
@@ -94,8 +202,8 @@ const ProfileScreen = () => {
         <View style={styles.dangerZone}>
           <Text style={styles.dangerTitle}>⚠️ Zone dangereuse</Text>
           <Text style={styles.dangerDescription}>
-            Cette action est irréversible. Toutes vos données d'épargne seront
-            définitivement perdues.
+            Cette action est irréversible. Toutes vos données d&apos;épargne
+            seront définitivement perdues.
           </Text>
           <TouchableOpacity style={styles.dangerButton}>
             <Text style={styles.dangerButtonText}>🗑️ Supprimer mon compte</Text>

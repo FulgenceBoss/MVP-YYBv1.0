@@ -7,27 +7,22 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async ({ phoneNumber, pin }, { dispatch, rejectWithValue }) => {
     try {
-      console.log("[DEBUG] Login: Démarrage pour", phoneNumber);
       const response = await api.post("/auth/login", { phoneNumber, pin });
       const { token, user } = response.data;
       await SecureStore.setItemAsync("userToken", token);
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      console.log(
-        "[DEBUG] Login: Token sauvegardé et en-tête Axios mis à jour."
-      );
       dispatch(resetConfig());
       return { token, user };
     } catch (err) {
-      let errorMessage = "Une erreur inconnue est survenue.";
-      // Handle network errors
-      if (err.code === "ERR_NETWORK") {
+      let errorMessage = "Une erreur de connexion est survenue.";
+      if (err.response?.status === 429) {
         errorMessage =
-          "Erreur de réseau. Vérifiez votre connexion et l'adresse du serveur.";
+          "Trop de tentatives. Veuillez patienter quelques instants avant de réessayer.";
       } else if (err.response?.data?.message) {
-        // Handle server-side errors
         errorMessage = err.response.data.message;
+      } else if (err.code === "ERR_NETWORK") {
+        errorMessage = "Erreur de réseau. Vérifiez votre connexion internet.";
       }
-      // Log a clean error message
       console.error("Login Error:", errorMessage);
       return rejectWithValue(errorMessage);
     }
@@ -38,15 +33,12 @@ export const rehydrateAuth = createAsyncThunk(
   "auth/rehydrate",
   async (_, { rejectWithValue }) => {
     try {
-      console.log("[DEBUG] Rehydrate: Démarrage.");
       const token = await SecureStore.getItemAsync("userToken");
       if (!token) {
         return rejectWithValue("No token found");
       }
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      console.log("[DEBUG] Rehydrate: Token trouvé, appel /me.");
       const response = await api.get("/auth/me");
-      console.log("[DEBUG] Rehydrate: Appel /me réussi.");
       return { token, user: response.data.user };
     } catch (error) {
       SecureStore.deleteItemAsync("userToken"); // Token is invalid, remove it
@@ -90,6 +82,9 @@ const authSlice = createSlice({
       SecureStore.deleteItemAsync("userToken");
       delete api.defaults.headers.common["Authorization"];
     },
+    updateAuthUser: (state, action) => {
+      state.user = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -131,8 +126,13 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUserToken, setLoading, setError, logoutSuccess } =
-  authSlice.actions;
+export const {
+  setUserToken,
+  setLoading,
+  setError,
+  logoutSuccess,
+  updateAuthUser,
+} = authSlice.actions;
 
 export const logout = () => (dispatch) => {
   dispatch(logoutSuccess());

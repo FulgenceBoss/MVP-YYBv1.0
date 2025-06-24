@@ -17,17 +17,9 @@ import { Platform } from "react-native";
 // export const API_URL = IS_IN_TUNNEL_MODE ? "" : LOCAL_API_URL;
 
 // --- CONFIGURATION DE L'API ---
-// Choisissez UNE des deux configurations ci-dessous en fonction de votre situation.
 
-// --- OPTION 1: Développement au bureau (Réseau local fiable) ---
-// 1. Trouvez votre IP locale avec `ipconfig` ou dans les préférences réseau.
-// 2. Décommentez la ligne ci-dessous et mettez votre IP.
-// const API_BASE_URL = "http://192.168.1.67:8080";
-
-// --- OPTION 2: Développement sur un réseau externe/restrictif (Hôtel, etc.) ---
-// Utilisez `ngrok http 8080` ou `npx localtunnel --port 8080` dans un terminal.
-// Copiez l'URL fournie et collez-la ci-dessous.
-const API_BASE_URL = "https://tasty-dragons-sit.loca.lt";
+// La configuration pointe maintenant vers notre backend de développement sur Render.
+const API_BASE_URL = "https://yessi-yessi-backend.onrender.com";
 
 // Ne pas modifier la ligne ci-dessous.
 export const API_URL = `${API_BASE_URL}/api`;
