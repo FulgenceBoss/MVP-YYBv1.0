@@ -64,12 +64,15 @@ const ManualSavingsScreen = ({ navigation }) => {
 
   const handleCustomAmountChange = (text) => {
     const numericValue = text.replace(/[^0-9]/g, "");
-    setCustomAmount(numericValue);
+
     if (numericValue) {
       setSelectedAmount(parseInt(numericValue, 10));
     } else {
       setSelectedAmount(null);
     }
+
+    const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    setCustomAmount(formattedValue);
   };
 
   const handleNext = () => {
@@ -267,7 +270,7 @@ const styles = StyleSheet.create({
   },
   customInput: {
     color: localColors.textPrimary,
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     flex: 1,
     textAlign: "right",
