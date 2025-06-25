@@ -18,6 +18,9 @@ dotenv.config();
 
 const app = express();
 
+// Set trust proxy for environments like Render
+app.set("trust proxy", 1);
+
 // Middlewares
 app.use(express.json()); // Body parser
 app.use(cors()); // Enable CORS

@@ -36,6 +36,16 @@ const processScheduledSavings = async () => {
     }
 
     for (const config of configsToProcess) {
+      // --- AJOUT DE LA VÉRIFICATION ---
+      // Si le montant n'est pas défini ou est à zéro, on ignore cette config
+      if (!config.amount || config.amount <= 0) {
+        console.log(
+          `-> Skipping user ${config.user.phoneNumber} due to invalid or missing amount.`
+        );
+        continue;
+      }
+      // --- FIN DE L'AJOUT ---
+
       // Vérifier si l'utilisateur a déjà été traité aujourd'hui
       const today = new Date();
       today.setHours(0, 0, 0, 0);

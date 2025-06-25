@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
 const cloudinary = require("../config/cloudinary");
-const Datauri = require("datauri");
+const DatauriParser = require("datauri/parser");
 const path = require("path");
 
 // @desc    Update user profile
@@ -70,9 +70,9 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new Error("Veuillez fournir une image.");
   }
 
-  const datauri = new Datauri();
+  const parser = new DatauriParser();
   const extName = path.extname(req.file.originalname).toString();
-  const file64 = datauri.format(extName, req.file.buffer);
+  const file64 = parser.format(extName, req.file.buffer);
 
   try {
     const result = await cloudinary.uploader.upload(file64.content, {
