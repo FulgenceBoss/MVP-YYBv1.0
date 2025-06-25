@@ -73,7 +73,9 @@ const savingsConfigSlice = createSlice({
       })
       .addCase(fetchSavingsConfig.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload.message;
+        state.error =
+          action.payload?.message ||
+          "Impossible de charger la configuration d'épargne.";
       })
       // Update config
       .addCase(updateSavingsConfig.pending, (state) => {
@@ -85,7 +87,9 @@ const savingsConfigSlice = createSlice({
       })
       .addCase(updateSavingsConfig.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload.message;
+        state.error =
+          action.payload?.message ||
+          "Impossible de mettre à jour la configuration d'épargne.";
       });
   },
 });
