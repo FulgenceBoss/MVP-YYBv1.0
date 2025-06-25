@@ -83,7 +83,11 @@ const authSlice = createSlice({
       delete api.defaults.headers.common["Authorization"];
     },
     updateAuthUser: (state, action) => {
-      state.user = action.payload;
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      } else {
+        state.user = action.payload;
+      }
     },
   },
   extraReducers: (builder) => {

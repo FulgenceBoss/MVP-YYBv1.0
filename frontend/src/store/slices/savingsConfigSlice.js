@@ -27,6 +27,19 @@ export const updateSavingsConfig = createAsyncThunk(
   }
 );
 
+// Thunk to test mobile money connection
+export const testConnection = createAsyncThunk(
+  "savingsConfig/testConnection",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/savings/test-connection");
+      return response.data; // Contient { success: true, message: "..." }
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const savingsConfigSlice = createSlice({
   name: "savingsConfig",
   initialState: {
@@ -90,6 +103,16 @@ const savingsConfigSlice = createSlice({
         state.error =
           action.payload?.message ||
           "Impossible de mettre à jour la configuration d'épargne.";
+      })
+      // Test Connection
+      .addCase(testConnection.pending, (state) => {
+        // Optionnel: on pourrait avoir un état 'testing'
+      })
+      .addCase(testConnection.fulfilled, (state, action) => {
+        // Pas besoin de changer l'état ici, on gère le message via l'alerte
+      })
+      .addCase(testConnection.rejected, (state, action) => {
+        // Idem, l'erreur est gérée dans l'alerte
       });
   },
 });

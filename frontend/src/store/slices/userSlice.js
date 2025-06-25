@@ -54,7 +54,7 @@ export const updateUserProfile = createAsyncThunk(
 // Thunk to upload user avatar
 export const updateUserAvatar = createAsyncThunk(
   "user/updateAvatar",
-  async (imageUri, { rejectWithValue, dispatch }) => {
+  async (imageAsset, { rejectWithValue, dispatch }) => {
     try {
       const token = await SecureStore.getItemAsync("userToken");
       if (!token) {
@@ -62,12 +62,14 @@ export const updateUserAvatar = createAsyncThunk(
       }
 
       const formData = new FormData();
-      const fileType = imageUri.split(".").pop();
 
+      // Utiliser les informations de l'asset pour une construction robuste
       formData.append("avatar", {
-        uri: imageUri,
-        name: `avatar.${fileType}`,
-        type: `image/${fileType}`,
+        uri: imageAsset.uri,
+        name: `avatar.${imageAsset.uri.split(".").pop()}`, // Garder un nom de fichier simple
+        type: imageAsset.type
+          ? `${imageAsset.type}/${imageAsset.uri.split(".").pop()}`
+          : "image/jpeg", // Utiliser le vrai type MIME fourni par le picker
       });
 
       const response = await apiClient.put("/users/me/avatar", formData, {
@@ -123,7 +125,12 @@ const initialState = {
 const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    clearUserError: (state) => {
+      state.status = "idle";
+      state.error = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchUserProfile.pending, (state) => {
@@ -179,5 +186,7 @@ const userSlice = createSlice({
       });
   },
 });
+
+export const { clearUserError } = userSlice.actions;
 
 export default userSlice.reducer;

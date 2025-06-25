@@ -16,12 +16,20 @@ import {
   updateUserProfile,
   changeUserPin,
   updateUserAvatar,
+  clearUserError,
 } from "../../store/slices/userSlice";
 import EditProfileModal from "../../components/EditProfileModal";
 import ChangePinModal from "../../components/ChangePinModal";
 import * as ImagePicker from "expo-image-picker";
+import { MediaType } from "expo-image-picker";
+import { useNavigation } from "@react-navigation/native";
+import {
+  fetchSavingsConfig,
+  testConnection,
+} from "../../store/slices/savingsConfigSlice";
 
 const ProfileScreen = () => {
+  const navigation = useNavigation();
   const dispatch = useDispatch();
   const {
     userInfo: userInfoFromUserSlice,
@@ -29,16 +37,24 @@ const ProfileScreen = () => {
     error,
   } = useSelector((state) => state.user);
   const { user: userInfo } = useSelector((state) => state.auth);
+  const { config: savingsConfig, status: savingsStatus } = useSelector(
+    (state) => state.savingsConfig
+  );
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [isPinModalVisible, setPinModalVisible] = useState(false);
   const [isPinChanging, setPinChanging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
 
   useEffect(() => {
+    dispatch(clearUserError());
     if (!userInfo) {
       dispatch(fetchUserProfile());
     }
-  }, [dispatch, userInfo]);
+    if (!savingsConfig) {
+      dispatch(fetchSavingsConfig());
+    }
+  }, [dispatch, userInfo, savingsConfig]);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -51,16 +67,16 @@ const ProfileScreen = () => {
     }
 
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: MediaType.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
+      const imageAsset = result.assets[0];
       setIsUploading(true);
-      dispatch(updateUserAvatar(uri))
+      dispatch(updateUserAvatar(imageAsset))
         .unwrap()
         .catch((err) => {
           Alert.alert("Erreur d'upload", err);
@@ -96,7 +112,25 @@ const ProfileScreen = () => {
       });
   };
 
-  if (status === "loading" && !userInfo) {
+  const handleTestConnection = () => {
+    setIsTesting(true);
+    dispatch(testConnection())
+      .unwrap()
+      .then((response) => {
+        Alert.alert("Succès", response.message);
+      })
+      .catch((error) => {
+        Alert.alert("Erreur", error.message || "Un problème est survenu.");
+      })
+      .finally(() => {
+        setIsTesting(false);
+      });
+  };
+
+  if (
+    (status === "loading" && !userInfo) ||
+    (savingsStatus === "loading" && !savingsConfig)
+  ) {
     return <ActivityIndicator size="large" style={styles.loader} />;
   }
 
@@ -124,7 +158,10 @@ const ProfileScreen = () => {
         isLoading={isPinChanging}
       />
       <View style={styles.navHeader}>
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Mon Profil</Text>
@@ -194,6 +231,48 @@ const ProfileScreen = () => {
             <Text style={styles.settingArrow}>›</Text>
           </TouchableOpacity>
         </View>
+
+        {savingsConfig && (
+          <View style={styles.settingsSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Mobile Money connecté</Text>
+              <Text style={styles.sectionSubtitle}>
+                Le compte utilisé pour vos épargnes
+              </Text>
+            </View>
+            <View style={styles.mobileMoneyItem}>
+              <View style={[styles.operatorLogo, styles.moovLogo]}>
+                <Text style={styles.operatorLogoText}>
+                  {savingsConfig.operator?.charAt(0)}
+                </Text>
+              </View>
+              <View style={styles.operatorInfo}>
+                <Text style={styles.operatorName}>
+                  {savingsConfig.operator} Money
+                </Text>
+                <Text style={styles.operatorNumber}>
+                  {savingsConfig.wallet}
+                </Text>
+              </View>
+              <View style={styles.operatorStatus}>
+                <Text style={styles.operatorStatusText}>Actif</Text>
+              </View>
+            </View>
+            <View style={styles.mobileMoneyActions}>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.actionButtonSecondary]}
+                onPress={handleTestConnection}
+                disabled={isTesting}
+              >
+                {isTesting ? (
+                  <ActivityIndicator color="#212121" />
+                ) : (
+                  <Text style={styles.actionButtonSecondaryText}>Tester</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         <View style={styles.dangerZone}>
           <Text style={styles.dangerTitle}>⚠️ Zone dangereuse</Text>
@@ -371,6 +450,51 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#757575",
   },
+  mobileMoneyItem: {
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  operatorLogo: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  moovLogo: {
+    backgroundColor: "#ff6b00", // Moov Orange
+  },
+  operatorLogoText: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "800",
+  },
+  operatorInfo: {
+    flex: 1,
+  },
+  operatorName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#212121",
+    marginBottom: 4,
+  },
+  operatorNumber: {
+    fontSize: 14,
+    color: "#757575",
+  },
+  operatorStatus: {
+    backgroundColor: "#e8f5e8", // light-green
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  operatorStatusText: {
+    color: "#4caf50", // success green
+    fontWeight: "600",
+    fontSize: 12,
+  },
   dangerZone: {
     marginTop: 24,
     backgroundColor: "#ffebee",
@@ -401,6 +525,23 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "600",
     fontSize: 14,
+  },
+  mobileMoneyActions: {
+    padding: 20,
+    paddingTop: 0,
+    alignItems: "flex-end",
+  },
+  actionButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  actionButtonSecondary: {
+    backgroundColor: "#e0e0e0",
+  },
+  actionButtonSecondaryText: {
+    color: "#212121",
+    fontWeight: "600",
   },
 });
 

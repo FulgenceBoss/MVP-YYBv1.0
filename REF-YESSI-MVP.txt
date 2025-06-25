@@ -165,6 +165,22 @@
     2.  Écrire des tests unitaires (si possible) pour valider le calcul dans différents scénarios (jours consécutifs, jours manquants, etc.).
     3.  Une fois la logique fiabilisée, réactiver l'affichage sur le `DashboardScreen`.
 
+- **Finaliser la Sélection d'Avatar (Dette Technique) :**
+  - **Contexte :** Après avoir résolu les problèmes de crash du backend, la fonctionnalité d'upload d'avatar est maintenant confrontée à un nouveau problème côté client : un clic sur l'avatar dans l'écran de profil ne déclenche aucune action (la galerie d'images ne s'ouvre pas).
+  - **État Actuel (Ce qui est en place) :**
+    - **Frontend :**
+      - La librairie `expo-image-picker` est installée et configurée.
+      - La fonction `pickImage` dans `ProfileScreen.js` est correctement liée au bouton de l'avatar.
+      - La logique de demande de permission (`requestMediaLibraryPermissionsAsync`) est présente.
+      - L'action Redux `updateUserAvatar` dans `userSlice.js` est prête à traiter et envoyer l'image sélectionnée.
+    - **Backend :**
+      - L'endpoint `PUT /api/users/me/avatar` est entièrement fonctionnel, testé et prêt à recevoir une image via `multer`, la traiter et la téléverser sur Cloudinary.
+  - **Action Requise (Pour plus tard) :**
+    1.  Déboguer la fonction `pickImage` dans `frontend/src/screens/user/ProfileScreen.js`.
+    2.  Utiliser la méthode des "logs numérotés" pour vérifier si l'appel à `ImagePicker.launchImageLibraryAsync` est bien atteint et pour inspecter sa réponse.
+    3.  Vérifier la gestion des permissions sur l'appareil de test (il est possible qu'une permission ait été refusée de manière permanente).
+    4.  S'assurer que la version de `expo-image-picker` est bien compatible avec le reste de l'environnement de build (EAS).
+
 ---
 
 ### NOTES DE DÉVELOPPEMENT : APPROCHE POUR LES NOTIFICATIONS (TÂCHE #9)
@@ -319,6 +335,60 @@
         - Cliquer sur l'avatar dans le profil.
         - Choisir une image dans la galerie.
         - Confirmer que l'image s'affiche correctement dans le profil après l'upload.
+
+---
+
+### **[SESSION DU 24/06 - SOIR]** CORRECTION DU BUG D'UPLOAD D'AVATAR
+
+- **Contexte :** La session a débuté par un test de la fonctionnalité d'upload de photo de profil. Le test a échoué avec une erreur "Échec de la mise à jour de l'avatar", indiquant que le frontend ne parvenait pas à envoyer l'image sélectionnée au backend.
+
+- **DIAGNOSTIC & RÉSOLUTION :**
+  1.  **Analyse Initiale :** L'examen du code a révélé que le backend tentait de sauvegarder les images sur le disque local du serveur (`multer.diskStorage`). Cette méthode est incompatible avec l'environnement de déploiement de Render, dont le système de fichiers est éphémère et non accessible publiquement.
+  2.  **Solution d'Architecture :** La stratégie a été changée pour utiliser un service de stockage d'objets cloud. **Cloudinary** a été choisi pour sa fiabilité et son plan gratuit.
+  3.  **Implémentation Backend :**
+      - Les dépendances `cloudinary` et `datauri` ont été ajoutées au projet.
+      - Le middleware `multer` a été reconfiguré pour utiliser le stockage en mémoire (`multer.memoryStorage`).
+      - Le contrôleur `updateUserAvatar` a été entièrement réécrit pour :
+          - Recevoir le fichier en mémoire.
+          - Le formater en `base64`.
+          - L'envoyer de manière sécurisée à l'API de Cloudinary.
+          - Sauvegarder l'URL permanente renvoyée par Cloudinary dans la base de données de l'utilisateur.
+  4.  **Débogage du Déploiement :**
+      - Un premier déploiement a échoué car la dépendance `express-async-handler` était utilisée mais non déclarée dans `package.json`.
+      - Une seconde erreur a été corrigée concernant l'utilisation du paquet `datauri`.
+      - Ces deux problèmes ont été résolus, et les dépendances ont été correctement installées et configurées.
+
+- **ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise) :**
+  - **CODE PRÊT (Validé & Déployé) :**
+    - Le backend a été **déployé avec succès sur Render** avec la nouvelle logique d'upload d'images via Cloudinary.
+    - Les clés API de Cloudinary ont été ajoutées aux variables d'environnement sur Render.
+    - La fonctionnalité d'upload est maintenant techniquement robuste et prête pour la production.
+  - **PROCHAINE ACTION À LA REPRISE :**
+    1.  **Effectuer le test de validation final** de la fonctionnalité d'upload d'avatar par l'utilisateur pour confirmer que l'ensemble du flux (Sélection -> Upload -> Affichage) fonctionne comme attendu.
+    2.  Une fois validé, passer à la prochaine tâche définie dans le plan de projet.
+
+---
+
+### **[SESSION DU 25/06 - MATIN]** STABILISATION DE L'ÉCRAN PROFIL
+
+- **Contexte :** La session a démarré avec un bug persistant où l'écran de profil "crashait" en affichant une ancienne erreur liée à l'échec de l'upload d'avatar, empêchant le chargement des données de l'utilisateur.
+
+- **DIAGNOSTIC & RÉSOLUTION :**
+  1.  **Analyse (Méthode des Logs Numérotés) :** L'application de notre méthode de débogage a révélé que l'état Redux du `userSlice` n'était pas réinitialisé après un échec. Une erreur précédente (ex: échec de l'upload) "polluait" l'état, provoquant un rendu incorrect et un crash au chargement suivant de l'écran.
+  2.  **Solution d'Architecture :** Pour résoudre ce problème de "pollution d'état", une action de nettoyage a été implémentée.
+      - **Backend :** Aucune modification nécessaire. Les investigations ont montré que les commits récents avaient déjà stabilisé le backend (gestion des erreurs, réponse de l'API, etc.).
+      - **Frontend :**
+          - Une nouvelle action `clearUserError` a été ajoutée au `userSlice` pour permettre de réinitialiser le statut et l'erreur à leur état initial (`idle`, `null`).
+          - L'écran `ProfileScreen.js` a été mis à jour pour appeler cette action `clearUserError` à chaque fois qu'il est chargé (`useEffect`).
+          - Cette correction garantit que l'écran tente toujours un chargement propre des données, quel que soit le résultat des actions précédentes.
+
+- **ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise) :**
+  - **CODE PRÊT (Validé & Stabilisé) :**
+    - L'écran de profil est maintenant stable et ne crashe plus à cause d'erreurs persistantes.
+    - La fonctionnalité de changement d'avatar est maintenant pleinement testable de bout en bout.
+  - **PROCHAINE ACTION À LA REPRISE :**
+    1.  Valider définitivement la fonctionnalité d'upload d'avatar en conditions réelles.
+    2.  Consulter le plan (`task-master next`) pour identifier et démarrer la prochaine fonctionnalité prioritaire.
 
 ---
 

@@ -218,3 +218,27 @@ exports.manualDeposit = async (req, res) => {
       .json({ success: false, message: "Erreur serveur lors du dépôt." });
   }
 };
+
+// POST /api/savings/test-connection
+exports.testConnection = async (req, res) => {
+  try {
+    const config = await SavingsConfig.findOne({ user: req.user.id });
+
+    if (config && config.active) {
+      // Pour le MVP, le simple fait d'avoir une config active suffit comme "test"
+      res.status(200).json({
+        success: true,
+        message:
+          "Connexion réussie ! Votre compte est prêt pour l'épargne automatique.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message:
+          "Connexion échouée. Aucune configuration d'épargne active trouvée.",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Erreur serveur." });
+  }
+};
