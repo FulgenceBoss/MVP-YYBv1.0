@@ -51,12 +51,7 @@ const LoginScreen = ({ route, navigation }) => {
       const timer = setTimeout(() => setLoginError(null), 5000);
       return;
     }
-    dispatch(loginUser({ phoneNumber, pin }))
-      .unwrap()
-      .catch((err) => {
-        setLoginError(err);
-        const timer = setTimeout(() => setLoginError(null), 5000);
-      });
+    dispatch(loginUser({ phoneNumber, pin }));
   };
 
   return (

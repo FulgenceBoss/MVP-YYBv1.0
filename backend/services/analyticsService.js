@@ -1,4 +1,5 @@
 const AnalyticsEvent = require("../models/AnalyticsEvent");
+const User = require("../models/User");
 
 /**
  * Tracks an analytics event and saves it to the database.
@@ -26,6 +27,35 @@ const trackEvent = async (userId, eventName, eventData = {}) => {
   }
 };
 
+/**
+ * Calculates the user activation rate.
+ * Activation is defined as the percentage of registered users
+ * who have successfully configured their savings plan.
+ * @returns {Promise<number>} The activation rate as a percentage (0-100).
+ */
+const getActivationRate = async () => {
+  try {
+    // 1. Compter le nombre total d'utilisateurs
+    const totalUsers = await User.countDocuments();
+    if (totalUsers === 0) {
+      return 0;
+    }
+
+    // 2. Compter le nombre d'utilisateurs uniques qui ont configuré l'épargne
+    const activatedUsersCount = await AnalyticsEvent.distinct("userId", {
+      eventName: "savings_configured",
+    });
+
+    // 3. Calculer le taux
+    const activationRate = (activatedUsersCount.length / totalUsers) * 100;
+    return activationRate;
+  } catch (error) {
+    console.error("[Analytics] Failed to calculate activation rate:", error);
+    return 0; // Retourner 0 en cas d'erreur
+  }
+};
+
 module.exports = {
   trackEvent,
+  getActivationRate,
 };

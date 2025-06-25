@@ -438,3 +438,36 @@
     - Mise en place du `userSlice.js` dans le store Redux pour gérer l'état du profil, avec un thunk `fetchUserProfile` pour appeler l'API.
     - L'écran `ProfileScreen.js` est maintenant connecté au store et tente de récupérer les données au chargement.
     - La navigation a été ajoutée dans `AppNavigator.js` et le `DashboardScreen.js` a été mis à jour pour inclure un lien vers le profil.
+
+---
+
+### **[SESSION DU 25/06 - SOIR]** AMÉLIORATION DE L'EXPÉRIENCE UTILISATEUR
+
+- **Contexte :** Après avoir stabilisé les fonctionnalités de base, cette session a été dédiée à l'amélioration de plusieurs écrans clés pour rendre l'application plus intuitive, professionnelle et digne de confiance.
+
+- **OPTIMISATIONS RÉALISÉES :**
+  1.  **Refonte du Flux d'Épargne Manuelle :**
+      - **Problème :** L'écran initial était jugé "chargé" et demandait trop d'actions simultanées.
+      - **Solution :** Le flux a été scindé en deux écrans successifs :
+        1.  Un écran simple pour le **choix du montant**.
+        2.  Un nouvel écran de **confirmation** (`ManualSavingsConfirmationScreen.js`) qui récapitule la transaction et demande une validation finale.
+      - **Améliorations Visuelles :** L'écran de confirmation a été stylisé pour être plus clair et rassurant, avec un affichage proéminent du montant et du portefeuille utilisé.
+
+  2.  **Implémentation Complète de l'Écran de Paramètres :**
+      - **Contexte :** L'écran était une page vide.
+      - **Solution :** Il a été entièrement construit pour devenir le centre de contrôle de l'application.
+        - Les options pour **modifier le montant et l'heure** de l'épargne sont fonctionnelles via des modaux.
+        - Le **"Kill Switch"** pour activer/désactiver l'épargne automatique est en place.
+        - La fonctionnalité de **changement de PIN** y a été intégrée.
+      - **Sécurité Ajoutée :** Un mécanisme de détection des changements non sauvegardés a été ajouté pour éviter les pertes de données accidentelles, avec une alerte de confirmation.
+
+  3.  **Amélioration de la Connexion et du Profil :**
+      - Le **bouton de retour** sur l'écran de profil est maintenant fonctionnel.
+      - Un **bug d'affichage persistant** sur le toast de connexion a été définitivement résolu en refactorisant la gestion de l'état d'erreur pour la rendre locale à l'écran de connexion.
+
+- **ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise) :**
+  - **CODE PRÊT (Validé & Stabilisé) :**
+    - L'application est globalement stable et les principaux flux utilisateurs (onboarding, dashboard, épargne manuelle, profil, paramètres) sont complets et fonctionnels.
+  - **PROCHAINE ACTION À LA REPRISE :**
+    1.  Consulter le plan de projet (`task-master list`) pour identifier les prochaines tâches.
+    2.  S'attaquer aux fonctionnalités restantes, comme les notifications ou la dette technique (avatar, streak).

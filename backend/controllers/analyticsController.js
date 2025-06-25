@@ -1,4 +1,5 @@
 const { trackEvent } = require("../services/analyticsService");
+const asyncHandler = require("express-async-handler");
 
 // @desc    Track a custom event from the frontend
 // @route   POST /api/analytics/track
