@@ -19,7 +19,8 @@ const localColors = {
   textSecondary: "#757575",
   background: "#fafafa",
   lightGreen: "#e8f5e8",
-  moovOrange: "#FFD700",
+  moovOrange: "#ff6b00",
+  airtelRed: "#e60012",
 };
 
 const ManualSavingsConfirmationScreen = ({ route, navigation }) => {
@@ -51,6 +52,11 @@ const ManualSavingsConfirmationScreen = ({ route, navigation }) => {
 
   const totalAfterSaving = (balance || 0) + (amount || 0);
 
+  const operatorColor =
+    savingsConfig?.operator === "Airtel"
+      ? localColors.airtelRed
+      : localColors.moovOrange;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -78,7 +84,7 @@ const ManualSavingsConfirmationScreen = ({ route, navigation }) => {
               <View
                 style={[
                   styles.operatorLogo,
-                  { backgroundColor: localColors.moovOrange },
+                  { backgroundColor: operatorColor },
                 ]}
               >
                 <Text style={styles.operatorLogoText}>
@@ -230,8 +236,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: localColors.border,
     backgroundColor: localColors.surface,
   },
   ctaButton: {
