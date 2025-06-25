@@ -19,7 +19,6 @@ import {
   fetchDashboardData,
   fetchTransactions,
   trackAnalyticsEvent,
-  fetchAnalytics,
 } from "../store/slices/dashboardSlice";
 import { logout } from "../store/slices/authSlice";
 import {
@@ -110,23 +109,6 @@ const DashboardScreen = ({ navigation }) => {
   const progress = balance && goalTarget ? (balance / goalTarget) * 100 : 0;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (circumference * progress) / 100;
-
-  const handleTestAnalytics = () => {
-    dispatch(fetchAnalytics())
-      .unwrap()
-      .then((data) => {
-        Alert.alert(
-          "Test d'Analyse Réussi",
-          `Taux d'activation : ${data.activationRate}%`
-        );
-      })
-      .catch((err) => {
-        Alert.alert(
-          "Erreur d'Analyse",
-          err.message || "Un problème est survenu."
-        );
-      });
-  };
 
   // Render a loading indicator if essential data is not yet available
   if (configStatus === "loading" || balanceStatus === "loading" || !user) {
@@ -278,13 +260,6 @@ const DashboardScreen = ({ navigation }) => {
             </Text>
           )}
         </View>
-
-        <TouchableOpacity
-          style={styles.testButton}
-          onPress={handleTestAnalytics}
-        >
-          <Text style={styles.mainActionButtonText}>📊 Tester l'Analyse</Text>
-        </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => dispatch(logout())}
@@ -519,14 +494,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: localColors.textSecondary,
     paddingVertical: 20,
-  },
-  testButton: {
-    backgroundColor: "#1976d2",
-    height: 50,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 12,
   },
   logoutButton: {
     marginTop: 20,
