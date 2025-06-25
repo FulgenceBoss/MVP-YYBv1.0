@@ -24,7 +24,8 @@ export const loginUser = createAsyncThunk(
       } else if (err.code === "ERR_NETWORK") {
         errorMessage = "Erreur de réseau. Vérifiez votre connexion internet.";
       }
-      console.error("Login Error:", err.response?.data || err.message); // On log l'erreur réelle pour le debug
+      // On log l'erreur réelle pour le debug, mais elle n'est plus préfixée
+      console.error("Login Error (raw):", err.response?.data || err.message);
       return rejectWithValue(errorMessage); // On renvoie notre message personnalisé
     }
   }
@@ -129,7 +130,6 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.userToken = null;
         state.user = null;
-        state.error = action.payload; // Store the error message
       });
   },
 });
