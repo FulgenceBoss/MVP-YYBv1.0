@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
   ActivityIndicator,
   StatusBar,
   ScrollView,
@@ -15,14 +14,7 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { COLORS, FONTS, SIZES } from "../../constants/theme";
-import api from "../../api/api";
-import {
-  setUserToken,
-  setLoading,
-  setError,
-  loginUser,
-} from "../../store/slices/authSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loginUser } from "../../store/slices/authSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -36,7 +28,7 @@ const LoginScreen = ({ route, navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
       setLoginError(null);
-    }, [dispatch])
+    }, [])
   );
 
   useEffect(() => {
@@ -48,14 +40,14 @@ const LoginScreen = ({ route, navigation }) => {
   const handleLogin = () => {
     if (!phoneNumber || !pin) {
       setLoginError("Veuillez remplir tous les champs.");
-      const timer = setTimeout(() => setLoginError(null), 5000);
+      setTimeout(() => setLoginError(null), 5000);
       return;
     }
     dispatch(loginUser({ phoneNumber, pin }))
       .unwrap()
       .catch((err) => {
         setLoginError(err);
-        const timer = setTimeout(() => setLoginError(null), 5000);
+        setTimeout(() => setLoginError(null), 5000);
       });
   };
 
