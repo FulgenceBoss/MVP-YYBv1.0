@@ -29,7 +29,7 @@ import { useFocusEffect } from "@react-navigation/native";
 
 const LoginScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
-  const { isLoading, error } = useSelector((state) => state.auth);
+  const { isLoading } = useSelector((state) => state.auth);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pin, setPin] = useState("");
   const [loginError, setLoginError] = useState(null);
@@ -37,16 +37,9 @@ const LoginScreen = ({ route, navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
       dispatch(clearAuthError());
+      setLoginError(null);
     }, [dispatch])
   );
-
-  useEffect(() => {
-    if (error && !isLoading) {
-      setLoginError(error);
-      const timer = setTimeout(() => setLoginError(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, isLoading]);
 
   useEffect(() => {
     if (route.params?.phoneNumber) {
@@ -60,7 +53,12 @@ const LoginScreen = ({ route, navigation }) => {
       const timer = setTimeout(() => setLoginError(null), 5000);
       return;
     }
-    dispatch(loginUser({ phoneNumber, pin }));
+    dispatch(loginUser({ phoneNumber, pin }))
+      .unwrap()
+      .catch((err) => {
+        setLoginError(err);
+        const timer = setTimeout(() => setLoginError(null), 5000);
+      });
   };
 
   return (

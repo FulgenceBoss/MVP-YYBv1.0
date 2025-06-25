@@ -24,8 +24,16 @@ export const loginUser = createAsyncThunk(
       } else if (err.code === "ERR_NETWORK") {
         errorMessage = "Erreur de réseau. Vérifiez votre connexion internet.";
       }
-      // On log l'erreur réelle pour le debug, mais elle n'est plus préfixée
-      console.error("Login Error (raw):", err.response?.data || err.message);
+
+      const errorToLog = err.response?.data || err.message;
+      console.error("Login Error (raw):", errorToLog);
+
+      console.log(
+        `[DEBUG A] Erreur préparée. Type: ${typeof errorMessage}, Contenu: ${JSON.stringify(
+          errorMessage
+        )}`
+      );
+
       return rejectWithValue(errorMessage); // On renvoie notre message personnalisé
     }
   }
@@ -55,7 +63,6 @@ const initialState = {
   userToken: null,
   isAuthenticated: false,
   isLoading: false,
-  error: null,
   user: null,
 };
 
@@ -65,12 +72,6 @@ const authSlice = createSlice({
   reducers: {
     setLoading: (state, action) => {
       state.isLoading = action.payload;
-    },
-    setError: (state, action) => {
-      state.error = action.payload;
-    },
-    clearAuthError: (state) => {
-      state.error = null;
     },
     setUserToken: (state, action) => {
       state.userToken = action.payload.token;
@@ -99,19 +100,16 @@ const authSlice = createSlice({
     builder
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
         state.userToken = action.payload.token;
         state.user = action.payload.user;
-        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = false;
-        state.error = action.payload;
         state.userToken = null;
         state.user = null;
       })
@@ -123,7 +121,6 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.userToken = action.payload.token;
         state.user = action.payload.user;
-        state.error = null;
       })
       .addCase(rehydrateAuth.rejected, (state, action) => {
         state.isLoading = false;
@@ -134,14 +131,8 @@ const authSlice = createSlice({
   },
 });
 
-export const {
-  setUserToken,
-  setLoading,
-  setError,
-  logoutSuccess,
-  updateAuthUser,
-  clearAuthError,
-} = authSlice.actions;
+export const { setUserToken, setLoading, logoutSuccess, updateAuthUser } =
+  authSlice.actions;
 
 export const logout = () => (dispatch) => {
   dispatch(logoutSuccess());
