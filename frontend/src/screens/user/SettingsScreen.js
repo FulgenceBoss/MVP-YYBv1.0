@@ -7,14 +7,17 @@ import {
   StatusBar,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchSavingsConfig,
   updateSavingsConfig,
 } from "../../store/slices/savingsConfigSlice";
+import { changeUserPin } from "../../store/slices/userSlice";
 import AmountInputModal from "../../components/AmountInputModal";
 import TimePickerModal from "../../components/TimePickerModal";
+import ChangePinModal from "../../components/ChangePinModal";
 
 const SettingsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -24,6 +27,8 @@ const SettingsScreen = ({ navigation }) => {
   const [localConfig, setLocalConfig] = React.useState(config);
   const [isAmountModalVisible, setIsAmountModalVisible] = React.useState(false);
   const [isTimePickerVisible, setIsTimePickerVisible] = React.useState(false);
+  const [isPinModalVisible, setIsPinModalVisible] = React.useState(false);
+  const [isPinChanging, setIsPinChanging] = React.useState(false);
 
   useEffect(() => {
     // Charger la config si elle n'est pas là
@@ -62,6 +67,22 @@ const SettingsScreen = ({ navigation }) => {
     handleUpdate("deductionTime", newTime);
   };
 
+  const handleSavePin = ({ oldPin, newPin }) => {
+    setIsPinChanging(true);
+    dispatch(changeUserPin({ oldPin, newPin }))
+      .unwrap()
+      .then(() => {
+        Alert.alert("Succès", "Votre PIN a été changé avec succès.");
+        setIsPinModalVisible(false);
+      })
+      .catch((error) => {
+        Alert.alert("Erreur", error);
+      })
+      .finally(() => {
+        setIsPinChanging(false);
+      });
+  };
+
   if (!localConfig || status === "loading") {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -83,6 +104,12 @@ const SettingsScreen = ({ navigation }) => {
         isVisible={isTimePickerVisible}
         onClose={() => setIsTimePickerVisible(false)}
         onSelect={handleSelectTime}
+      />
+      <ChangePinModal
+        isVisible={isPinModalVisible}
+        onClose={() => setIsPinModalVisible(false)}
+        onSave={handleSavePin}
+        isLoading={isPinChanging}
       />
       <View style={styles.navHeader}>
         <TouchableOpacity
@@ -169,6 +196,32 @@ const SettingsScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
+          </View>
+        </View>
+
+        {/* Section Sécurité */}
+        <View style={styles.settingsSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Sécurité</Text>
+            <Text style={styles.sectionSubtitle}>
+              Gérez votre code de sécurité
+            </Text>
+          </View>
+          <View style={styles.sectionContent}>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => setIsPinModalVisible(true)}
+            >
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingLabel}>Changer mon PIN</Text>
+                <Text style={styles.settingDescription}>
+                  Modifier votre code de sécurité à 4 chiffres
+                </Text>
+              </View>
+              <View style={styles.settingAction}>
+                <Text style={styles.settingArrow}>›</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -310,6 +363,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "700",
+  },
+  settingArrow: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#757575",
   },
 });
 

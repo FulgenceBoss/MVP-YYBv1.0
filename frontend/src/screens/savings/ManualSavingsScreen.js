@@ -8,10 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  ActivityIndicator,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { saveManualTransaction } from "../../store/slices/dashboardSlice";
 
 const localColors = {
   primary: "#2e7d32",
@@ -50,13 +47,6 @@ const AmountCard = ({ amount, label, selected, featured, onSelect }) => (
 );
 
 const ManualSavingsScreen = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const { manualSaveStatus, manualSaveError, balance } = useSelector(
-    (state) => state.dashboard
-  );
-  const { config: savingsConfig } = useSelector((state) => state.savingsConfig);
-  const [walletNumber, setWalletNumber] = useState(savingsConfig?.wallet || "");
-
   const [selectedAmount, setSelectedAmount] = useState(1000);
   const [isCustomSelected, setIsCustomSelected] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
@@ -82,14 +72,7 @@ const ManualSavingsScreen = ({ navigation }) => {
     }
   };
 
-  const handleConfirm = async () => {
-    if (!walletNumber || walletNumber.length < 8) {
-      Alert.alert(
-        "Numéro invalide",
-        "Veuillez vérifier votre numéro de portefeuille."
-      );
-      return;
-    }
+  const handleNext = () => {
     if (!selectedAmount || selectedAmount < 100) {
       Alert.alert(
         "Montant invalide",
@@ -97,30 +80,11 @@ const ManualSavingsScreen = ({ navigation }) => {
       );
       return;
     }
-
-    try {
-      const result = await dispatch(
-        saveManualTransaction(selectedAmount)
-      ).unwrap();
-      navigation.replace("TransactionStatus", {
-        status: "success",
-        title: "Épargne Réussie !",
-        message: `Vous avez ajouté ${result.transaction.amount.toLocaleString(
-          "fr-FR"
-        )} FCFA à votre épargne. Votre nouveau solde est de ${result.newBalance.toLocaleString(
-          "fr-FR"
-        )} FCFA.`,
-      });
-    } catch (error) {
-      navigation.replace("TransactionStatus", {
-        status: "error",
-        title: "Échec de l'épargne",
-        message: error.message || "Une erreur est survenue lors de l'épargne.",
-      });
-    }
+    // Naviguer vers l'écran de confirmation avec le montant
+    navigation.navigate("ManualSavingsConfirmation", {
+      amount: selectedAmount,
+    });
   };
-
-  const totalAfterSaving = (balance || 0) + (selectedAmount || 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -191,55 +155,8 @@ const ManualSavingsScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              Votre numéro de portefeuille
-            </Text>
-            <View style={styles.phoneInputContainer}>
-              <Text style={styles.prefix}>+241</Text>
-              <TextInput
-                style={styles.phoneInput}
-                placeholder="0X XX XX XX"
-                keyboardType="phone-pad"
-                maxLength={9}
-                value={walletNumber}
-                onChangeText={setWalletNumber}
-              />
-            </View>
-          </View>
-
-          <View style={styles.summarySection}>
-            <Text style={styles.summaryTitle}>Récapitulatif</Text>
-            <Text style={styles.summaryAmount}>
-              {(selectedAmount || 0).toLocaleString("fr-FR")} FCFA
-            </Text>
-            <Text style={styles.summarySubtitle}>à épargner</Text>
-            <View style={styles.impactPreview}>
-              <View style={styles.impactRow}>
-                <Text style={styles.impactLabel}>Total actuel :</Text>
-                <Text style={styles.impactValue}>
-                  {(balance || 0).toLocaleString("fr-FR")} FCFA
-                </Text>
-              </View>
-              <View style={styles.impactRow}>
-                <Text style={styles.impactLabel}>Après épargne :</Text>
-                <Text style={styles.impactValueHighlight}>
-                  {totalAfterSaving.toLocaleString("fr-FR")} FCFA
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={styles.ctaButton}
-            onPress={handleConfirm}
-            disabled={manualSaveStatus === "loading"}
-          >
-            {manualSaveStatus === "loading" ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text style={styles.ctaText}>💰 Confirmer l&apos;épargne</Text>
-            )}
+          <TouchableOpacity style={styles.ctaButton} onPress={handleNext}>
+            <Text style={styles.ctaText}>Suivant →</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

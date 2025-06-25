@@ -208,23 +208,23 @@ const ProfileScreen = () => {
 
         <View style={styles.settingsSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Sécurité</Text>
+            <Text style={styles.sectionTitle}>Sécurité & Paramètres</Text>
             <Text style={styles.sectionSubtitle}>
-              Protégez votre compte et vos données
+              Gérez votre compte et vos préférences
             </Text>
           </View>
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => setPinModalVisible(true)}
+            onPress={() => navigation.navigate("Settings")}
           >
             <View style={styles.settingInfo}>
               <View style={[styles.settingIcon, styles.securityIcon]}>
-                <Text>🔐</Text>
+                <Text>⚙️</Text>
               </View>
               <View style={styles.settingDetails}>
-                <Text style={styles.settingLabel}>Changer mon PIN</Text>
+                <Text style={styles.settingLabel}>Gérer mes paramètres</Text>
                 <Text style={styles.settingDescription}>
-                  Code de sécurité à 4 chiffres
+                  Épargne, PIN, et notifications
                 </Text>
               </View>
             </View>

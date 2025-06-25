@@ -144,16 +144,22 @@ const DashboardScreen = ({ navigation }) => {
           />
         }
       >
-        <View style={styles.balanceCard}>
+        <LinearGradient
+          colors={["#388E3C", "#2E7D32"]}
+          style={styles.balanceCard}
+        >
           <Text style={styles.balanceTitle}>Ma cagnotte actuelle</Text>
           <Text style={styles.balanceValue}>
             {balance ? balance.toLocaleString("fr-FR") : "0"} FCFA
           </Text>
-        </View>
+        </LinearGradient>
 
         {goal && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Mon objectif en cours</Text>
+            <Text style={styles.goalTargetText}>
+              Objectif : {goal.amount.toLocaleString("fr-FR")} FCFA
+            </Text>
             <View style={styles.progressContainer}>
               <Svg
                 height={radius * 2 + 20}
@@ -197,19 +203,14 @@ const DashboardScreen = ({ navigation }) => {
 
         <View style={[styles.card, styles.controlCenter]}>
           <Text style={styles.cardTitle}>Centre de contrôle</Text>
-          <View style={styles.controlRow}>
-            <Text style={styles.controlLabel}>Épargne automatique</Text>
-            <Switch
-              value={localSwitchState}
-              onValueChange={toggleSavings}
-              trackColor={{
-                false: localColors.border,
-                true: localColors.lightGreen,
-              }}
-              thumbColor={localColors.primary}
-              style={{ transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }] }}
-            />
-          </View>
+          {savingsConfig?.dailyAmount && (
+            <View style={styles.dailyAmountContainer}>
+              <Text style={styles.controlLabel}>Épargne quotidienne</Text>
+              <Text style={styles.dailyAmountText}>
+                {savingsConfig.dailyAmount.toLocaleString("fr-FR")} FCFA
+              </Text>
+            </View>
+          )}
           <TouchableOpacity
             style={styles.mainActionButton}
             onPress={() => navigation.navigate("ManualSavings")}
@@ -329,29 +330,35 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   balanceCard: {
-    backgroundColor: localColors.surface,
     borderRadius: 20,
     padding: 24,
     marginBottom: 24,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   balanceTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: localColors.textSecondary,
-    opacity: 0.8,
+    color: "rgba(255, 255, 255, 0.8)",
     marginBottom: 8,
   },
   balanceValue: {
     fontSize: 36,
     fontWeight: "800",
-    color: localColors.primary,
+    color: "#ffffff",
   },
   card: {
     backgroundColor: localColors.surface,
     borderRadius: 16,
     padding: 20,
-    marginBottom: 20,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -362,6 +369,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: localColors.textPrimary,
+    marginBottom: 16,
+  },
+  goalTargetText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: localColors.textSecondary,
+    textAlign: "center",
     marginBottom: 16,
   },
   progressContainer: {
@@ -393,11 +407,19 @@ const styles = StyleSheet.create({
   controlCenter: {
     // specific styles for control center if needed
   },
-  controlRow: {
+  dailyAmountContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: localColors.border,
+    marginBottom: 12,
+  },
+  dailyAmountText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: localColors.textPrimary,
   },
   controlLabel: {
     fontSize: 16,

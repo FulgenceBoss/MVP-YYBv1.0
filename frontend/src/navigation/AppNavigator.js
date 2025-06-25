@@ -22,6 +22,7 @@ import SpeedSelectionScreen from "../screens/savings/SpeedSelectionScreen";
 import ConfirmationScreen from "../screens/savings/ConfirmationScreen";
 import ProfileScreen from "../screens/user/ProfileScreen";
 import SettingsScreen from "../screens/user/SettingsScreen";
+import ManualSavingsConfirmationScreen from "../screens/savings/ManualSavingsConfirmationScreen";
 
 const AuthStack = createStackNavigator();
 const AppStack = createStackNavigator();
@@ -58,6 +59,10 @@ const AppNavigator = () => {
             <AppStack.Screen
               name="ManualSavings"
               component={ManualSavingsScreen}
+            />
+            <AppStack.Screen
+              name="ManualSavingsConfirmation"
+              component={ManualSavingsConfirmationScreen}
             />
             <AppStack.Screen
               name="TransactionStatus"

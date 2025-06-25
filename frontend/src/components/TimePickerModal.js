@@ -5,24 +5,12 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
+  ScrollView,
 } from "react-native";
 
 const TimePickerModal = ({ isVisible, onClose, onSelect }) => {
   // Heures paires de 8h à 22h pour le MVP
   const timeOptions = [8, 10, 12, 14, 16, 18, 20, 22];
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.timeOption}
-      onPress={() => {
-        onSelect(item);
-        onClose();
-      }}
-    >
-      <Text style={styles.timeText}>{String(item).padStart(2, "0")}:00</Text>
-    </TouchableOpacity>
-  );
 
   return (
     <Modal
@@ -34,13 +22,22 @@ const TimePickerModal = ({ isVisible, onClose, onSelect }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.modalTitle}>Choisir l&apos;heure</Text>
-          <FlatList
-            data={timeOptions}
-            renderItem={renderItem}
-            keyExtractor={(item) => String(item)}
-            numColumns={2}
-            contentContainerStyle={styles.listContainer}
-          />
+          <View style={styles.optionsContainer}>
+            {timeOptions.map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={styles.timeOption}
+                onPress={() => {
+                  onSelect(item);
+                  onClose();
+                }}
+              >
+                <Text style={styles.timeText}>
+                  {String(item).padStart(2, "0")}:00
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Annuler</Text>
           </TouchableOpacity>
@@ -79,22 +76,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#212121",
   },
-  listContainer: {
-    justifyContent: "center",
+  optionsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     width: "100%",
   },
   timeOption: {
     backgroundColor: "#e8f5e8",
-    padding: 20,
+    paddingVertical: 15,
     borderRadius: 10,
-    margin: 8,
+    marginVertical: 8,
     alignItems: "center",
-    flex: 1,
+    justifyContent: "center",
+    width: "47%",
+    minHeight: 60,
   },
   timeText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#2e7d32",
+    color: "#212121",
   },
   closeButton: {
     marginTop: 20,
