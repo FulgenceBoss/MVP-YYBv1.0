@@ -72,14 +72,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new Error("Veuillez fournir une image.");
   }
 
-  const datauri = new Datauri();
-  datauri.format(
-    path.extname(req.file.originalname).toString(),
-    req.file.buffer
-  );
+  // Création manuelle et robuste du Data URI
+  const b64 = Buffer.from(req.file.buffer).toString("base64");
+  const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
 
   try {
-    const result = await cloudinary.uploader.upload(datauri.content, {
+    const result = await cloudinary.uploader.upload(dataURI, {
       folder: "yessi-yessi-avatars",
       public_id: `avatar_${req.user.id}`,
       overwrite: true,
