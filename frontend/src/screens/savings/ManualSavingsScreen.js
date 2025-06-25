@@ -136,22 +136,23 @@ const ManualSavingsScreen = ({ navigation }) => {
               ]}
               onPress={handleSelectCustom}
             >
-              <Text
-                style={[
-                  styles.amountValue,
-                  isCustomSelected && styles.selectedValueText,
-                ]}
-              >
-                Autre montant
-              </Text>
-              <TextInput
-                placeholder="Saisissez..."
-                style={styles.customInput}
-                keyboardType="numeric"
-                value={customAmount}
-                onChangeText={handleCustomAmountChange}
-                onFocus={handleSelectCustom}
-              />
+              {isCustomSelected ? (
+                <View style={styles.customInputContainer}>
+                  <TextInput
+                    placeholder="Saisir un montant"
+                    placeholderTextColor={localColors.textSecondary}
+                    style={styles.customInput}
+                    keyboardType="numeric"
+                    value={customAmount}
+                    onChangeText={handleCustomAmountChange}
+                    autoFocus={true}
+                  />
+                  <Text style={styles.currencyLabel}>FCFA</Text>
+                </View>
+              ) : (
+                <Text style={styles.amountValue}>Autre montant</Text>
+              )}
+              <Text style={styles.amountEquivalent}>Personnalisé</Text>
             </TouchableOpacity>
           </View>
 
@@ -255,14 +256,27 @@ const styles = StyleSheet.create({
   ctaText: { color: "white", fontSize: 16, fontWeight: "700" },
   customAmount: {
     width: "100%",
-    borderColor: localColors.primary,
-    borderStyle: "dashed",
+    minHeight: 100,
+    justifyContent: "center",
+  },
+  customInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "80%",
   },
   customInput: {
     color: localColors.textPrimary,
-    fontSize: 16,
-    marginTop: 8,
-    textAlign: "center",
+    fontSize: 22,
+    fontWeight: "700",
+    flex: 1,
+    textAlign: "right",
+    paddingRight: 8,
+  },
+  currencyLabel: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: localColors.textSecondary,
   },
   summarySection: {
     backgroundColor: localColors.lightGreen,
