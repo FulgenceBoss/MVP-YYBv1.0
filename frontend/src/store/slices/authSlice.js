@@ -78,13 +78,11 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.isAuthenticated = true;
       state.isLoading = false;
-      state.error = null;
     },
     logoutSuccess: (state) => {
       state.userToken = null;
       state.user = null;
       state.isLoading = false;
-      state.error = null;
       SecureStore.deleteItemAsync("userToken");
       delete api.defaults.headers.common["Authorization"];
     },

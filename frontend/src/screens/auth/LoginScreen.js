@@ -21,7 +21,6 @@ import {
   setLoading,
   setError,
   loginUser,
-  clearAuthError,
 } from "../../store/slices/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
@@ -36,7 +35,6 @@ const LoginScreen = ({ route, navigation }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(clearAuthError());
       setLoginError(null);
     }, [dispatch])
   );
