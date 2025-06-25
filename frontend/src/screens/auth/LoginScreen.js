@@ -21,9 +21,11 @@ import {
   setLoading,
   setError,
   loginUser,
+  clearAuthError,
 } from "../../store/slices/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 
 const LoginScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -31,6 +33,12 @@ const LoginScreen = ({ route, navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pin, setPin] = useState("");
   const [loginError, setLoginError] = useState(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(clearAuthError());
+    }, [dispatch])
+  );
 
   useEffect(() => {
     if (error && !isLoading) {
