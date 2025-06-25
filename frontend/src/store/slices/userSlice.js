@@ -7,29 +7,16 @@ import { updateAuthUser } from "./authSlice";
 export const fetchUserProfile = createAsyncThunk(
   "user/fetchProfile",
   async (_, { getState, rejectWithValue }) => {
-    console.log("[DEBUG] 2. userSlice: Entrée dans fetchUserProfile.");
     try {
       const token = await SecureStore.getItemAsync("userToken");
       if (!token) {
-        console.log("[DEBUG] 2a. userSlice: ECHEC - Pas de token trouvé.");
         return rejectWithValue("No token found");
       }
-      console.log(
-        "[DEBUG] 2b. userSlice: Token trouvé. Lancement de l'appel API vers /auth/me."
-      );
       const response = await apiClient.get("/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(
-        "[DEBUG] 2c. userSlice: SUCCES - Réponse API reçue.",
-        response.data
-      );
       return response.data.user;
     } catch (error) {
-      console.log(
-        "[DEBUG] 2d. userSlice: ERREUR CATCH - L'appel API a échoué.",
-        error
-      );
       const message =
         error?.response?.data?.message || "Impossible de charger le profil.";
       return rejectWithValue(message);
@@ -90,6 +77,7 @@ export const updateUserAvatar = createAsyncThunk(
         },
       });
 
+      // Synchroniser également l'état d'authentification
       dispatch(updateAuthUser(response.data.user));
       return response.data.user;
     } catch (error) {
@@ -139,9 +127,6 @@ const userSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchUserProfile.pending, (state) => {
-        console.log(
-          "[DEBUG] 3. userSlice: Reducer 'pending' exécuté. status -> loading."
-        );
         state.status = "loading";
         state.error = null;
       })

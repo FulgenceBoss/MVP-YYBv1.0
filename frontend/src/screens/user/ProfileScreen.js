@@ -23,16 +23,18 @@ import * as ImagePicker from "expo-image-picker";
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
-  const { userInfo, status, error } = useSelector((state) => state.user);
+  const {
+    userInfo: userInfoFromUserSlice,
+    status,
+    error,
+  } = useSelector((state) => state.user);
+  const { user: userInfo } = useSelector((state) => state.auth);
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [isPinModalVisible, setPinModalVisible] = useState(false);
   const [isPinChanging, setPinChanging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    console.log(
-      "[DEBUG] 1. ProfileScreen: useEffect déclenché. Lancement de fetchUserProfile."
-    );
     if (!userInfo) {
       dispatch(fetchUserProfile());
     }
@@ -95,16 +97,10 @@ const ProfileScreen = () => {
   };
 
   if (status === "loading" && !userInfo) {
-    console.log(
-      "[DEBUG] 4. ProfileScreen: status='loading'. Affichage du loader."
-    );
     return <ActivityIndicator size="large" style={styles.loader} />;
   }
 
   if (status === "failed") {
-    console.log(
-      `[DEBUG] 5. ProfileScreen: status='failed'. Affichage de l'erreur: ${error}`
-    );
     return (
       <Text style={styles.errorText}>
         Erreur: {error || "Impossible de charger le profil"}
