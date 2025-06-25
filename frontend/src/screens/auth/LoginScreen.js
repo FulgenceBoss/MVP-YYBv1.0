@@ -32,7 +32,6 @@ const LoginScreen = ({ route, navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pin, setPin] = useState("");
   const [loginError, setLoginError] = useState(null);
-  const [debugToken, setDebugToken] = useState("");
 
   useFocusEffect(
     React.useCallback(() => {
@@ -52,52 +51,13 @@ const LoginScreen = ({ route, navigation }) => {
       const timer = setTimeout(() => setLoginError(null), 5000);
       return;
     }
-    api
-      .post("/auth/login", { phoneNumber, pin })
-      .then((response) => {
-        setDebugToken(response.data.token);
-      })
+    dispatch(loginUser({ phoneNumber, pin }))
+      .unwrap()
       .catch((err) => {
-        const errorMessage =
-          err.response?.data?.message || "Une erreur est survenue.";
-        setLoginError(errorMessage);
+        setLoginError(err);
         const timer = setTimeout(() => setLoginError(null), 5000);
       });
   };
-
-  const proceedToDashboard = () => {
-    dispatch(loginUser({ phoneNumber, pin }));
-  };
-
-  if (debugToken) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={{ padding: 20 }}>
-          <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 10 }}>
-            Token de Connexion (Copiez-le)
-          </Text>
-          <TextInput
-            style={{
-              borderColor: "gray",
-              borderWidth: 1,
-              padding: 10,
-              marginBottom: 10,
-              height: 150,
-            }}
-            value={debugToken}
-            multiline
-            editable
-          />
-          <TouchableOpacity
-            onPress={proceedToDashboard}
-            style={styles.ctaButton}
-          >
-            <Text style={styles.ctaText}>Continuer vers le Dashboard</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
