@@ -17,6 +17,7 @@ import {
   changeUserPin,
   updateUserAvatar,
   clearUserError,
+  deleteUserAccount,
 } from "../../store/slices/userSlice";
 import EditProfileModal from "../../components/EditProfileModal";
 import ChangePinModal from "../../components/ChangePinModal";
@@ -124,6 +125,29 @@ const ProfileScreen = () => {
       })
       .finally(() => {
         setIsTesting(false);
+      });
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Êtes-vous absolument sûr ?",
+      "Cette action est irréversible. Toutes vos données (épargne, historique, etc.) seront définitivement perdues.",
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Je comprends, supprimer",
+          style: "destructive",
+          onPress: () => confirmDeletion(),
+        },
+      ]
+    );
+  };
+
+  const confirmDeletion = () => {
+    dispatch(deleteUserAccount())
+      .unwrap()
+      .catch((err) => {
+        Alert.alert("Erreur", err || "La suppression a échoué.");
       });
   };
 
@@ -280,8 +304,18 @@ const ProfileScreen = () => {
             Cette action est irréversible. Toutes vos données d&apos;épargne
             seront définitivement perdues.
           </Text>
-          <TouchableOpacity style={styles.dangerButton}>
-            <Text style={styles.dangerButtonText}>🗑️ Supprimer mon compte</Text>
+          <TouchableOpacity
+            style={styles.dangerButton}
+            onPress={handleDeleteAccount}
+            disabled={status === "loading"}
+          >
+            {status === "loading" ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.dangerButtonText}>
+                🗑️ Supprimer mon compte
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>

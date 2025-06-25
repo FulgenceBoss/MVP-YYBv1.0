@@ -1,4 +1,7 @@
 const User = require("../models/User");
+const SavingsConfig = require("../models/SavingsConfig");
+const SavingsBalance = require("../models/SavingsBalance");
+const Transaction = require("../models/Transaction");
 const asyncHandler = require("express-async-handler");
 const cloudinary = require("../config/cloudinary");
 const Datauri = require("datauri");
@@ -106,8 +109,31 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Delete user account and all associated data
+// @route   DELETE /api/users/me
+// @access  Private
+const deleteUserAccount = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  // Suppression en cascade
+  await SavingsConfig.deleteOne({ user: userId });
+  await SavingsBalance.deleteOne({ user: userId });
+  await Transaction.deleteMany({ user: userId });
+
+  // Supprimer l'avatar sur Cloudinary
+  await cloudinary.uploader.destroy(`yessi-yessi-avatars/avatar_${userId}`);
+
+  // Supprimer l'utilisateur lui-même
+  await User.findByIdAndDelete(userId);
+
+  res
+    .status(200)
+    .json({ success: true, message: "Compte supprimé avec succès." });
+});
+
 module.exports = {
   updateUserProfile,
   savePushToken,
   updateUserAvatar,
+  deleteUserAccount,
 };

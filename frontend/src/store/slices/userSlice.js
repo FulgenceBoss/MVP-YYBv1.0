@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiClient from "../../api/api";
 import * as SecureStore from "expo-secure-store";
-import { updateAuthUser } from "./authSlice";
+import { updateAuthUser, logout } from "./authSlice";
 
 // Thunk to fetch user profile
 export const fetchUserProfile = createAsyncThunk(
@@ -116,6 +116,29 @@ export const changeUserPin = createAsyncThunk(
   }
 );
 
+// Thunk to delete user account
+export const deleteUserAccount = createAsyncThunk(
+  "user/deleteAccount",
+  async (_, { rejectWithValue, dispatch }) => {
+    try {
+      const token = await SecureStore.getItemAsync("userToken");
+      if (!token) {
+        return rejectWithValue("No token found");
+      }
+      await apiClient.delete("/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // En cas de succès, déconnecter l'utilisateur
+      dispatch(logout());
+      return;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || "La suppression du compte a échoué.";
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const initialState = {
   userInfo: null,
   status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -181,6 +204,19 @@ const userSlice = createSlice({
         state.userInfo = action.payload;
       })
       .addCase(updateUserAvatar.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+      // Cases for deleting account
+      .addCase(deleteUserAccount.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(deleteUserAccount.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.userInfo = null; // Vider les infos utilisateur
+      })
+      .addCase(deleteUserAccount.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       });

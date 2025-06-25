@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  BackHandler,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -18,36 +19,90 @@ import { changeUserPin } from "../../store/slices/userSlice";
 import AmountInputModal from "../../components/AmountInputModal";
 import TimePickerModal from "../../components/TimePickerModal";
 import ChangePinModal from "../../components/ChangePinModal";
+import { useFocusEffect } from "@react-navigation/native";
 
 const SettingsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { config, status } = useSelector((state) => state.savingsConfig);
 
-  // Utiliser un état local pour gérer les modifications avant de les sauvegarder
   const [localConfig, setLocalConfig] = React.useState(config);
+  const [hasChanges, setHasChanges] = React.useState(false);
   const [isAmountModalVisible, setIsAmountModalVisible] = React.useState(false);
   const [isTimePickerVisible, setIsTimePickerVisible] = React.useState(false);
   const [isPinModalVisible, setIsPinModalVisible] = React.useState(false);
   const [isPinChanging, setIsPinChanging] = React.useState(false);
 
   useEffect(() => {
-    // Charger la config si elle n'est pas là
     if (!config) {
       dispatch(fetchSavingsConfig());
     }
-    // Synchroniser l'état local si la config du store change
     if (config) {
       setLocalConfig(config);
+      setHasChanges(false);
     }
   }, [config, dispatch]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (!hasChanges) {
+          return false;
+        }
+        handleGoBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [hasChanges])
+  );
+
   const handleUpdate = (field, value) => {
     setLocalConfig((prev) => ({ ...prev, [field]: value }));
+    setHasChanges(true);
   };
 
   const onSave = () => {
     dispatch(updateSavingsConfig(localConfig));
-    navigation.goBack();
+    setHasChanges(false);
+    Alert.alert("Succès", "Vos paramètres ont été sauvegardés.");
+  };
+
+  const handleGoBack = () => {
+    if (!hasChanges) {
+      navigation.goBack();
+      return;
+    }
+
+    Alert.alert(
+      "Modifications non enregistrées",
+      "Voulez-vous sauvegarder vos modifications avant de quitter ?",
+      [
+        {
+          text: "Quitter sans sauvegarder",
+          onPress: () => navigation.goBack(),
+          style: "destructive",
+        },
+        {
+          text: "Sauvegarder et quitter",
+          onPress: () => {
+            onSave();
+            navigation.goBack();
+          },
+          style: "default",
+        },
+        {
+          text: "Annuler",
+          onPress: () => {},
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const handleModifyAmount = () => {
@@ -112,10 +167,7 @@ const SettingsScreen = ({ navigation }) => {
         isLoading={isPinChanging}
       />
       <View style={styles.navHeader}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Mes Paramètres</Text>
@@ -225,7 +277,11 @@ const SettingsScreen = ({ navigation }) => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+        <TouchableOpacity
+          style={[styles.saveButton, !hasChanges && styles.saveButtonDisabled]}
+          onPress={onSave}
+          disabled={!hasChanges}
+        >
           <Text style={styles.saveButtonText}>
             Sauvegarder les modifications
           </Text>
@@ -358,6 +414,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     margin: 20,
+  },
+  saveButtonDisabled: {
+    backgroundColor: "#9E9E9E",
   },
   saveButtonText: {
     color: "white",
