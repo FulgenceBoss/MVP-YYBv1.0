@@ -457,7 +457,7 @@
 
   3.  **Amélioration de la Connexion et du Profil :**
       - Le **bouton de retour** sur l'écran de profil est maintenant fonctionnel.
-      - Un **bug d'affichage persistant** sur le toast de connexion a été définitivement résolu en refactorisant la gestion de l'état d'erreur pour la rendre locale à l'écran de connexion.
+      - Un **bug d'affichage persistant** sur le toast de connexion a été définitivement résolu en refactorisant la gestion de l'état d'erreur pour la rendre locale à l'écran de connexion et indépendante de l'état global Redux.
 
 - **ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise) :**
   - **CODE PRÊT (Validé & Stabilisé) :**
