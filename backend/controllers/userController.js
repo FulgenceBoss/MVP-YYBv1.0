@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
 const cloudinary = require("../config/cloudinary");
-const DatauriParser = require("datauri/parser");
+const Datauri = require("datauri");
 const path = require("path");
 
 // @desc    Update user profile
@@ -14,12 +14,14 @@ const updateUserProfile = async (req, res) => {
     if (user) {
       user.fullName = req.body.fullName || user.fullName;
 
-      const updatedUser = await user.save();
+      await user.save();
 
-      res.json({
-        _id: updatedUser._id,
-        fullName: updatedUser.fullName,
-        phoneNumber: updatedUser.phoneNumber,
+      // On renvoie l'objet utilisateur complet (sans le PIN) pour une mise à jour fluide du frontend
+      const userToReturn = await User.findById(req.user.id).select("-pin");
+
+      res.status(200).json({
+        success: true,
+        user: userToReturn,
       });
     } else {
       res.status(404);
@@ -70,9 +72,9 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new Error("Veuillez fournir une image.");
   }
 
-  const parser = new DatauriParser();
+  const datauri = new Datauri();
   const extName = path.extname(req.file.originalname).toString();
-  const file64 = parser.format(extName, req.file.buffer);
+  const file64 = datauri.format(extName, req.file.buffer);
 
   try {
     const result = await cloudinary.uploader.upload(file64.content, {
