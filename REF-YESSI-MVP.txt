@@ -324,17 +324,11 @@
       - Les problèmes de "disparition" du bug étaient dus au caractère intermittent du rate limiting.
 
 - **ÉTAT ACTUEL DU DÉVELOPPEMENT (Point de reprise) :**
-  - **Objectif en cours :** Finaliser la fonctionnalité d'upload et d'affichage de la photo de profil.
-  - **Dernier Point d'Attention :**
-    - Nous avons découvert que le **déploiement automatique sur Render ne fonctionnait pas** car le filtre "Included Paths" était vide. Nous avons lancé un déploiement manuel du backend.
-    - Nous avons également lancé un **nouveau build du frontend (`eas build`)** pour inclure la nouvelle dépendance native `expo-image-picker`. Ces deux processus doivent se terminer.
+  - **CODE PRÊT (Validé & Stabilisé) :**
+    - L'application est globalement stable et les principaux flux utilisateurs (onboarding, dashboard, épargne manuelle, profil, paramètres) sont complets et fonctionnels.
   - **PROCHAINE ACTION À LA REPRISE :**
-    1.  **Vérifier** que le déploiement manuel du backend sur Render est bien terminé avec le statut "Live".
-    2.  **Installer** le nouvel APK généré par `eas build` sur le téléphone de test.
-    3.  **Tester de bout en bout la fonctionnalité d'avatar :**
-        - Cliquer sur l'avatar dans le profil.
-        - Choisir une image dans la galerie.
-        - Confirmer que l'image s'affiche correctement dans le profil après l'upload.
+    1.  Poursuivre le développement du **Dashboard d'Administration** séparé pour implémenter les métriques restantes (Total Utilisateurs, Total Épargné) et un système de login robuste.
+    2.  S'attaquer à la dette technique (avatar, streak) ou aux notifications (Tâche #9) lorsque le dashboard admin sera jugé suffisant pour le suivi du MVP.
 
 ---
 

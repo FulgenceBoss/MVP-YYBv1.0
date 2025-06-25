@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 // Composant pour le Dashboard principal
 const Dashboard = ({ token, onLogout }) => {
-  const [activationRate, setActivationRate] = useState(null);
+  const [metrics, setMetrics] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -24,7 +24,7 @@ const Dashboard = ({ token, onLogout }) => {
 
         const result = await response.json();
         if (result.success) {
-          setActivationRate(result.data.activationRate);
+          setMetrics(result.data);
         } else {
           throw new Error(
             result.message || "Erreur lors de la récupération des données."
@@ -43,42 +43,47 @@ const Dashboard = ({ token, onLogout }) => {
   }, [token]);
 
   if (isLoading) {
-    return <div style={{ padding: "20px" }}>Chargement des données...</div>;
+    return <div style={styles.container}>Chargement des données...</div>;
   }
 
   if (error) {
-    return <div style={{ padding: "20px", color: "red" }}>Erreur: {error}</div>;
+    return (
+      <div style={{ ...styles.container, color: "red" }}>Erreur: {error}</div>
+    );
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <button
-        onClick={onLogout}
-        style={{ float: "right", padding: "8px 12px" }}
-      >
+    <div style={styles.container}>
+      <button onClick={onLogout} style={styles.logoutButton}>
         Déconnexion
       </button>
-      <h1>Tableau de Bord Yessi-Yessi</h1>
-      <div
-        style={{
-          border: "1px solid #ccc",
-          padding: "16px",
-          borderRadius: "8px",
-          marginTop: "20px",
-        }}
-      >
-        <h2>Taux d'Activation des Utilisateurs</h2>
-        <p
-          style={{
-            fontSize: "36px",
-            fontWeight: "bold",
-            color: "#2e7d32",
-            margin: "10px 0",
-          }}
-        >
-          {activationRate}%
-        </p>
-        <p>des utilisateurs ont configuré leur épargne.</p>
+      <h1 style={styles.header}>Tableau de Bord Yessi-Yessi</h1>
+
+      <div style={styles.grid}>
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>Taux d'Activation</h2>
+          <p style={styles.metricValue}>{metrics?.activationRate}%</p>
+          <p style={styles.cardDescription}>
+            des utilisateurs ont configuré leur épargne.
+          </p>
+        </div>
+
+        {/* Placeholders pour les futures métriques */}
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>Rétention J30</h2>
+          <p style={styles.metricValue}>N/A</p>
+          <p style={styles.cardDescription}>Prochainement disponible.</p>
+        </div>
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>Total Utilisateurs</h2>
+          <p style={styles.metricValue}>N/A</p>
+          <p style={styles.cardDescription}>Prochainement disponible.</p>
+        </div>
+        <div style={styles.card}>
+          <h2 style={styles.cardTitle}>Total Épargné</h2>
+          <p style={styles.metricValue}>N/A</p>
+          <p style={styles.cardDescription}>Prochainement disponible.</p>
+        </div>
       </div>
     </div>
   );
@@ -174,5 +179,48 @@ function App() {
     </div>
   );
 }
+
+const styles = {
+  container: {
+    fontFamily: "sans-serif",
+    padding: "20px",
+    maxWidth: "1200px",
+    margin: "auto",
+  },
+  header: { textAlign: "center", marginBottom: "30px", color: "#212121" },
+  logoutButton: {
+    float: "right",
+    padding: "8px 12px",
+    background: "#f1f1f1",
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+    cursor: "pointer",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gap: "20px",
+  },
+  card: {
+    border: "1px solid #e0e0e0",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+    backgroundColor: "white",
+  },
+  cardTitle: {
+    fontSize: "18px",
+    fontWeight: "600",
+    color: "#757575",
+    margin: "0 0 10px 0",
+  },
+  metricValue: {
+    fontSize: "36px",
+    fontWeight: "bold",
+    color: "#2e7d32",
+    margin: "0 0 5px 0",
+  },
+  cardDescription: { fontSize: "14px", color: "#757575", margin: 0 },
+};
 
 export default App;

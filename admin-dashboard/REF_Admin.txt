@@ -23,6 +23,23 @@
 
 ---
 
+### PLAN D'ACTION PROCHAINE SESSION
+
+1.  **Améliorer l'Authentification :**
+    -   **Backend :** Créer un endpoint `/api/admin/login` qui valide des identifiants admin stockés dans les variables d'environnement.
+    -   **Frontend :** Transformer le `LoginPage` pour accepter un email et un mot de passe.
+
+2.  **Ajouter les Nouvelles Métriques :**
+    -   **Backend :**
+        -   Créer les fonctions de calcul pour le **nombre total d'utilisateurs** et le **total épargné** dans `analyticsService.js`.
+        -   Ajouter ces nouvelles données à la réponse de l'endpoint `/api/analytics/overview`.
+    -   **Frontend :**
+        -   Connecter les cartes "Total Utilisateurs" et "Total Épargné" aux nouvelles données de l'API.
+
+3.  **(Plus tard) Taux de Rétention :** Le calcul du taux de rétention est plus complexe et sera traité dans une phase ultérieure.
+
+---
+
 ### JOURNAL DES DÉCISIONS
 
 - **25/06/2025 :** Décision de créer un projet séparé pour le dashboard admin afin de ne pas mélanger le code de l'application principale avec les outils internes.
