@@ -1,0 +1,37 @@
+# DOCUMENT DE RÉFÉRENCE - DÉVELOPPEMENT DASHBOARD ADMIN YESSI-YESSI
+# Mis à jour le: 25/06/2025
+
+---
+
+### STACK TECHNIQUE
+- **Framework :** React (via Vite)
+- **Dépendances :** Aucune dépendance supplémentaire pour le moment.
+
+---
+
+### ÉTAT ACTUEL DU PROJET (Point de reprise)
+
+- **Objectif Immédiat :** Afficher la première métrique clé, le Taux d'Activation.
+- **Action en Cours :**
+  1.  Le projet a été initialisé avec Vite.
+  2.  La structure de base du composant `App.jsx` a été créée.
+  3.  Le composant appelle l'endpoint `/api/analytics/overview` pour récupérer les données.
+- **Prochaine Action à la Reprise :**
+  1.  Mettre en place un système de login simple pour sécuriser l'accès.
+  2.  Remplacer le token JWT codé en dur par une solution d'authentification dynamique.
+  3.  Améliorer le style de base de l'interface.
+
+---
+
+### JOURNAL DES DÉCISIONS
+
+- **25/06/2025 :** Décision de créer un projet séparé pour le dashboard admin afin de ne pas mélanger le code de l'application principale avec les outils internes.
+- **25/06/2025 :** Choix de Vite pour sa légèreté et sa rapidité, idéales pour un projet interne simple.
+- **25/06/2025 :** L'authentification se fera pour l'instant en partageant un token JWT valide de l'application principale. Une solution plus robuste (login admin dédié) sera envisagée plus tard si nécessaire.
+
+---
+
+### ACCÈS ET DÉPLOIEMENT
+
+- **Accès en Développement :** Le tableau de bord est accessible localement en exécutant `npm run dev` dans le dossier `admin-dashboard`, via l'URL fournie (ex: `http://localhost:5173`).
+- **Accès en Production :** Le projet sera déployé sur un service d'hébergement web (ex: Vercel, Netlify) pour le rendre accessible à l'équipe via une URL publique et sécurisée. Le déploiement se fera automatiquement à partir du dépôt GitHub. 

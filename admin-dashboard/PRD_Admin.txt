@@ -1,0 +1,65 @@
+# DOCUMENT DES EXIGENCES PRODUIT (PRD) - Dashboard d'Administration Yessi-Yessi
+# Version: 1.0
+# Date: 25/06/2025
+# Auteur: Yessi-Yessi Team & AI Assistant
+
+---
+
+## 1. INTRODUCTION ET VISION
+
+Le Dashboard d'Administration Yessi-Yessi est une interface web interne et sécurisée conçue pour l'équipe de Yessi-Yessi. Sa vision est de fournir un aperçu clair, rapide et exploitable des métriques de performance clés de l'application, permettant de prendre des décisions basées sur les données pour améliorer le produit et mesurer l'atteinte des objectifs stratégiques du MVP.
+
+---
+
+## 2. OBJECTIF PRINCIPAL
+
+L'objectif de ce tableau de bord est de **mesurer et de visualiser les métriques de succès du MVP** définies dans le PRD principal de l'application, notamment le taux d'activation et le taux de rétention.
+
+---
+
+## 3. UTILISATEURS CIBLES
+
+*   **Utilisateurs :** L'équipe de direction et l'équipe produit de Yessi-Yessi.
+*   **Accès :** L'accès doit être strictement restreint et sécurisé par une authentification.
+
+---
+
+## 4. FONCTIONNALITÉS CORE (MVP)
+
+Le mantra est la simplicité et la clarté. Nous ne voulons que les chiffres qui comptent.
+
+### 4.1. Phase 1 : Vue d'Ensemble des Métriques Clés
+
+*   **Épopée :** En tant que membre de l'équipe, je veux voir les métriques de performance les plus importantes en un coup d'œil pour comprendre la santé du produit.
+*   **User Stories :**
+    *   Je peux voir le **Taux d'Activation** des utilisateurs (Objectif PRD: > 85%). C'est le pourcentage d'utilisateurs inscrits qui ont configuré leur plan d'épargne.
+    *   (Future) Je peux voir le **Taux de Rétention à 30 jours** (Objectif PRD: > 40%).
+    *   (Future) Je peux voir le **nombre total d'utilisateurs** inscrits.
+    *   (Future) Je peux voir le **montant total épargné** par tous les utilisateurs.
+
+### 4.2. Phase 2 : Sécurité et Accès
+
+*   **Épopée :** En tant qu'administrateur, je veux que l'accès au tableau de bord soit sécurisé pour protéger les données.
+*   **User Stories :**
+    *   Je dois me connecter via une page de login simple avant d'accéder aux données.
+    *   La communication avec l'API backend doit être authentifiée (par exemple, via un token JWT partagé ou un système de clé d'API dédié).
+
+---
+
+## 5. EXIGENCES TECHNIQUES
+
+*   **Framework :** React (via Vite) pour la légèreté et la rapidité de développement.
+*   **Style :** Pas de système de style complexe. Du CSS simple ou des styles en ligne suffisent pour le MVP.
+*   **Communication API :** Utilisation de la fonction `fetch` native du navigateur.
+*   **Backend :** Le tableau de bord consommera les endpoints sécurisés de l'API principale de Yessi-Yessi (ex: `/api/analytics/overview`).
+
+---
+
+## 6. HORS PÉRIMÈTRE (POUR LE MVP)
+
+*   La gestion des utilisateurs (création, suppression).
+*   La modification des données de l'application.
+*   Des graphiques complexes ou des filtrages de dates avancés.
+*   L'export de données.
+
+Le tableau de bord est un outil de **lecture seule**. 
