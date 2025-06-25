@@ -73,11 +73,13 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   }
 
   const datauri = new Datauri();
-  const extName = path.extname(req.file.originalname).toString();
-  const file64 = datauri.format(extName, req.file.buffer);
+  datauri.format(
+    path.extname(req.file.originalname).toString(),
+    req.file.buffer
+  );
 
   try {
-    const result = await cloudinary.uploader.upload(file64.content, {
+    const result = await cloudinary.uploader.upload(datauri.content, {
       folder: "yessi-yessi-avatars",
       public_id: `avatar_${req.user.id}`,
       overwrite: true,
