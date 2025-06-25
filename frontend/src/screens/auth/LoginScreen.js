@@ -42,9 +42,7 @@ const LoginScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     if (error && !isLoading) {
-      setLoginError(
-        "Numéro de téléphone ou PIN incorrect. Veuillez réessayer."
-      );
+      setLoginError(error);
       const timer = setTimeout(() => setLoginError(null), 5000);
       return () => clearTimeout(timer);
     }
