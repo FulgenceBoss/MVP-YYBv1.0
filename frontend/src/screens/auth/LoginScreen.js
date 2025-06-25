@@ -23,23 +23,26 @@ import {
   loginUser,
 } from "../../store/slices/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
 
 const LoginScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.auth);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pin, setPin] = useState("");
-  const [attemptedLogin, setAttemptedLogin] = useState(false);
+  const [loginError, setLoginError] = useState(null);
 
   useEffect(() => {
-    if (attemptedLogin && error) {
-      Alert.alert("Connexion impossible", error);
-      setAttemptedLogin(false); // Reset after showing alert
+    if (error && !isLoading) {
+      setLoginError(
+        "Numéro de téléphone ou PIN incorrect. Veuillez réessayer."
+      );
+      const timer = setTimeout(() => setLoginError(null), 5000);
+      return () => clearTimeout(timer);
     }
-  }, [error, attemptedLogin]);
+  }, [error, isLoading]);
 
   useEffect(() => {
-    // Pre-fill phone number if it's passed from the sign-up screen
     if (route.params?.phoneNumber) {
       setPhoneNumber(route.params.phoneNumber);
     }
@@ -47,10 +50,10 @@ const LoginScreen = ({ route, navigation }) => {
 
   const handleLogin = () => {
     if (!phoneNumber || !pin) {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs.");
+      setLoginError("Veuillez remplir tous les champs.");
+      const timer = setTimeout(() => setLoginError(null), 5000);
       return;
     }
-    setAttemptedLogin(true);
     dispatch(loginUser({ phoneNumber, pin }));
   };
 
@@ -130,6 +133,16 @@ const LoginScreen = ({ route, navigation }) => {
               </Text>
             </TouchableOpacity>
           </View>
+
+          {loginError && (
+            <View style={styles.toastContainer}>
+              <Ionicons name="alert-circle" size={24} color="white" />
+              <Text style={styles.toastText}>{loginError}</Text>
+              <TouchableOpacity onPress={() => setLoginError(null)}>
+                <Ionicons name="close-circle" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -246,6 +259,29 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontWeight: "600",
     padding: SIZES.base,
+  },
+  toastContainer: {
+    position: "absolute",
+    bottom: 30,
+    left: 20,
+    right: 20,
+    backgroundColor: "#323232",
+    borderRadius: SIZES.radius_lg,
+    padding: SIZES.padding,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  toastText: {
+    color: "white",
+    flex: 1,
+    marginHorizontal: 10,
+    ...FONTS.body3,
   },
 });
 
