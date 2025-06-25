@@ -61,6 +61,18 @@ export const saveManualTransaction = createAsyncThunk(
   }
 );
 
+export const fetchAnalytics = createAsyncThunk(
+  "dashboard/fetchAnalytics",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/analytics/overview");
+      return response.data.data; // Renvoie { activationRate: "XX.XX" }
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const dashboardSlice = createSlice({
   name: "dashboard",
   initialState: {
