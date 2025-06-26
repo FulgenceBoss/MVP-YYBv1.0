@@ -19,22 +19,11 @@ export const loginUser = createAsyncThunk(
         errorMessage =
           "Trop de tentatives. Veuillez patienter quelques instants avant de réessayer.";
       } else if (err.response?.status === 401 || err.response?.status === 400) {
-        // Erreur d'authentification ou de validation
         errorMessage = "Numéro de téléphone ou PIN incorrect.";
       } else if (err.code === "ERR_NETWORK") {
         errorMessage = "Erreur de réseau. Vérifiez votre connexion internet.";
       }
-
-      const errorToLog = err.response?.data || err.message;
-      console.error("Login Error (raw):", errorToLog);
-
-      console.log(
-        `[DEBUG A] Erreur préparée. Type: ${typeof errorMessage}, Contenu: ${JSON.stringify(
-          errorMessage
-        )}`
-      );
-
-      return rejectWithValue(errorMessage); // On renvoie notre message personnalisé
+      return rejectWithValue(errorMessage);
     }
   }
 );

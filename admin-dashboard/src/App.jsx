@@ -91,39 +91,65 @@ const Dashboard = ({ token, onLogout }) => {
 
 // Composant pour la page de Login
 const LoginPage = ({ onLogin }) => {
-  const [token, setToken] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (token) {
-      onLogin(token);
-    } else {
-      alert("Veuillez coller un token JWT valide.");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(
+        "https://yessi-yessi-backend.onrender.com/api/admin/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Erreur d'authentification.");
+      }
+
+      onLogin(data.token);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
-      <h1>Accès au Dashboard Admin</h1>
-      <p>Veuillez coller un token JWT valide pour continuer.</p>
-      <textarea
-        value={token}
-        onChange={(e) => setToken(e.target.value)}
-        rows="8"
-        style={{
-          width: "90%",
-          maxWidth: "600px",
-          marginBottom: "10px",
-          padding: "8px",
-        }}
-        placeholder="Collez le token ici..."
-      />
-      <br />
-      <button
-        onClick={handleLogin}
-        style={{ padding: "10px 20px", fontSize: "16px" }}
-      >
-        Se Connecter
-      </button>
+    <div style={styles.loginContainer}>
+      <form onSubmit={handleLogin} style={styles.loginForm}>
+        <h2>Accès au Dashboard Admin</h2>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          required
+          style={styles.input}
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Mot de passe"
+          required
+          style={styles.input}
+        />
+        <button type="submit" disabled={isLoading} style={styles.button}>
+          {isLoading ? "Connexion..." : "Se Connecter"}
+        </button>
+      </form>
     </div>
   );
 };
@@ -221,6 +247,38 @@ const styles = {
     margin: "0 0 5px 0",
   },
   cardDescription: { fontSize: "14px", color: "#757575", margin: 0 },
+  loginContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    background: "#f5f5f5",
+  },
+  loginForm: {
+    background: "white",
+    padding: "40px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+    textAlign: "center",
+    width: "350px",
+  },
+  input: {
+    width: "100%",
+    padding: "12px",
+    margin: "10px 0",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+  },
+  button: {
+    width: "100%",
+    padding: "12px",
+    background: "#2e7d32",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
 };
 
 export default App;

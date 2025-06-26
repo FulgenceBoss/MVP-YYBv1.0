@@ -12,6 +12,7 @@ const authRoutes = require("./routes/auth");
 const savingsRoutes = require("./routes/savings");
 const analyticsRoutes = require("./routes/analytics");
 const userRoutes = require("./routes/user");
+const adminRoutes = require("./routes/admin");
 
 // Load env vars from root .env file
 dotenv.config();
@@ -39,6 +40,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/savings", savingsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running...");
